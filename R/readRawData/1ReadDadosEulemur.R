@@ -65,7 +65,7 @@ raw.data %<>%
   filter(Tombo != "16368") #%>% #APET_TS
 
 #depois de limpar os zuados, salvar em um arquivo
-#write.csv(raw.data, "Eulemur_Clean.csv", row.names= F)
+#write.csv(raw.data, "Data/Eulemur_Clean.csv", row.names= F)
 
 #organizando databases por genero e outro por especie
 raw.main.data <- dlply(raw.data, .(Especie), tbl_df)
