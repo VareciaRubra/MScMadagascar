@@ -57,8 +57,7 @@ DoubleRep <- function (current.data, detailed = FALSE) {
    reps<- cbind(names(doub.rep) , as.data.frame(doub.rep), as.data.frame(all.rep), total,  X2dists, quantos  )
    if (detailed == TRUE) return(reps) else return(as.data.frame(doub.rep))
   } else return( as.data.frame(doub.rep)/NA )
-  
-  
+   
 } 
 
 mask.rep = laply(raw.main.data, count, Especie)[,2] > 20
@@ -69,7 +68,6 @@ rep.gen <- ldply(raw.main.data[mask.rep], DoubleRep, detailed = FALSE)
 rep.gen[,3] <- c( names(raw.main.data[[1]][12:50]) )
 
 rep.gen[,3] <- factor (rep.gen[,3], levels = unique(rep.gen[,3]) )
-
 
 ####### Plotando os valores de repetibilidade
 rep.gen<- tbl_df(rep.gen)
