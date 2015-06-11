@@ -70,9 +70,19 @@ makeMainData <- function (current.data, compare.size = FALSE, final = FALSE )
   
 }
 
-main.data.albifrons<- makeMainData(raw.main.data$Eulemur_albifrons, compare.size = TRUE, final = TRUE)
+#############################################
+############# PRIMEIRA PARTE ################
+####### OLHANDO PRO PLOT DE PC1 X PC2 #######
+#############################################
+
+all.main.data <- llply(all.raw.main.data,  final = FALSE, makeMainData, .progress = 'text')
+
+#############################################
+############## SEGUNDA PARTE ################
+#### ARQUIVO FINAL PARA SALVAR NO RData #####
+#############################################
+
 main.data<- llply(raw.main.data, makeMainData, compare.size = TRUE, final = TRUE, .progress = 'text')
-all.main.data <- llply(all.raw.main.data,  final = TRUE, makeMainData, .progress = 'text')
 
 #Hapalemur.image <- list (main.data = main.data,   
 #                      all.main.data = all.main.data)

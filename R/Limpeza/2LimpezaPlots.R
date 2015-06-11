@@ -1,13 +1,13 @@
 ############################  GRAFICOS PARA A LIMPEZA DE DADOS ########################
 #1.Violin das medias das especies por variável
-raw.data %>%
-  #filter(., is.na(Sexo) ) %>% 
-  gather(key=ed, value=value, 12:50 ) %>% 
-  ggplot(., aes( x= Especie, y=value, color=Especie), varwidth = T) + 
-  geom_violin() + 
-  geom_jitter() +
-  facet_wrap(~ed, scale="free_y") + 
-  theme(axis.text.x = element_text(angle = 90)) 
+# raw.data %>%
+#   #filter(., is.na(Sexo) ) %>% 
+#   gather(key=ed, value=value, 12:50 ) %>% 
+#   ggplot(., aes( x= Especie, y=value, color=Especie), varwidth = T) + 
+#   geom_violin() + 
+#   geom_jitter() +
+#   facet_wrap(~ed, scale="free_y") + 
+#   theme(axis.text.x = element_text(angle = 90)) 
   
 # mesmo plot mas com os labels de cada indivíduo, bom para identificar os outliers e remove-los individualmente
 raw.data %>%
@@ -23,7 +23,7 @@ raw.data %>%
 # mesmo plot com os labels de cada indivíduo mas por variável bom para identificar os outliers e remove-los individualmente
 raw.data %>%
   #filter(., is.na(Sexo) ) %>% 
-  gather(key=ed, value=value, APET_TS ) %>% 
+  gather(key=ed, value=value, PT_FM ) %>% 
   ggplot(., aes( x= Especie, y=value, color=Especie, label = Tombo), varwidth = T) + 
   geom_text(aes(size = 0.4, vjust = 1) )  +
   geom_violin() + 
@@ -57,10 +57,8 @@ raw.data %>%
   facet_wrap(~Sexo)+
   theme(axis.text.x = element_text(angle = 90))
 
-
-
 ######## Biplot PC1 x PC2 ##############
-current.data <- all.main.data$Eulemur
+current.data <- all.main.data$Propithecus
 PRCOMP <- princomp(data.frame(na.omit(current.data$ed))) # extraindo os componentes principais a partir dos dados (medias ed)
 #PRCOMP <- princomp(data.frame(na.omit(current.data$)))
 resp <- current.data$info[current.data$info$Tombo %in% dimnames(PRCOMP$scores)[[1]], ] #respectivos dados aos participantes da PCA
