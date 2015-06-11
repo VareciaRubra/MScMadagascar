@@ -67,18 +67,18 @@ DoubleRep(raw.main.data[[10]])
 rep.sp <- llply(raw.main.data, DoubleRep, detailed = TRUE)
 rep.gen <- ldply(raw.main.data[mask.rep], DoubleRep, detailed = FALSE) 
 rep.gen[,3] <- c( names(raw.main.data[[1]][12:50]) )
-rep.gen$V1 <- factor (rep.gen$V1, levels = unique(rep.gen$V1) )
+rep.gen[,3] <- factor (rep.gen[,3], levels = unique(rep.gen[,3]) )
 
 ####### Plotando os valores de repetibilidade
 rep.gen<- tbl_df(rep.gen)
 rep.gen %>% na.omit(.) %>%
-  ggplot(., aes( x= V1, y=doub.rep, color=.id)) +
+  ggplot(., aes_string( x= names(.)[3], y="doub.rep", color=".id")) +
   geom_line(aes(group = .id)) +
   theme_bw() +
   theme(axis.text.x = element_text(angle = 90))
 
-rep.gen %>% na.omit(.) %>%
-  ggplot(., aes( x= V1, y=doub.rep, color=.id)) +
+rep.gen %>% na.omit %>%
+  ggplot(., aes_string( x= names(.)[3], y="doub.rep", color=".id")) +
   geom_line(aes(group = .id)) +
   facet_wrap(~.id) +
   theme_bw() +

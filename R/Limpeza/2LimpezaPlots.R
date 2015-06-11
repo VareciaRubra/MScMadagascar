@@ -14,7 +14,7 @@ raw.data %>%
   #filter(., is.na(Sexo) ) %>% 
   gather(key=ed, value=value, 12:50 ) %>% 
   ggplot(., aes( x= Especie, y=value, color=Especie, label = Tombo), varwidth = T) + 
-  geom_text(aes(size = 0.4, vjust = 1) )  +
+  geom_text(aes(size =.4, vjust = 1) )  +
   geom_violin() + 
   geom_jitter() +
   facet_wrap(~ed, scale="free_y") + 
