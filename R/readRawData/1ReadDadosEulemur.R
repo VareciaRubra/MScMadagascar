@@ -60,7 +60,8 @@ raw.data %<>%
   filter(Tombo != "4010") %>% # ZYGO_TSP
   filter(Tombo != "44884") %>% #BA_OPI
   filter(Tombo != "8338") %>% #BA_OPI
-  filter(Tombo != "35753") #%>% #PT_AS
+  filter(Tombo != "35753") %>% #PT_AS
+  filter(Tombo != "16368") #%>% #APET_TS
 
 #depois de limpar os zuados, salvar em um arquivo
 #write.csv(raw.data, "Eulemur_Clean.csv", row.names= F)
