@@ -19,6 +19,19 @@ raw.data %>%
   geom_jitter() +
   facet_wrap(~ed, scale="free_y") + 
   theme(axis.text.x = element_text(angle = 90)) 
+
+# mesmo plot com os labels de cada indivíduo mas por variável bom para identificar os outliers e remove-los individualmente
+raw.data %>%
+  #filter(., is.na(Sexo) ) %>% 
+  gather(key=ed, value=value, APET_TS ) %>% 
+  ggplot(., aes( x= Especie, y=value, color=Especie, label = Tombo), varwidth = T) + 
+  geom_text(aes(size = 0.4, vjust = 1) )  +
+  geom_violin() + 
+  geom_jitter() +
+  #facet_wrap(~ed, scale="free_y") + 
+  theme(axis.text.x = element_text(angle = 90)) 
+
+
 #ggplot da distribuiçao dos valires de determinada variável em determinada espécie num histograma
 #ggplot(filter(raw.data, Especie == "Hapalemur_griseus"), aes(BA_OPI, color= Sexo)) + geom_histogram() + facet_grid(Especie~Sexo)
 
@@ -41,7 +54,7 @@ raw.data %>%
   gather(key=ed, value=value, 3:41 )  %>%
   ggplot(., aes( x= ed, y=value, color=Especie)) +
   geom_line(aes(group = interaction(Especie, Sexo))) +
-  facet_wrap(~Sexo, )+
+  facet_wrap(~Sexo)+
   theme(axis.text.x = element_text(angle = 90))
 
 
