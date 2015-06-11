@@ -25,6 +25,7 @@ raw.data <- tbl_df(original.raw)
 # no proprio dataframe-------> 
 #isso evita que funçoes da classe apply reoordenem os resultados numérica/alfabeticamente.
 raw.data$Tombo <- factor (raw.data$Tombo, levels = unique(raw.data$Tombo) )
+raw.data$Especie <- factor (raw.data$Especie, levels = unique(raw.data$Especie) )
 
 #substituindo os espaços nos momes de especies
 raw.data$Especie %<>% gsub(" ", "_", .)
