@@ -14,7 +14,6 @@ if(!require(doParallel)) {install.packages('doParallel'); library(doParallel)}
 #para descobrir rodar no terminal: nproc
 registerDoParallel(cores = 5)
 
-
 arquivo.bruto = "Data/Propithecus_All.csv"
 arquivo.saida = "Data/Propithecus_Clean.csv"
 raw.regular <- read.csv(arquivo.bruto, head = T)
@@ -64,7 +63,8 @@ raw.data %<>%
   filter(Tombo != "44863") %>% #BR
   filter(Tombo != "448637") #%>% #BR
   
-  
+raw.main.data <- dlply(raw.data, .(Especie), tbl_df)
+all.raw.main.data<- dlply(raw.data, .(Genero), tbl_df)
   
 
 
