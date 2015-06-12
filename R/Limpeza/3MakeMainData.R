@@ -82,6 +82,8 @@ all.main.data <- llply(all.raw.main.data,  final = FALSE, makeMainData, .progres
 #### ARQUIVO FINAL PARA SALVAR NO RData #####
 #############################################
 
+main.data<- llply(raw.main.data, makeMainData, compare.size = FALSE, final = FALSE, .progress = 'text')
+
 main.data<- llply(raw.main.data, makeMainData, compare.size = TRUE, final = TRUE, .progress = 'text')
 
 #Hapalemur.image <- list (main.data = main.data,   
