@@ -61,8 +61,14 @@ raw.data %<>%
   filter(Tombo != "MO-1982-2830") %>% #PT_FM
   filter(Tombo != "MO-1869-194") %>% #PT_FM
   filter(Tombo != "44863") %>% #BR
-  filter(Tombo != "448637") #%>% #BR
-  
+  filter(Tombo != "44867") %>% #BR
+  filter(Tombo != "44865") %>% #BR
+  filter(Tombo != "44855") %>% #BR
+  filter(Tombo != "63350") %>% #BR
+  filter(Tombo != "100558") %>% #BR
+  filter(Tombo != "44866") %>% #BR
+  filter(Tombo != "043011f") #%>% #BR
+
 raw.main.data <- dlply(raw.data, .(Especie), tbl_df)
 all.raw.main.data<- dlply(raw.data, .(Genero), tbl_df)
   
