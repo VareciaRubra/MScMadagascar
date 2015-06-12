@@ -53,21 +53,42 @@ raw.data %>%
   summarise_each(funs(mean),IS_PM:BA_OPI) %>% 
   gather(key=ed, value=value, 3:41 )  %>%
   ggplot(., aes( x= ed, y=value, color=Especie)) +
-  geom_line(aes(group = interaction(Especie, Sexo))) +
+  geom_line(aes(group = Especie)) +
   facet_wrap(~Sexo)+
+  theme(axis.text.x = element_text(angle = 90))
+
+#plot em linhas por media entre replica de indivíduos por museu e por especie
+
+raw.data %>% 
+    dplyr::group_by(., Especie, Museu, Tombo ) %>%
+  summarise_each(funs(mean),IS_PM:BA_OPI) %>% 
+  gather(key=ed, value=value, 4:42 )  %>%
+  ggplot(., aes( x= ed, y=value, color=Museu )) +
+  geom_line(aes(group = Tombo, linetype = Especie)) +
+  #facet_wrap(~Especie)+
+  theme(axis.text.x = element_text(angle = 90))
+
+raw.data %>% 
+  filter(Especie == "Propithecus_verreauxi") %>%
+  dplyr::group_by(., Museu, Tombo ) %>%
+  summarise_each(funs(mean),IS_PM:BA_OPI) %>% 
+  gather(key=ed, value=value, 3:41 )  %>%
+  ggplot(., aes( x= ed, y= value, color= Museu )) +
+  geom_line(aes(group = Tombo)) +
   theme(axis.text.x = element_text(angle = 90))
 
 ######## Biplot PC1 x PC2 ##############
 current.data <- all.main.data$Propithecus
 PRCOMP <- princomp(data.frame(na.omit(current.data$ed))) # extraindo os componentes principais a partir dos dados (medias ed)
-#PRCOMP <- princomp(data.frame(na.omit(current.data$)))
+PRCOMP <- princomp(data.frame(na.omit(current.data$sizeless  )))
 resp <- current.data$info[current.data$info$Tombo %in% dimnames(PRCOMP$scores)[[1]], ] #respectivos dados aos participantes da PCA
 resp %<>% mutate(., PC1 = PRCOMP$scores[,1], PC2=PRCOMP$scores[,2]) 
 hulls <-ddply(resp, .(Especie), plyr::summarise, "hpc1"=PC1[chull(PC1,PC2)],
               "hpc2"=PC2[chull(PC1,PC2)])
 fig <- ggplot(resp, aes(PC1, PC2, color= Especie)) +
-  geom_text(aes(PC1, PC2, color=Especie, label=Tombo)) +
+  geom_text(aes(PC1, PC2, color=Especie, label = Especie) ) +
   geom_polygon(aes(hpc1, hpc2, fill= Especie, group= Especie),
                hulls,alpha=.3)
 fig
+
 
