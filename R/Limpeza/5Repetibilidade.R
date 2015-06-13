@@ -1,4 +1,4 @@
-current.data <- raw.main.data[[10]]
+current.data <- raw.main.data[[1]]
 DoubleRep <- function (current.data, detailed = FALSE) {
   x = vector("list", 10)
   x[[1]] <- dplyr::select(current.data, c(Arquivo:Take)) # pegando as info de cada replica
@@ -60,12 +60,12 @@ DoubleRep <- function (current.data, detailed = FALSE) {
    
 } 
 
-mask.rep = laply(raw.main.data, count, Especie)[,2] > 20
+mask.rep = laply(raw.main.data, count, Especie)[,2] > 14
 
-DoubleRep(raw.main.data[[10]])
+DoubleRep(raw.main.data[[8]])
 rep.sp <- llply(raw.main.data, DoubleRep, detailed = TRUE)
 rep.gen <- ldply(raw.main.data[mask.rep], DoubleRep, detailed = FALSE) 
-rep.gen[,3] <- c( names(raw.main.data[[1]][12:50]) )
+rep.gen$ed <- c( names(raw.main.data[[1]][12:50]) )
 
 rep.gen[,3] <- factor (rep.gen[,3], levels = unique(rep.gen[,3]) )
 
@@ -84,4 +84,5 @@ rep.gen %>% na.omit(.) %>%
   facet_wrap(~.id) +
   theme_bw() +
   theme(axis.text.x = element_text(angle = 90))
+
 
