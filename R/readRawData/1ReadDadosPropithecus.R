@@ -60,6 +60,7 @@ raw.data %<>%
   filter(Tombo != "043008a") %>% #IS_PM
   filter(Tombo != "MO-1982-2830") %>% #PT_FM
   filter(Tombo != "MO-1869-194") %>% #PT_FM
+  filter(Tombo != "MO-2009-377") %>% #PT_FM
   filter(Tombo != "44863") %>% #BR
   filter(Tombo != "44867") %>% #BR
   filter(Tombo != "44865") %>% #BR
