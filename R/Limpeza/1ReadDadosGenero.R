@@ -10,10 +10,11 @@ if(!require(evolqg)) {install.packages('evolqg'); library(evolqg)}
 #if(!require(evolqg)) {devtools::install_github('lem-usp/evolqg'); library(evolqg)}
 if(!require(readr)) {devtools::install_github('hadley/readr'); library(readr)}
 if(!require(doParallel)) {install.packages('doParallel'); library(doParallel)}
-#Registrando o numero de cores : 3 em casa e 7 no lab
+#Registrando o numero de cores : 3 em casa, 7 no lab e até 10 no darwin
 #para descobrir rodar no terminal: nproc
+#abrir no terminal htop para ver os cores trabalhando
 registerDoParallel(cores = 6)
-
+#abrir no terminal htop para ver os cores trabalhando
 
 arquivo.bruto = ".csv"
 arquivo.saida = ".csv"
