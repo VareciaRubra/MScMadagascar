@@ -75,3 +75,14 @@ all.raw.main.data<- dlply(raw.data, .(Genero), tbl_df)
   
 
 
+# No caso dos Propithecus, no MCZ pelo visto eu viajei na medida do BR
+# Olhei para a comparaç~ao de matrizes controlando pra efeito de museu na amostra de P. verreauxi
+# 
+# RS: COV MX RESIDUAL EFEITO DE MUSEU X SEM CORRIGIR PRA MUSEU
+# correlation    probability correlation_sd 
+# 0.96855519     0.00000000     0.03316361 
+# rs: COV MX RESIDUAL EFEITO DE MUSEU X EXCLUINDO MCZ DA AMOSTRA (NUMERO MUITO REDUZIDO: de 58 vai pra 37 individuos)
+# correlation    probability correlation_sd 
+# 0.88718570     0.00000000     0.08812961 
+
+
