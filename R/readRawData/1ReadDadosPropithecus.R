@@ -72,6 +72,9 @@ raw.data %<>%
 
 raw.main.data <- dlply(raw.data, .(Especie), tbl_df)
 all.raw.main.data<- dlply(raw.data, .(Genero), tbl_df)
+
+#depois de limpar os zuados, salvar em um arquivo
+#write.csv(raw.data, "Data/Propithecus_Clean.csv", row.names= F)
   
 
 
