@@ -12,7 +12,7 @@ if(!require(readr)) {devtools::install_github('hadley/readr'); library(readr)}
 if(!require(doParallel)) {install.packages('doParallel'); library(doParallel)}
 #Registrando o numero de cores : 3 em casa e 7 no lab
 #para descobrir rodar no terminal: nproc
-registerDoParallel(cores = 5)
+registerDoParallel(cores = 10)
 
 arquivo.bruto = "Data/Propithecus_All.csv"
 arquivo.saida = "Data/Propithecus_Clean.csv"
