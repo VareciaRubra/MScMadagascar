@@ -52,4 +52,4 @@ plot.matrix.cor<- function(cor.mx = NULL, main = "", title = "", brewer = "BrBG"
   
 plot.matrix.cor(cor.mx = cov2cor(CalculateMatrix(y[[1]])) )
 
-
+plot.matrix.cor(x$matrix$cov)

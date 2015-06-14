@@ -20,6 +20,8 @@ arquivo.bruto = "Data/Indri_All.csv"
 arquivo.saida = "Data/Indri_Clean.csv"
 raw.regular <- read.csv(arquivo.bruto, head = T)
 
+length(raw.regular)
+
 #read csv and create table dataframe
 raw.data <- tbl_df(read_csv(arquivo.bruto))
 table(is.na(raw.data$Tombo))

@@ -1,6 +1,6 @@
 ################ ?Organizando tudo em listas por ranking taxonomico ##############
 
-current.data <- raw.main.data[[4]]
+current.data <- raw.main.data[[1]]
 makeMainData <- function (current.data, specie = TRUE, compare.size = FALSE, final = FALSE ) 
   {
   x = vector("list", 16 )
@@ -25,7 +25,8 @@ makeMainData <- function (current.data, specie = TRUE, compare.size = FALSE, fin
   x[[10]] <- colMeans(x[[4]])
   names(x)[9:10] <- c('sample.size', 'ed.means')
   x[[11]] <- vector("list", 5)
-    sp.fit <-  if (specie == FALSE) manova(as.matrix(x[[4]]) ~ Especie, data = as.data.frame(x[[3]])) else NA
+    sp.number <- length(unique(x[[3]]$Especie) ) 
+    sp.fit <-  if (specie == FALSE & sp.number > 1) manova(as.matrix(x[[4]]) ~ Especie, data = as.data.frame(x[[3]])) else NA
     gr <- if(specie == TRUE) var(x[[4]]) else CalculateMatrix(sp.fit) 
     pq <- matrix(data = NA, nrow = 39, ncol = 39) 
   x[[11]][[1]] <- if(x[[9]]>20) gr else pq
@@ -81,7 +82,7 @@ makeMainData <- function (current.data, specie = TRUE, compare.size = FALSE, fin
 ####### OLHANDO PRO PLOT DE PC1 X PC2 #######
 #############################################
 
-all.main.data <- llply(all.raw.main.data,  final = FALSE, makeMainData, .progress = 'text')
+all.main.data <- llply(all.raw.main.data, specie = TRUE, final = FALSE, makeMainData, .progress = 'text')
 
 #############################################
 ############## SEGUNDA PARTE ################
