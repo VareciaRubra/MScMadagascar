@@ -31,7 +31,7 @@ makeMainData <- function (current.data, specie = TRUE, compare.size = FALSE, fin
   x[[11]][[2]] <- if(x[[9]]>20) cov2cor(x[[11]][[1]]) else matrix(data = NA, nrow = 39, ncol = 39) 
   x[[11]][[3]] <- if(x[[9]]>20) var(x[[5]]) else matrix(data = NA, nrow = 39, ncol = 39) 
   x[[11]][[4]] <- if(x[[9]]>20) var(x[[6]]) else matrix(data = NA, nrow = 39, ncol = 39) 
-  names(x[[11]]) <- 'matrix'
+  names(x)[11] <- 'matrix'
   names(x[[11]])[1:4] <- c('cov','cor', 'cov.sizeless', 'cov.log')
 
 #   x[[13]] <- vector("list", 4)
@@ -44,15 +44,15 @@ makeMainData <- function (current.data, specie = TRUE, compare.size = FALSE, fin
 #    x[[13]][[4]]<- if(x[[9]]>20) BootstrapRep( x[[6]], ComparisonFunc = RandomSkewers, iterations = 1000, parallel = T) else NA
 #    
 #    x[[14]] <- RandomSkewers(cov.x = x[[11]][-2], num.vectors = 1000, repeat.vector = unlist(x[[13]][-2]) ) 
-#    names (x[12:14]) <- c('mean.mx.stats', 'BootsRep', 'rs.size.comparisson')
+#    names (x)[12:14] <- c('mean.mx.stats', 'BootsRep', 'rs.size.comparisson')
 #   }   
-#   names (x[12:14]) <- c('mean.mx.stats', 'BootsRep', 'rs.size.comparisson')
+#   names (x)[12:14] <- c('mean.mx.stats', 'BootsRep', 'rs.size.comparisson')
   
   x[[15]] <- vector("list", 5)
   x[[16]] <- vector("list", 5)
   if (final == TRUE)
   {
-    x[[15]][[1]] <- if(x[[9]]>20) Rarefaction(x[[4]], RandomSkewers, iterations = 1000, num.reps = x[[9]], parallel = T) else NA
+    #x[[15]][[1]] <- if(x[[9]]>20) Rarefaction(x[[4]], RandomSkewers, iterations = 1000, num.reps = x[[9]], parallel = T) else NA
 #     x[[15]][[2]] <- if(x[[9]]>20) Rarefaction(x[[4]], KrzCor, iterations = 1000, num.reps = x[[9]], parallel = T) else NA
 #     x[[15]][[3]] <- if(x[[9]]>20) Rarefaction(x[[4]], PCAsimilarity, iterations = 1000, num.reps = x[[9]], parallel = T) else NA
 #     x[[15]][[4]] <- if(x[[9]]>20) Rarefaction(x[[4]], MatrixCor, correlation = TRUE, iterations = 1000, num.reps = x[[9]], parallel = T) else NA
@@ -87,6 +87,7 @@ all.main.data <- llply(all.raw.main.data,  final = FALSE, makeMainData, .progres
 #############################################
 
 main.data<- llply(raw.main.data, makeMainData, compare.size = TRUE, final = TRUE, .progress = 'text')
+
 all.main.data<- llply(all.raw.main.data, makeMainData, specie = FALSE, compare.size = FALSE, final = TRUE, .progress = 'text')
 
 
