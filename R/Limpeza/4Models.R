@@ -5,12 +5,12 @@
 #############################################
 options(contrasts=c("contr.sum", "contr.poly"))
 
-current.data <- all.main.data$Propithecus
+current.data <- all.main.data$Indri
   y = vector("list", 4)
   y[[1]] = vector("list", 4)
-  y[[1]] [[1]] <- manova(as.matrix(current.data$ed) ~ Especie, data = as.data.frame(current.data$info))
+  y[[1]] [[1]] <- manova(as.matrix(current.data$ed) ~ Sexo, data = as.data.frame(current.data$info))
   y[[1]] [[2]] <- Manova(y[[1]] [[1]], type=3, test.statistic="Wilks",icontrasts=c("contr.sum", "contr.poly"))
-  y[[1]] [[3]]  <- apply(as.matrix(current.data$ed), 2, function (x) return (Anova(lm(x ~ Especie, data = as.data.frame(current.data$info) ), type= 3, test.statistic="Wilks",icontrasts=c("contr.sum", "contr.poly" ))))
+  y[[1]] [[3]]  <- apply(as.matrix(current.data$ed), 2, function (x) return (Anova(lm(x ~ Sexo, data = as.data.frame(current.data$info) ), type= 3, test.statistic="Wilks",icontrasts=c("contr.sum", "contr.poly" ))))
   y[[1]] [[4]] <- CalculateMatrix(y[[1]] [[1]]) 
   names(y)[[1]][1:4] <- c("fit", "multi", "uni", "cov.mx")
 
@@ -50,6 +50,8 @@ plot.matrix.cor<- function(cor.mx = NULL, main = "", title = "", brewer = "BrBG"
   axis(2, mx.dimentions:1, rownames(cor.mx), las = 1, cex.axis = 0.6, tick = FALSE)
   }
   
-plot.matrix.cor(cor.mx = cov2cor(CalculateMatrix(y[[1]])) )
 
-plot.matrix.cor(x$matrix$cov)
+par(mfrow= c(1,2))
+plot.matrix.cor(cor.mx = cov2cor(CalculateMatrix(y[[1]][[1]])) )
+
+plot.matrix.cor(cor.mx = all.main.data$Indri$matrix$cor)

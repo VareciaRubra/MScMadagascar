@@ -11,8 +11,6 @@ makeMainData <- function (current.data, specie = TRUE, compare.size = FALSE, fin
   x[[4]] <- ddply(dplyr::select(current.data, c(Tombo, IS_PM:BA_OPI)), .(Tombo), numcolwise(mean)) # calculando as médias individuais, excluindo a primeira coluna que ta a info de id
   rownames(x[[4]]) <- x[[4]][,1] # nomeando as linhas como o numero de tombo para manter correspondencia
   x[[4]]<- x[[4]][, -1]
-  rownames(x[[4]]) <- x[[4]][,1] # nomeando as linhas como o numero de tombo/especie para manter correspondencia
-  x[[4]]<- x[[4]][, -1]
   names(x)[1:4] <- c('info.raw', 'ed.raw', 'info', 'ed') # nomemando as listas
   x[[5]] <- t(apply(x[[4]], 1, FUN = function(x) x/ exp( mean( as.matrix(log (x)) ) )  ) ) 
   rownames(x[[5]]) <- x[[3]]$Tombo # nomeando as linhas como o numero de tombo para manter correspondencia
@@ -89,7 +87,7 @@ all.main.data <- llply(all.raw.main.data, specie = TRUE, final = FALSE, makeMain
 #### ARQUIVO FINAL PARA SALVAR NO RData #####
 #############################################
 
-makeMainData(raw.main.data[[1]], specie = TRUE, compare.size = TRUE, final = TRUE)
+#makeMainData(raw.main.data[[1]], specie = TRUE, compare.size = TRUE, final = TRUE)
 
 main.data<- llply(raw.main.data, makeMainData, specie = TRUE, compare.size = TRUE, final = TRUE, .progress = 'text')
 
