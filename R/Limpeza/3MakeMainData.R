@@ -1,6 +1,6 @@
 ################ ?Organizando tudo em listas por ranking taxonomico ##############
 
-current.data <- all.raw.main.data$Propithecus
+current.data <- raw.main.data[[4]]
 makeMainData <- function (current.data, specie = TRUE, compare.size = FALSE, final = FALSE ) 
   {
   x = vector("list", 16 )
@@ -24,15 +24,17 @@ makeMainData <- function (current.data, specie = TRUE, compare.size = FALSE, fin
   x[[9]] <- dim(x[[3]])[1]
   x[[10]] <- colMeans(x[[4]])
   names(x)[9:10] <- c('sample.size', 'ed.means')
-  x[[11]] <- vector("list", 4)
-  x[[11]][[1]] <- if(x[[9]]>20) var(x[[4]]) else matrix(data = NA, nrow = 39, ncol = 39) 
-  sp.fit <- manova(as.matrix(x[[4]]) ~ Especie, data = as.data.frame(x[[3]]))
-  x[[11]][[1]] <- if (specie == FALSE & x[[9]]>20) CalculateMatrix(sp.fit) else matrix(data = NA, nrow = 39, ncol = 39)
-  x[[11]][[2]] <- if(x[[9]]>20) cov2cor(x[[11]][[1]]) else matrix(data = NA, nrow = 39, ncol = 39) 
-  x[[11]][[3]] <- if(x[[9]]>20) var(x[[5]]) else matrix(data = NA, nrow = 39, ncol = 39) 
-  x[[11]][[4]] <- if(x[[9]]>20) var(x[[6]]) else matrix(data = NA, nrow = 39, ncol = 39) 
+  x[[11]] <- vector("list", 5)
+    sp.fit <-  if (specie == FALSE) manova(as.matrix(x[[4]]) ~ Especie, data = as.data.frame(x[[3]])) else NA
+    gr <- if(specie == TRUE) var(x[[4]]) else CalculateMatrix(sp.fit) 
+    pq <- matrix(data = NA, nrow = 39, ncol = 39) 
+  x[[11]][[1]] <- if(x[[9]]>20) gr else pq
+  x[[11]][[2]] <- if(x[[9]]>20) cov2cor(x[[11]][[1]]) else pq
+  x[[11]][[3]] <- if(x[[9]]>20) var(x[[5]]) else pq
+  x[[11]][[4]] <- if(x[[9]]>20) var(x[[6]]) else pq
+  x[[11]][[5]] <- sp.fit 
   names(x)[11] <- 'matrix'
-  names(x[[11]])[1:4] <- c('cov','cor', 'cov.sizeless', 'cov.log')
+  names(x[[11]])[1:5] <- c('cov','cor', 'cov.sizeless', 'cov.log', 'fit')
 
 #   x[[13]] <- vector("list", 4)
 #   names(x[[13]])[1:4] <-  c('cov.RS','cor.Mt', 'cov.sizeless.RS', 'cov.log.RS')
@@ -46,7 +48,7 @@ makeMainData <- function (current.data, specie = TRUE, compare.size = FALSE, fin
 #    x[[14]] <- RandomSkewers(cov.x = x[[11]][-2], num.vectors = 1000, repeat.vector = unlist(x[[13]][-2]) ) 
 #    names (x)[12:14] <- c('mean.mx.stats', 'BootsRep', 'rs.size.comparisson')
 #   }   
-#   names (x)[12:14] <- c('mean.mx.stats', 'BootsRep', 'rs.size.comparisson')
+  names (x)[12:14] <- c('mean.mx.stats', 'BootsRep', 'rs.size.comparisson')
   
   x[[15]] <- vector("list", 5)
   x[[16]] <- vector("list", 5)
@@ -86,7 +88,9 @@ all.main.data <- llply(all.raw.main.data,  final = FALSE, makeMainData, .progres
 #### ARQUIVO FINAL PARA SALVAR NO RData #####
 #############################################
 
-main.data<- llply(raw.main.data, makeMainData, compare.size = TRUE, final = TRUE, .progress = 'text')
+makeMainData(raw.main.data[[1]], specie = TRUE, compare.size = TRUE, final = TRUE)
+
+main.data<- llply(raw.main.data, makeMainData, specie = TRUE, compare.size = TRUE, final = TRUE, .progress = 'text')
 
 all.main.data<- llply(all.raw.main.data, makeMainData, specie = FALSE, compare.size = FALSE, final = TRUE, .progress = 'text')
 
