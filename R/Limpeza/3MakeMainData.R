@@ -1,7 +1,7 @@
 ################ ?Organizando tudo em listas por ranking taxonomico ##############
 
-current.data <- raw.main.data$Eulemur_albifrons
-makeMainData <- function (current.data, compare.size = FALSE, final = FALSE ) 
+current.data <- all.raw.main.data$Propithecus
+makeMainData <- function (current.data, specie = TRUE, compare.size = FALSE, final = FALSE ) 
   {
   x = vector("list", 16 )
   x[1:11] <- NA
@@ -10,6 +10,8 @@ makeMainData <- function (current.data, compare.size = FALSE, final = FALSE )
   x[[3]] <- base::unique(select(current.data, c(Arquivo:Data_dado))) # pegando as info únicas de cada indivíduo
   x[[4]] <- ddply(dplyr::select(current.data, c(Tombo, IS_PM:BA_OPI)), .(Tombo), numcolwise(mean)) # calculando as médias individuais, excluindo a primeira coluna que ta a info de id
   rownames(x[[4]]) <- x[[4]][,1] # nomeando as linhas como o numero de tombo para manter correspondencia
+  x[[4]]<- x[[4]][, -1]
+  rownames(x[[4]]) <- x[[4]][,1] # nomeando as linhas como o numero de tombo/especie para manter correspondencia
   x[[4]]<- x[[4]][, -1]
   names(x)[1:4] <- c('info.raw', 'ed.raw', 'info', 'ed') # nomemando as listas
   x[[5]] <- t(apply(x[[4]], 1, FUN = function(x) x/ exp( mean( as.matrix(log (x)) ) )  ) ) 
@@ -24,12 +26,14 @@ makeMainData <- function (current.data, compare.size = FALSE, final = FALSE )
   names(x)[9:10] <- c('sample.size', 'ed.means')
   x[[11]] <- vector("list", 4)
   x[[11]][[1]] <- if(x[[9]]>20) var(x[[4]]) else matrix(data = NA, nrow = 39, ncol = 39) 
+  sp.fit <- manova(as.matrix(x[[4]]) ~ Especie, data = as.data.frame(x[[3]]))
+  x[[11]][[1]] <- if (specie == FALSE & x[[9]]>20) CalculateMatrix(sp.fit) else matrix(data = NA, nrow = 39, ncol = 39)
   x[[11]][[2]] <- if(x[[9]]>20) cov2cor(x[[11]][[1]]) else matrix(data = NA, nrow = 39, ncol = 39) 
   x[[11]][[3]] <- if(x[[9]]>20) var(x[[5]]) else matrix(data = NA, nrow = 39, ncol = 39) 
   x[[11]][[4]] <- if(x[[9]]>20) var(x[[6]]) else matrix(data = NA, nrow = 39, ncol = 39) 
   names(x[[11]]) <- 'matrix'
   names(x[[11]])[1:4] <- c('cov','cor', 'cov.sizeless', 'cov.log')
-    
+
 #   x[[13]] <- vector("list", 4)
 #   names(x[[13]])[1:4] <-  c('cov.RS','cor.Mt', 'cov.sizeless.RS', 'cov.log.RS')
 #   if (compare.size == TRUE)
@@ -82,14 +86,21 @@ all.main.data <- llply(all.raw.main.data,  final = FALSE, makeMainData, .progres
 #### ARQUIVO FINAL PARA SALVAR NO RData #####
 #############################################
 
-main.data<- llply(raw.main.data, makeMainData, compare.size = FALSE, final = FALSE, .progress = 'text')
-
 main.data<- llply(raw.main.data, makeMainData, compare.size = TRUE, final = TRUE, .progress = 'text')
+all.main.data<- llply(all.raw.main.data, makeMainData, specie = FALSE, compare.size = FALSE, final = TRUE, .progress = 'text')
 
+
+#############################################
+############# TERCEIRA PARTE ################
+## Colocando Mx bem estimadas para os n<27###
+#############################################
+
+raw.data %>% count(Especie) %>% 
+  
 #Hapalemur.image <- list (main.data = main.data,   
 #                      all.main.data = all.main.data)
 
-Eulemur_image <- list (main.data = main.data   
+Propithecus_image <- list (main.data = main.data   
                        #all.main.data = all.main.data
                        )
 
