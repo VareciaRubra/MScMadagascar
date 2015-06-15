@@ -16,8 +16,8 @@ if(!require(doParallel)) {install.packages('doParallel'); library(doParallel)}
 registerDoParallel(cores = 6)
 #abrir no terminal htop para ver os cores trabalhando
 
-arquivo.bruto = "Data/Genus_All.csv"
-arquivo.saida = "Data/Genus_Clean.csv"
+arquivo.bruto = "Data/Varecia_All.csv"
+arquivo.saida = "Data/Varecia_Clean.csv"
 raw.regular <- read.csv(arquivo.bruto, head = T)
 
 #read csv and create table dataframe
@@ -60,7 +60,7 @@ raw.data %<>%
   filter(Tombo != "NumerodeTombo") #%>% #comentario de pq foi removido
 
 #depois de limpar os zuados, salvar em um arquivo
-#write.csv(raw.data, arquivo.saida , row.names= F)
+write.csv(raw.data, arquivo.saida , row.names= F)
 
 #organizando databases por genero e outro por especie
 raw.main.data <- dlply(raw.data, .(Especie), tbl_df)
