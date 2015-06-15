@@ -90,3 +90,6 @@ fig <- ggplot(resp, aes(PC1, PC2, color= Especie)) +
   geom_polygon(aes(hpc1, hpc2, fill= Especie, group= Especie),
                hulls,alpha=.2)
 fig
+
+
+
