@@ -13,9 +13,9 @@ makeMainData <- function (current.data, specie = TRUE, compare.size = FALSE, fin
   x[[4]]<- x[[4]][, -1]
   names(x)[1:4] <- c('info.raw', 'ed.raw', 'info', 'ed') # nomemando as listas
   x[[5]] <- t(apply(x[[4]], 1, FUN = function(x) x/ exp( mean( as.matrix(log (x)) ) )  ) ) 
-  rownames(x[[5]]) <- x[[3]]$Tombo # nomeando as linhas como o numero de tombo para manter correspondencia
+  #rownames(x[[5]]) <- x[[3]]$Tombo # nomeando as linhas como o numero de tombo para manter correspondencia
   x[[6]] <- log(x[[4]])
-  rownames(x[[6]]) <- rownames(x[[4]])
+  #rownames(x[[6]]) <- rownames(x[[4]])
   x[[7]] <- t(apply(x[[4]], 1, FUN = function(x) exp( mean( as.matrix(log (x)) ) )  ) )  
   x[[8]] <- mean(x[[7]])
   names(x)[5:8] <- c('sizeless', 'log', 'gm.ind', 'gm.mean')
@@ -99,15 +99,15 @@ all.main.data<- llply(all.raw.main.data, makeMainData, specie = FALSE, compare.s
 ## Colocando Mx bem estimadas para os n<27###
 #############################################
 
-raw.data %>% count(Especie) %>% 
+raw.data %>% count(Especie) 
   
-#Hapalemur.image <- list (main.data = main.data,   
-#                      all.main.data = all.main.data)
-
-Propithecus_image <- list (main.data = main.data   
-                       #all.main.data = all.main.data
-                       )
-
-save(Eulemur_image,
-     file = "attaches/Eulemur_image.RData")
+# Hapalemur.image <- list (main.data = main.data,   
+#                       all.main.data = all.main.data)
+# 
+# Propithecus_image <- list (main.data = main.data   
+#                        #all.main.data = all.main.data
+#                        )
+# 
+# save(Eulemur_image,
+#      file = "attaches/Eulemur_image.RData")
 
