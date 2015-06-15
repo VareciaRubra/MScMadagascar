@@ -60,6 +60,9 @@ raw.data %<>%
   filter(Tombo != "44942") %>% #comentario de pq foi removido
   filter(Tombo != "44945") #%>%
 
+#depois de limpar os zuados, salvar em um arquivo
+#write.csv(raw.data, arquivo.saida , row.names= F)
+
 #organizando databases por genero e outro por especie
 raw.main.data <- dlply(raw.data, .(Especie), tbl_df)
 all.raw.main.data<- dlply(raw.data, .(Genero), tbl_df)
