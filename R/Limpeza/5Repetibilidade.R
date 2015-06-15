@@ -1,4 +1,4 @@
-current.data <- raw.main.data[[1]]
+current.data <- raw.main.data[[2]]
 DoubleRep <- function (current.data, detailed = FALSE) {
   x = vector("list", 10)
   x[[1]] <- dplyr::select(current.data, c(Arquivo:Take)) # pegando as info de cada replica
@@ -25,7 +25,7 @@ DoubleRep <- function (current.data, detailed = FALSE) {
   ###### 1. ver se tem diferença entre as reploicas de pelo menos algum indivíduo, 
   ###### 2. ver se tem diferença entre as reploicas de pelo menos algum indivíduo, 
   ###### 3. ver se tem mais de 4 bichos medidos com replica
-  if( dim( table(x[[5]] !=0) ) !=1 & sum((x[[5]] !=0) == TRUE) !=0 & sum(X2dists) >= (39*4)  )
+  if( dim( table(x[[5]] !=0) ) !=1 | sum((x[[5]] !=0) == TRUE) !=0 & sum(X2dists) >= (39*4)  )
   { 
    ####### matriz para indexar quais replicas sao diferentes entre si #############
    indexX2<- aggregate(x[[2]], by =list(x[[1]]$Tombo) , FUN = function (x) x[1] != x[2])
@@ -60,12 +60,12 @@ DoubleRep <- function (current.data, detailed = FALSE) {
    
 } 
 
-mask.rep = laply(raw.main.data, count, Especie)[,2] > 14
+mask.rep = ldply(raw.main.data, count, Especie)[,2] > 14
 
-DoubleRep(raw.main.data[[8]])
-rep.sp <- llply(raw.main.data, DoubleRep, detailed = TRUE)
+DoubleRep(raw.main.data[[2]], detailed = F)
+rep.sp <- ldply(raw.main.data, DoubleRep, detailed = TRUE)
 rep.gen <- ldply(raw.main.data[mask.rep], DoubleRep, detailed = FALSE) 
-rep.gen$ed <- c( names(raw.main.data[[1]][12:50]) )
+rep.gen[,3] <- c( names(raw.main.data[[1]][12:50]) )
 
 rep.gen[,3] <- factor (rep.gen[,3], levels = unique(rep.gen[,3]) )
 
@@ -84,5 +84,3 @@ rep.gen %>% na.omit(.) %>%
   facet_wrap(~.id) +
   theme_bw() +
   theme(axis.text.x = element_text(angle = 90))
-
-
