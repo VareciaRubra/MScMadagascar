@@ -17,6 +17,7 @@ registerDoParallel(cores = 6)
 #abrir no terminal htop para ver os cores trabalhando
 
 arquivo.bruto = "Data/Avahi_Shower.csv"
+arquivo.bruto = "Data/Avahi_All.csv"
 arquivo.saida = "Data/Avahi_Clean.csv"
 raw.regular <- read.csv(arquivo.bruto, head = T)
 
@@ -64,7 +65,7 @@ raw.data %<>%
   filter(Tombo != "170494") #%>%
 
 #depois de limpar os zuados, salvar em um arquivo
-#write.csv(raw.data, arquivo.saida , row.names= F)
+write.csv(raw.data, arquivo.saida , row.names= F)
 
 #organizando databases por genero e outro por especie
 raw.main.data <- dlply(raw.data, .(Especie), tbl_df)
