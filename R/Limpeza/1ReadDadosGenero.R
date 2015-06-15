@@ -16,8 +16,8 @@ if(!require(doParallel)) {install.packages('doParallel'); library(doParallel)}
 registerDoParallel(cores = 6)
 #abrir no terminal htop para ver os cores trabalhando
 
-arquivo.bruto = ".csv"
-arquivo.saida = ".csv"
+arquivo.bruto = "Data/Genus_All.csv"
+arquivo.saida = "Data/Genus_Clean.csv"
 raw.regular <- read.csv(arquivo.bruto, head = T)
 
 #read csv and create table dataframe
