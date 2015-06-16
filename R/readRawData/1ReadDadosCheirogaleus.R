@@ -57,12 +57,14 @@ all.raw.main.data<- dlply(raw.data, .(Genero), tbl_df)
 #Removendo outliers (procedimento enquanto tou olhando os graficos, cada cara escroto que percebo add uma linha)
 #Fazer isso junto com a rodada dos demais scripts
 raw.data %<>% 
-  filter(Tombo != "ZMB_Mam_5511") %>% #comentario de pq foi removido
-  filter(Tombo != "10956_B") %>%
-  filter(Tombo != "109858_A") #%>%
+  filter(Tombo != "MO-1932-3362") %>% #comentario de pq foi removido
+  filter(Tombo != "MO-2002-45") %>%
+  filter(Tombo != "040004g") %>%
+  filter(Tombo != "040005g") #%>%
 #depois de limpar os zuados, salvar em um arquivo
-write.csv(raw.data, arquivo.saida , row.names= F)
+#write.csv(raw.data, arquivo.saida , row.names= F)
 
 #organizando databases por genero e outro por especie
 raw.main.data <- dlply(raw.data, .(Especie), tbl_df)
 all.raw.main.data<- dlply(raw.data, .(Genero), tbl_df)
+
