@@ -23,7 +23,7 @@ raw.data %>%
 # mesmo plot com os labels de cada indivíduo mas por variável bom para identificar os outliers e remove-los individualmente
 raw.data %>%
   #filter(., is.na(Sexo) ) %>% 
-  gather(key=ed, value=value, NSL_ZS ) %>% 
+  gather(key=ed, value=value, IS_NSL ) %>% 
   ggplot(., aes( x= Especie, y=value, color=Especie, label = Tombo), varwidth = T) + 
   geom_text(aes(size = 0.4, vjust = 1) )  +
   geom_violin(aes(alpha = 0)) + 
@@ -63,8 +63,8 @@ raw.data %>%
     dplyr::group_by(., Especie, Museu, Tombo ) %>%
   summarise_each(funs(mean),IS_PM:BA_OPI) %>% 
   gather(key=ed, value=value, 4:42 )  %>%
-  ggplot(., aes( x= ed, y=value, color=Museu )) +
-  geom_line(aes(group = Tombo, linetype = Especie)) +
+  ggplot(., aes( x= ed, y=value, color=Especie )) +
+  geom_line(aes(group = Tombo, linetype = Museu)) +
   #facet_wrap(~Especie)+
   theme(axis.text.x = element_text(angle = 90))
 
@@ -78,9 +78,9 @@ raw.data %>%
   theme(axis.text.x = element_text(angle = 90))
 
 ######## Biplot PC1 x PC2 ##############
-current.data <- all.main.data[[1]]
+current.data <- all.main.data$Daubentonia
 PRCOMP <- princomp(current.data$ed) # extraindo os componentes principais a partir dos dados (medias ed)
-PRCOMP <- princomp(data.frame(na.omit(current.data$sizeless ) ) )
+#PRCOMP <- princomp(data.frame(na.omit(current.data$sizeless ) ) )
 resp <- current.data$info[current.data$info$Tombo %in% dimnames(PRCOMP$scores)[[1]], ] #respectivos dados aos participantes da PCA
 resp %<>% mutate(., PC1 = PRCOMP$scores[,1], PC2=PRCOMP$scores[,2]) 
 hulls <-ddply(resp, .(Especie), plyr::summarise, "hpc1"=PC1[chull(PC1,PC2)],
