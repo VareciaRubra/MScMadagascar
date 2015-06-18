@@ -67,7 +67,7 @@ raw.data %<>%
   filter(Tombo != "16168") #%>% 
 
 #depois de limpar os zuados, salvar em um arquivo
-#write.csv(raw.data, "Data/Indri_Clean.csv", row.names= F)
+#write.csv(raw.data, arquivo.saida, row.names= F)
 
 #organizando databases por genero e outro por especie
 raw.main.data <- dlply(raw.data, .(Especie), tbl_df)
