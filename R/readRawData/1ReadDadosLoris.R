@@ -17,7 +17,7 @@ registerDoParallel(cores = 6)
 #abrir no terminal htop para ver os cores trabalhando
 
 arquivo.bruto = "Data/Loris_All.csv"
-arquivo.saida = "Data/Loris_Clen.csv"
+arquivo.saida = "Data/Loris_Clean.csv"
 raw.regular <- read.csv(arquivo.bruto, head = T)
 
 #read csv and create table dataframe
