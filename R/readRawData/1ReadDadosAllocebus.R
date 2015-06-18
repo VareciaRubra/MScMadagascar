@@ -16,8 +16,8 @@ if(!require(doParallel)) {install.packages('doParallel'); library(doParallel)}
 registerDoParallel(cores = 6)
 #abrir no terminal htop para ver os cores trabalhando
 
-arquivo.bruto = "Data/Euoticus_All.csv"
-arquivo.saida = "Data/Euoticus_Clean.csv"
+arquivo.bruto = "Data/Allocebus_All.csv"
+arquivo.saida = "Data/Allocebus_Clean.csv"
 raw.regular <- read.csv(arquivo.bruto, head = T)
 
 #read csv and create table dataframe
@@ -57,10 +57,8 @@ all.raw.main.data<- dlply(raw.data, .(Genero), tbl_df)
 #Removendo outliers (procedimento enquanto tou olhando os graficos, cada cara escroto que percebo add uma linha)
 #Fazer isso junto com a rodada dos demais scripts
 raw.data %<>% 
-  #comentario de pq foi removido
-  filter(Tombo != "") %>%
-  filter(Tombo != "") #%>%
-  filter(Tombo != "") #%>%
+  filter(Tombo != "") #%>% #comentario de pq foi removido
+ 
 #depois de limpar os zuados, salvar em um arquivo
 write.csv(raw.data, arquivo.saida , row.names= F)
 
