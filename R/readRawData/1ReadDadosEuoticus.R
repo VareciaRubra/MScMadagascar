@@ -16,8 +16,8 @@ if(!require(doParallel)) {install.packages('doParallel'); library(doParallel)}
 registerDoParallel(cores = 6)
 #abrir no terminal htop para ver os cores trabalhando
 
-arquivo.bruto = "Data/Euoticus_All.csv"
-arquivo.saida = "Data/Euoticus_Clen.csv"
+arquivo.bruto = "Data/Otolemur_All.csv"
+arquivo.saida = "Data/Otolemur_Clen.csv"
 raw.regular <- read.csv(arquivo.bruto, head = T)
 
 #read csv and create table dataframe
@@ -62,7 +62,7 @@ raw.data %<>%
   filter(Tombo != "") #%>%
   filter(Tombo != "") #%>%
 #depois de limpar os zuados, salvar em um arquivo
-#write.csv(raw.data, arquivo.saida , row.names= F)
+write.csv(raw.data, arquivo.saida , row.names= F)
 
 #organizando databases por genero e outro por especie
 raw.main.data <- dlply(raw.data, .(Especie), tbl_df)
