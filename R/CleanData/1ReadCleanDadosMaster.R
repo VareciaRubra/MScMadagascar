@@ -37,12 +37,10 @@ raw.data %>% count(Take)
 
 #organizando databases por ordem taxonomica 
 unique(raw.data$Regiao)
-raw.data$Regiao %<>% gsub("Tarsiidae", "Out_Madagascar", .)
-raw.main.data<- ddply(raw.data, .(Regiao), tbl_df)
-raw.main.data<- ddply(raw.data, .(Status), tbl_df)
-raw.main.data<- ddply(raw.data, .(Familia), tbl_df)
-raw.main.data<- ddply(raw.data, .(Genero), tbl_df)
-raw.main.data<- ddply(raw.data, .(Especie), tbl_df)
+#raw.data$Regiao %<>% gsub("Tarsiidae", "Out_Madagascar", .)
+All.raw.main.data<- dlply(raw.data, .(All), tbl_df)
+raw.main.data<- dlply(raw.data, .(Genero), tbl_df)
+raw.main.data<- dlply(raw.data, .(Especie), tbl_df)
 
 
 write.csv(raw.data, arquivo.saida , row.names= F)

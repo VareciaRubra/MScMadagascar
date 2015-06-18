@@ -1,6 +1,6 @@
 ################ ?Organizando tudo em listas por ranking taxonomico ##############
 
-current.data <- all.raw.main.data[[1]]
+current.data <- All.raw.main.data$All
 makeMainData <- function (current.data, specie = TRUE, compare.size = FALSE, final = FALSE ) 
   {
   x = vector("list", 16 )
@@ -83,6 +83,7 @@ makeMainData <- function (current.data, specie = TRUE, compare.size = FALSE, fin
 #############################################
 
 all.main.data <- llply(all.raw.main.data, specie = TRUE, final = FALSE, makeMainData, .progress = 'text')
+master.main.data <- llply(All.raw.main.data, specie = TRUE, final = FALSE, makeMainData, .progress = 'text', .inform = T)
 
 #############################################
 ############## SEGUNDA PARTE ################
