@@ -5,7 +5,7 @@
 #############################################
 options(contrasts=c("contr.sum", "contr.poly"))
 
-current.data <- all.main.data$Cheirogaleus
+current.data <- all.main.data$Galago
 
   y = vector("list", 4)
   y[[1]] = vector("list", 4)

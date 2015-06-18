@@ -63,8 +63,8 @@ raw.data %>%
     dplyr::group_by(., Especie, Museu, Tombo ) %>%
   summarise_each(funs(mean),IS_PM:BA_OPI) %>% 
   gather(key=ed, value=value, 4:42 )  %>%
-  ggplot(., aes( x= ed, y=value, color=Especie )) +
-  geom_line(aes(group = Tombo, linetype = Museu)) +
+  ggplot(., aes( x= ed, y=value, color=Museu )) +
+  geom_line(aes(group = Tombo, linetype = Especie)) +
   #facet_wrap(~Especie)+
   theme(axis.text.x = element_text(angle = 90))
 
@@ -78,7 +78,7 @@ raw.data %>%
   theme(axis.text.x = element_text(angle = 90))
 
 ######## Biplot PC1 x PC2 ##############
-current.data <- all.main.data$Daubentonia
+current.data <- all.main.data$Lemur
 PRCOMP <- princomp(current.data$ed) # extraindo os componentes principais a partir dos dados (medias ed)
 #PRCOMP <- princomp(data.frame(na.omit(current.data$sizeless ) ) )
 resp <- current.data$info[current.data$info$Tombo %in% dimnames(PRCOMP$scores)[[1]], ] #respectivos dados aos participantes da PCA

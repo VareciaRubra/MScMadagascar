@@ -58,8 +58,8 @@ all.raw.main.data<- dlply(raw.data, .(Genero), tbl_df)
 #Fazer isso junto com a rodada dos demais scripts
 raw.data %<>% 
   #comentario de pq foi removido
-  filter(Tombo != "454774") %>%
-  filter(Tombo != "454777") #%>%
+  filter(Tombo != "") %>%
+  filter(Tombo != "") #%>%
   filter(Tombo != "") #%>%
 #depois de limpar os zuados, salvar em um arquivo
 write.csv(raw.data, arquivo.saida , row.names= F)
