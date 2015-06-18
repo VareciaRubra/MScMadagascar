@@ -78,7 +78,7 @@ raw.data %>%
   theme(axis.text.x = element_text(angle = 90))
 
 ######## Biplot PC1 x PC2 ##############
-current.data <- all.main.data$Perodicticus
+current.data <- all.main.data$Nycticebus
 PRCOMP <- princomp(current.data$ed) # extraindo os componentes principais a partir dos dados (medias ed)
 #PRCOMP <- princomp(data.frame(na.omit(current.data$sizeless ) ) )
 resp <- current.data$info[current.data$info$Tombo %in% dimnames(PRCOMP$scores)[[1]], ] #respectivos dados aos participantes da PCA

@@ -16,8 +16,8 @@ if(!require(doParallel)) {install.packages('doParallel'); library(doParallel)}
 registerDoParallel(cores = 6)
 #abrir no terminal htop para ver os cores trabalhando
 
-arquivo.bruto = "Data/Otolemur_All.csv"
-arquivo.saida = "Data/Otolemur_Clean.csv"
+arquivo.bruto = "Data/1Master_Organized_Factors.csv"
+arquivo.saida =  "Data/1Master_Organized_Factors.csv"
 raw.regular <- read.csv(arquivo.bruto, head = T)
 
 #read csv and create table dataframe
@@ -30,41 +30,20 @@ table(is.na(raw.data$Tombo))
 #isso evita que funçoes da classe apply reoordenem os resultados numérica/alfabeticamente.
 raw.data$Tombo <- factor (raw.data$Tombo, levels = unique(raw.data$Tombo) )
 
-#substituindo os espaços nos momes de especies
-raw.data$Especie %<>% gsub(" ", "_", .)
-#removendo os ? nos casos de especies que tava em duvida 
-#fazer depois de rodar o biplot PC1xPC2
-raw.data$Especie %<>% gsub("[?]", "", .)
-#Substituindo o . por _ nos labels 
-names(raw.data) <- gsub(".", "_", names(raw.data), fixed = T)
-
-#renomeando o BAOPI que escrevi errado lá no arquivo original de coletar dado
-raw.data %<>% 
-  rename(., BA_OPI = BAO_PI) 
-
 #contando quantos tem por espécie e por Take (pra ter certeza de que se removeu um cara sairam as duas replicas)
 raw.data %>% count(Especie) 
 raw.data %>% count(Take)
+#write.csv(raw.data, arquivo.saida , row.names= F)
 
-#organizando databases por genero e outro por especie
-raw.main.data <- dlply(raw.data, .(Especie), tbl_df)
-all.raw.main.data<- dlply(raw.data, .(Genero), tbl_df)
+#organizando databases por ordem taxonomica 
+unique(raw.data$Regiao)
+raw.data$Regiao %<>% gsub("Tarsiidae", "Out_Madagascar", .)
+raw.main.data<- ddply(raw.data, .(Regiao), tbl_df)
+raw.main.data<- ddply(raw.data, .(Status), tbl_df)
+raw.main.data<- ddply(raw.data, .(Familia), tbl_df)
+raw.main.data<- ddply(raw.data, .(Genero), tbl_df)
+raw.main.data<- ddply(raw.data, .(Especie), tbl_df)
 
 
-#############################################
-############## SEGUNDA PARTE ################
-#############################################
-#Removendo outliers (procedimento enquanto tou olhando os graficos, cada cara escroto que percebo add uma linha)
-#Fazer isso junto com a rodada dos demais scripts
-raw.data %<>% 
-  #comentario de pq foi removido
-  filter(Tombo != "") %>%
-  filter(Tombo != "") #%>%
-  filter(Tombo != "") #%>%
-#depois de limpar os zuados, salvar em um arquivo
 write.csv(raw.data, arquivo.saida , row.names= F)
-
-#organizando databases por genero e outro por especie
-raw.main.data <- dlply(raw.data, .(Especie), tbl_df)
-all.raw.main.data<- dlply(raw.data, .(Genero), tbl_df)
 
