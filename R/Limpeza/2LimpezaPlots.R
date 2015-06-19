@@ -68,6 +68,16 @@ raw.data %>%
   #facet_wrap(~Especie)+
   theme(axis.text.x = element_text(angle = 90))
 
+##### com todo mundo #####
+raw.data %>% 
+  dplyr::group_by(., Familia, Genero, Especie, Museu, Tombo ) %>%
+  summarise_each(funs(mean),IS_PM:BA_OPI) %>% 
+  gather(key=ed, value=value, 6:42 )  %>%
+  ggplot(., aes( x= ed, y=value, color=Genero )) +
+  geom_line(aes(group = Tombo, linetype = Museu)) +
+  facet_wrap(~Familia, scale="free_y")+
+  theme(axis.text.x = element_text(angle = 90))
+
 raw.data %>% 
   filter(Especie == "Propithecus_verreauxi") %>%
   dplyr::group_by(., Museu, Tombo ) %>%
