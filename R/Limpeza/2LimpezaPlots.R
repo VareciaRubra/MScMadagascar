@@ -125,12 +125,12 @@ plot.W <- cbind(resp.info, resp)
 hulls <- ddply(plot.W, .(.info), plyr::summarise, "hpc1"=PC1[chull(PC1,PC2)],
               "hpc2"=PC2[chull(PC1,PC2)])
 hulls %<>% separate(.info, c('Familia', 'Genero', 'Especie'), sep = "\\.")
-plot.W %<>% separate(.info, c('Familia', 'Genero', 'Especie'), sep = "\\.")
-pc_plot <- ggplot(plot.W, aes(PC1, PC2)) +
-  geom_polygon(aes(hpc1, hpc2, fill = Genero, group= interaction(Especie, Genero)), hulls, alpha=.3) + 
-  geom_point(data = ddply(plot.W, .(Especie), numcolwise(mean)),
-             aes(PC1, PC2, group= interaction(Especie, Genero), color = Familia, shape = Genero), size = 10) + 
-             theme_bw() + ggtitle("Cranial traits Within-group PC scores")
 
+pc_plot <- ggplot(plot.W, aes(PC1, PC2)) +
+  geom_polygon(aes(hpc1, hpc2, fill = Familia, color = Familia, group= Especie ), data = hulls, alpha=.3) + 
+  geom_point(data = ddply(plot.W, .(Especie), numcolwise(mean)),
+             aes(PC1, PC2, group= Especie), size = 3) + 
+             theme_bw() + ggtitle("Cranial traits Within-group PC scores")
+pc_plot
 
 
