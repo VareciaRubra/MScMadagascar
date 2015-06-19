@@ -134,3 +134,12 @@ pc_plot <- ggplot(plot.W, aes(PC1, PC2)) +
 pc_plot
 
 
+pc_plot <- ggplot(plot.W, aes(PC1, PC2)) +
+  geom_polygon(aes(hpc1, hpc2, fill = Familia, color = Familia, group= Especie ), data = hulls, alpha=.3) + 
+  geom_text(data = ddply(plot.W, .(Especie), numcolwise(mean)),
+            aes(PC1, PC2, label= Especie), size = 3) +
+  theme_bw() + ggtitle("Cranial traits Within-group PC scores")
+pc_plot
+
+
+
