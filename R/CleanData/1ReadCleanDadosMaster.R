@@ -13,7 +13,7 @@ if(!require(doParallel)) {install.packages('doParallel'); library(doParallel)}
 #Registrando o numero de cores : 3 em casa, 7 no lab e até 10 no darwin
 #para descobrir rodar no terminal: nproc
 #abrir no terminal htop para ver os cores trabalhando
-registerDoParallel(cores = 6)
+registerDoParallel(cores = 10)
 #abrir no terminal htop para ver os cores trabalhando
 
 arquivo.bruto = "Data/1Master_Organized_Factors.csv"
@@ -28,6 +28,7 @@ table(is.na(raw.data$Tombo))
 # forçando a ordem dos fatores como sendo a ordem que aparece 
 # no proprio dataframe-------> 
 #isso evita que funçoes da classe apply reoordenem os resultados numérica/alfabeticamente.
+raw.data$Especie %<>% gsub("\\.", "", .)
 raw.data$Tombo <- factor (raw.data$Tombo, levels = unique(raw.data$Tombo) )
 
 #contando quantos tem por espécie e por Take (pra ter certeza de que se removeu um cara sairam as duas replicas)
@@ -43,5 +44,5 @@ raw.main.data<- dlply(raw.data, .(Genero), tbl_df)
 raw.main.data<- dlply(raw.data, .(Especie), tbl_df)
 
 
-write.csv(raw.data, arquivo.saida , row.names= F)
+#write.csv(raw.data, arquivo.saida , row.names= F)
 
