@@ -40,8 +40,8 @@ raw.data %>% count(Take)
 unique(raw.data$Regiao)
 #raw.data$Regiao %<>% gsub("Tarsiidae", "Out_Madagascar", .)
 All.raw.main.data<- dlply(raw.data, .(All), tbl_df)
-raw.main.data<- dlply(raw.data, .(Genero), tbl_df)
-raw.main.data<- dlply(raw.data, .(Especie), tbl_df)
+Gen.raw.main.data<- dlply(raw.data, .(Genero), tbl_df)
+Sp.raw.main.data<- dlply(raw.data, .(Especie), tbl_df)
 
 
 #write.csv(raw.data, arquivo.saida , row.names= F)

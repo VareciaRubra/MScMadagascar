@@ -25,12 +25,12 @@ makeMainData <- function (current.data, specie = TRUE, compare.size = FALSE, fin
   x[[11]] <- vector("list", 5)
     sp.number <- length(unique(x[[3]]$Especie) ) 
     sp.fit <-  if (specie == FALSE & sp.number > 1) manova(as.matrix(x[[4]]) ~ Especie, data = as.data.frame(x[[3]])) else NA
-    gr <- if(specie == TRUE) var(x[[4]]) else CalculateMatrix(sp.fit) 
+    gr <- if(specie == TRUE) var(na.omit(x[[4]])) else CalculateMatrix(sp.fit) 
     pq <- matrix(data = NA, nrow = 39, ncol = 39) 
   x[[11]][[1]] <- if(x[[9]]>15) gr else pq
   x[[11]][[2]] <- if(x[[9]]>15) cov2cor(x[[11]][[1]]) else pq
-  x[[11]][[3]] <- if(x[[9]]>15) var(x[[5]]) else pq
-  x[[11]][[4]] <- if(x[[9]]>15) var(x[[6]]) else pq
+  x[[11]][[3]] <- if(x[[9]]>15) var(na.omit(x[[5]]) ) else pq
+  x[[11]][[4]] <- if(x[[9]]>15) var(na.omit(x[[6]]) ) else pq
   x[[11]][[5]] <- sp.fit 
   names(x)[11] <- 'matrix'
   names(x[[11]])[1:5] <- c('cov','cor', 'cov.sizeless', 'cov.log', 'fit')
