@@ -1,6 +1,6 @@
 ################ ?Organizando tudo em listas por ranking taxonomico ##############
 
-current.data <- Sp.raw.main.data$Eulemur_albifrons
+current.data <- Gen.raw.main.data$Mesopropithecus
 makeMainData <- function (current.data, specie = TRUE, compare.size = FALSE, final = FALSE ) 
   {
   x = vector("list", 17 )
@@ -24,8 +24,8 @@ makeMainData <- function (current.data, specie = TRUE, compare.size = FALSE, fin
   names(x)[9:10] <- c('sample.size', 'ed.means')
   x[[11]] <- vector("list", 5)
     sp.number <- length(unique(x[[3]]$Especie) ) 
-    sp.fit <-  if (specie == FALSE & sp.number > 1) manova(as.matrix(x[[4]]) ~ Especie, data = as.data.frame(x[[3]])) else NA
-    gr <- if(specie == TRUE | specie == FALSE & sp.number <= 1 ) var(na.omit(x[[4]])) else CalculateMatrix(sp.fit) 
+    sp.fit <-  if (specie == FALSE & sp.number > 1 & dim(table( table(x[[3]]$Especie)>=3)) == 1 ) manova(as.matrix(x[[4]]) ~ Especie, data = as.data.frame(x[[3]])) else NA
+    gr <- if(specie == TRUE | specie == FALSE & sp.number <= 1 | specie == FALSE & dim(table( table(x[[3]]$Especie)>=3)) != 1  ) var(na.omit(x[[4]])) else CalculateMatrix(sp.fit) 
     pq <- matrix(data = NA, nrow = 39, ncol = 39) 
   x[[11]][[1]] <- if(x[[9]]>15) gr else pq
   x[[11]][[2]] <- if(x[[9]]>15) cov2cor(x[[11]][[1]]) else pq
@@ -116,7 +116,7 @@ gen.master.main.data <- llply(Gen.raw.main.data, specie = FALSE, final = FALSE, 
 #############################################
 #registerDoParallel(cores = 15)
 sp.master.main.data <- llply(Sp.raw.main.data, specie = TRUE, compare.size = TRUE, final = TRUE, makeMainData, .progress = progress_text(char = "."), .inform = T)
-gen.master.main.data <- llply(Gen.raw.main.data, specie = FALSE, compare.size = TRUE, final = TRUE, makeMainData, .progress = progress_text(char = "."), .inform = T)
+gen.master.main.data <- llply(Gen.raw.main.data[[18]], specie = FALSE, compare.size = TRUE, final = TRUE, makeMainData, .progress = progress_text(char = "."), .inform = T)
   
 Strepsirrhini.image <- list (specie.lists = sp.master.main.data,   
                                genus.list = gen.master.main.data)

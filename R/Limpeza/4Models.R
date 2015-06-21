@@ -5,7 +5,8 @@
 #############################################
 options(contrasts=c("contr.sum", "contr.poly"))
 
-current.data <- master.main.data$All
+current.data <-Gen.raw.main.data$Archaeolemur
+
 
   y = vector("list", 4)
   y[[1]] = vector("list", 4)
