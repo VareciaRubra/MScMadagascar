@@ -3,7 +3,7 @@
 current.data <- Gen.raw.main.data$Allocebus
 makeMainData <- function (current.data, specie = TRUE, compare.size = FALSE, final = FALSE ) 
   {
-  x = vector("list", 16 )
+  x = vector("list", 17 )
   x[1:11] <- NA
   x[[1]] <- dplyr::select(current.data, c(Arquivo:Take)) # pegando as info de cada replica
   x[[2]] <- dplyr::select(current.data, c(IS_PM:BA_OPI)) # pegando as ed de cada replica
@@ -32,20 +32,20 @@ makeMainData <- function (current.data, specie = TRUE, compare.size = FALSE, fin
   x[[11]][[3]] <- if(x[[9]]>15) var(na.omit(x[[5]]) ) else pq
   x[[11]][[4]] <- if(x[[9]]>15) var(na.omit(x[[6]]) ) else pq
   x[[11]][[5]] <- sp.fit 
+  x[[11]][[6]] <- if(x[[9]]>15) ExtendMatrix(cov.matrix = x[[11]][[1]], var.cut.off = 1e-04, ret.dim = NULL) else pq
   names(x)[11] <- 'matrix'
-  names(x[[11]])[1:5] <- c('cov','cor', 'cov.sizeless', 'cov.log', 'fit')
+  names(x[[11]])[1:6] <- c('cov','cor', 'cov.sizeless', 'cov.log', 'fit', 'ext.cov.mx')
 
   x[[13]] <- vector("list", 4)
   names(x[[13]])[1:4] <-  c('cov.RS','cor.Mt', 'cov.sizeless.RS', 'cov.log.RS')
   if (compare.size == TRUE)
   {x[[12]] <- if(x[[9]]>40) ldply(.data = x[[11]][-2], .fun = MeanMatrixStatistics, parallel = TRUE, full.results = FALSE) else NA
-   x[[13]][[1]]<- if(x[[9]]>20) BootstrapRep( x[[4]], ComparisonFunc = RandomSkewers, iterations = 1000, parallel = TRUE) else NA
-   x[[13]][[2]]<- if(x[[9]]>20) BootstrapRep( x[[4]], ComparisonFunc = MantelCor, iterations = 1000, correlation = TRUE, parallel = T) else NA
-   x[[13]][[3]]<- if(x[[9]]>20) BootstrapRep( x[[5]], ComparisonFunc = RandomSkewers, iterations = 1000, parallel = TRUE) else NA
-   x[[13]][[4]]<- if(x[[9]]>20) BootstrapRep( x[[6]], ComparisonFunc = RandomSkewers, iterations = 1000, parallel = T) else NA
+   x[[13]][[1]]<- if(x[[9]]>15) BootstrapRep( x[[4]], ComparisonFunc = RandomSkewers, iterations = 1000, parallel = TRUE) else NA
+   x[[13]][[2]]<- if(x[[9]]>15) BootstrapRep( x[[4]], ComparisonFunc = MantelCor, iterations = 1000, correlation = TRUE, parallel = T) else NA
+   x[[13]][[3]]<- if(x[[9]]>15) BootstrapRep( x[[5]], ComparisonFunc = RandomSkewers, iterations = 1000, parallel = TRUE) else NA
+   x[[13]][[4]]<- if(x[[9]]>15) BootstrapRep( x[[6]], ComparisonFunc = RandomSkewers, iterations = 1000, parallel = TRUE) else NA
    
    x[[14]] <- RandomSkewers(cov.x = x[[11]][-2], num.vectors = 1000, repeat.vector = unlist(x[[13]][-2]) ) 
-   names (x)[12:14] <- c('mean.mx.stats', 'BootsRep', 'rs.size.comparisson')
   }   
   names (x)[12:14] <- c('mean.mx.stats', 'size.mx.rep', 'rs.size.comparisson')
   
@@ -54,17 +54,17 @@ makeMainData <- function (current.data, specie = TRUE, compare.size = FALSE, fin
   x[[16]][[1]] <- matrix(NA, nrow = 1, ncol= 5)
   if (final == TRUE)
   {
-    x[[15]][[1]] <- if(x[[9]]>20) Rarefaction(x[[4]], RandomSkewers, iterations = 1000, num.reps = x[[9]], parallel = T) else NA
-    x[[15]][[2]] <- if(x[[9]]>20) Rarefaction(x[[4]], KrzCor, iterations = 1000, num.reps = x[[9]], parallel = T) else NA
-    x[[15]][[3]] <- if(x[[9]]>20) Rarefaction(x[[4]], PCAsimilarity, iterations = 1000, num.reps = x[[9]], parallel = T) else NA
-    x[[15]][[4]] <- if(x[[9]]>20) Rarefaction(x[[4]], MatrixCor, correlation = TRUE, iterations = 1000, num.reps = x[[9]], parallel = T) else NA
-    x[[15]][[5]] <- if(x[[9]]>20) Rarefaction(x[[4]], KrzCor, correlation = TRUE, iterations = 1000, num.reps = x[[9]], parallel = T) else NA
+    x[[15]][[1]] <- if(x[[9]]>15) Rarefaction(x[[4]], RandomSkewers, iterations = 1000, num.reps = x[[9]], parallel = T) else NA
+    x[[15]][[2]] <- if(x[[9]]>15) Rarefaction(x[[4]], KrzCor, iterations = 1000, num.reps = x[[9]], parallel = T) else NA
+    x[[15]][[3]] <- if(x[[9]]>15) Rarefaction(x[[4]], PCAsimilarity, iterations = 1000, num.reps = x[[9]], parallel = T) else NA
+    x[[15]][[4]] <- if(x[[9]]>15) Rarefaction(x[[4]], MatrixCor, correlation = TRUE, iterations = 1000, num.reps = x[[9]], parallel = T) else NA
+    x[[15]][[5]] <- if(x[[9]]>15) Rarefaction(x[[4]], KrzCor, correlation = TRUE, iterations = 1000, num.reps = x[[9]], parallel = T) else NA
         
     x[[16]][[1]][1] <- if(x[[9]]>15) BootstrapRep( x[[4]], ComparisonFunc = RandomSkewers, iterations = 1000, parallel = T) else NA
-    x[[16]][[1]][2] <- if(x[[9]]>20) BootstrapRep( x[[4]], ComparisonFunc = KrzCor, iterations = 1000, parallel = T) else NA
-    x[[16]][[1]][3] <- if(x[[9]]>20) BootstrapRep( x[[4]], ComparisonFunc = PCAsimilarity, iterations = 1000, parallel = T) else NA
-    x[[16]][[1]][4] <- if(x[[9]]>20) BootstrapRep( x[[4]], ComparisonFunc = MantelCor, iterations = 1000, correlation = TRUE, parallel = T) else NA
-    x[[16]][[1]][5] <- if(x[[9]]>20) BootstrapRep( x[[4]], ComparisonFunc = KrzCor, iterations = 1000, correlation = TRUE, parallel = T) else NA
+    x[[16]][[1]][2] <- if(x[[9]]>15) BootstrapRep( x[[4]], ComparisonFunc = KrzCor, iterations = 1000, parallel = T) else NA
+    x[[16]][[1]][3] <- if(x[[9]]>15) BootstrapRep( x[[4]], ComparisonFunc = PCAsimilarity, iterations = 1000, parallel = T) else NA
+    x[[16]][[1]][4] <- if(x[[9]]>15) BootstrapRep( x[[4]], ComparisonFunc = MantelCor, iterations = 1000, correlation = TRUE, parallel = T) else NA
+    x[[16]][[1]][5] <- if(x[[9]]>15) BootstrapRep( x[[4]], ComparisonFunc = KrzCor, iterations = 1000, correlation = TRUE, parallel = T) else NA
   }  
   
   names(x)[15] <- c('rarefaction')
@@ -73,9 +73,21 @@ makeMainData <- function (current.data, specie = TRUE, compare.size = FALSE, fin
   names(x[[16]])[[1]] <- c('BootsRep')
   colnames(x[[16]][[1]])[1:5] <- c('rs', 'krz','pcas', 'cor.mantel', 'cor.krz')
   
+  x[[17]] <- vector ("list", 3)
+  x[[17]][[1]] <- if(x[[9]]>15) BootstrapR2(ind.data= x[[4]], iterations = 1000, parallel = TRUE) else NA
+  x[[17]][[2]] <- if(x[[9]]>15) BootstrapR2(ind.data= x[[5]], iterations = 1000, parallel = TRUE) else NA
+  x[[17]][[3]] <- if(x[[9]]>15) BootstrapR2(ind.data= x[[6]], iterations = 1000, parallel = TRUE) else NA
+    names(x[[17]]) <- 'BootsR2'
+  names(x[[17]])[1:3] <- c('ed.means', 'sizeless','log')
+  
+    
   return(x)
   
 }
+
+
+
+
 
 #############################################
 ############# PRIMEIRA PARTE ################
@@ -104,14 +116,14 @@ all.main.data<- llply(all.raw.main.data, makeMainData, specie = FALSE, compare.s
 ## Colocando Mx bem estimadas para os n<27###
 #############################################
 
-sp.master.main.data <- llply(Sp.raw.main.data, specie = TRUE, final = TRUE, makeMainData, .progress = progress_text(char = "."), .inform = T)
+sp.master.main.data <- llply(Sp.raw.main.data, specie = TRUE, compare.size = TRUE, final = TRUE, makeMainData, .progress = progress_text(char = "."), .inform = T)
 .progress = progress_text(char = ".")
 
-gen.master.main.data <- llply(Gen.raw.main.data, specie = FALSE, final = TRUE, makeMainData, .progress = progress_text(char = "."), .inform = T)
+gen.master.main.data <- llply(Gen.raw.main.data, specie = FALSE, compare.size = TRUE, final = TRUE, makeMainData, .progress = progress_text(char = "."), .inform = T)
   
 Strepsirrhini.image <- list (specie.lists = sp.master.main.data,   
                                genus.list = gen.master.main.data)
                              
-save(Strepsirrhini.image,
-     file = "~/attaches/Strepsirrhini.image.RData")
+save( Strepsirrhini.image,
+     file = "~/atachesStrepsirrhini_image.RData")
 
