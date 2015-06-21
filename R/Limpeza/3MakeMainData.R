@@ -108,17 +108,10 @@ sp.master.main.data <- llply(Sp.raw.main.data, specie = TRUE, final = TRUE, make
 .progress = progress_text(char = ".")
 
 gen.master.main.data <- llply(Gen.raw.main.data, specie = FALSE, final = TRUE, makeMainData, .progress = progress_text(char = "."), .inform = T)
-
-
-raw.data %>% count(Especie) 
   
-# Hapalemur.image <- list (main.data = main.data,   
-#                       all.main.data = all.main.data)
-# 
-# Propithecus_image <- list (main.data = main.data   
-#                        #all.main.data = all.main.data
-#                        )
-# 
-# save(Eulemur_image,
-#      file = "attaches/Eulemur_image.RData")
+Strepsirrhini.image <- list (specie.lists = sp.master.main.data,   
+                               genus.list = gen.master.main.data)
+                             
+save(Strepsirrhini.image,
+     file = "~/attaches/Strepsirrhini.image.RData")
 
