@@ -13,7 +13,7 @@ if(!require(doParallel)) {install.packages('doParallel'); library(doParallel)}
 #Registrando o numero de cores : 3 em casa, 7 no lab e até 10 no darwin
 #para descobrir rodar no terminal: nproc
 #abrir no terminal htop para ver os cores trabalhando
-registerDoParallel(cores = 10)
+registerDoParallel(cores = 15)
 #abrir no terminal htop para ver os cores trabalhando
 
 arquivo.bruto = "Data/1Master_Organized_Factors.csv"

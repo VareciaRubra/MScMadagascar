@@ -1,6 +1,6 @@
 ################ ?Organizando tudo em listas por ranking taxonomico ##############
 
-current.data <- Gen.raw.main.data$Babakotia
+current.data <- Gen.raw.main.data$Allocebus
 makeMainData <- function (current.data, specie = TRUE, compare.size = FALSE, final = FALSE ) 
   {
   x = vector("list", 17 )
@@ -116,7 +116,7 @@ gen.master.main.data <- llply(Gen.raw.main.data, specie = FALSE, final = FALSE, 
 #############################################
 #registerDoParallel(cores = 15)
 sp.master.main.data <- llply(Sp.raw.main.data, specie = TRUE, compare.size = TRUE, final = TRUE, makeMainData, .progress = progress_text(char = "."), .inform = T)
-gen.master.main.data <- llply(Gen.raw.main.data[[18]], specie = FALSE, compare.size = TRUE, final = TRUE, makeMainData, .progress = progress_text(char = "."), .inform = T)
+gen.master.main.data <- llply(Gen.raw.main.data, specie = FALSE, compare.size = TRUE, final = TRUE, makeMainData, .progress = progress_text(char = "."), .inform = T)
   
 Strepsirrhini.image <- list (specie.lists = sp.master.main.data,   
                                genus.list = gen.master.main.data)
