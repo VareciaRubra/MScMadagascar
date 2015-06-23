@@ -5,7 +5,6 @@ Wmat.extant.Fuckers = CalculateMatrix(manova(as.matrix(extant.main.data$All$ed) 
 Wmat.madagascar.Fuckers = CalculateMatrix(manova(as.matrix(madagascar.main.data$All$ed)  ~ Especie, data = as.data.frame(madagascar.main.data$All$info) ) )
 Wmat.extant.madagascar.Fuckers = CalculateMatrix(manova(as.matrix(extant.madagascar.main.data$All$ed)  ~ Especie, data = as.data.frame(extant.madagascar.main.data$All$info) ) )
 
-
 mask.extant<- unique(All.raw.main.data$All$Especie[All.raw.main.data$All$Status != "Extinct"])
 mask.madagascar<- unique(All.raw.main.data$All$Especie[All.raw.main.data$All$Regiao == "Madagascar"])
 mask.madagascar.extant <- unique(All.raw.main.data$All$Especie[All.raw.main.data$All$Status != "Extinct" &All.raw.main.data$All$Regiao == "Madagascar"])
@@ -20,7 +19,3 @@ DriftTest(means = means.extant.Fuckers, cov.matrix = Wmat.extant.Fuckers, show.p
 DriftTest(means = means.madagascar.Fuckers, cov.matrix = Wmat.madagascar.Fuckers, show.plot = TRUE)
 DriftTest(means = means.extant.madagascar.Fuckers, cov.matrix = Wmat.extant.madagascar.Fuckers, show.plot = TRUE)
 DriftTest(means = means.extant.madagascar.Fuckers, cov.matrix = Wmat.madagascar.Fuckers, show.plot = TRUE)
-
-sp.master.main.data<- Strepsirrhini.image$specie.lists
-
-
