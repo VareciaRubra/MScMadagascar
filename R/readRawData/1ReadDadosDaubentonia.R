@@ -57,9 +57,9 @@ all.raw.main.data<- dlply(raw.data, .(Genero), tbl_df)
 #Removendo outliers (procedimento enquanto tou olhando os graficos, cada cara escroto que percebo add uma linha)
 #Fazer isso junto com a rodada dos demais scripts
 raw.data %<>% 
-  filter(Tombo != "") %>% #comentario de pq foi removido
-  filter(Tombo != "") %>%
-  filter(Tombo != "") %>%
+  filter(Tombo != "044001b") %>% #comentario de pq foi removido
+  filter(Tombo != "2386(16b)") %>%
+  filter(Tombo != "16351") %>%
   filter(Tombo != "") #%>%
 #depois de limpar os zuados, salvar em um arquivo
 #write.csv(raw.data, arquivo.saida , row.names= F)

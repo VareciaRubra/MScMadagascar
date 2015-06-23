@@ -64,7 +64,8 @@ raw.data %<>%
   filter(Tombo != "MO-1962-2797") %>% 
   filter(Tombo != "MO-1932-3252") %>% 
   filter(Tombo != "16197") %>% 
-  filter(Tombo != "16168") #%>% 
+  filter(Tombo != "16168") %>% 
+  filter(Tombo != "043004d") #%>% 
 
 #depois de limpar os zuados, salvar em um arquivo
 #write.csv(raw.data, arquivo.saida, row.names= F)
