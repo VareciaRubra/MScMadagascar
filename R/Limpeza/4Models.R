@@ -50,8 +50,8 @@ plot.matrix.cor<- function(cor.mx = NULL, main = "", title = "", brewer = "BrBG"
   
   color2D.matplot(x = cor.mx, axes = F, cellcol = cores, show.values= show.values, vcex= 0.5, xlab = "", ylab = "", xaxt = "n", yaxt = "n")
   title(main = main , sub =  title)
-  axis(1, 1:mx.dimentions, rownames(cor.mx), las = 3, cex.axis = 0.6, tick = FALSE)
-  axis(2, mx.dimentions:1, rownames(cor.mx), las = 1, cex.axis = 0.6, tick = FALSE)
+  axis(1, 1:mx.dimentions, rownames(cor.mx), las = 3, cex.axis = 0.4, tick = FALSE, line = 0)
+  axis(2, mx.dimentions:1, rownames(cor.mx), las = 1, cex.axis = 0.4, tick = FALSE, line = 0)
   }
   
 
@@ -59,3 +59,9 @@ par(mfrow= c(1,2))
 plot.matrix.cor(cor.mx = cov2cor(CalculateMatrix(y[[1]][[1]])) )
 
 plot.matrix.cor(cor.mx = all.main.data$Indri$matrix$cor)
+
+
+
+
+RS.compare <- RandomSkewers(cov.x = cov.no.na, repeat.vector = rep.no.na, num.vectors = 1000, parallel = TRUE)
+plot.matrix.cor(RS.compare$correlations, main = "V/CV Matrix compared by Random Skewers", brewer = "BrBG")

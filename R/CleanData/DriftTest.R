@@ -46,5 +46,7 @@ pruned.tree<-drop.tip(treefile,treefile$tip.label[-match(species, treefile$tip.l
 plot(pruned.tree)
 
 tree.drift.test<- TreeDriftTest(tree = pruned.tree, mean.list = ed.means , cov.matrix.list = cov.no.na, sample.sizes = sample.no.na)
-
+results <- llply(tree.drift.test, function(x) x$drift_rejected)
 PlotTreeDriftTest(test.list = tree.drift.test, tree = pruned.tree)
+nodelabels()
+tree.drift.test$`49`

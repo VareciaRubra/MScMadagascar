@@ -33,4 +33,4 @@ ed.means <- ed.means[mask.na.cov]
 
 names(ed.means) == names(rep.no.na) == names(cov.mx[mask.na.cov]) == mx.rep[,1][mask.na.cov]
 
-
+RS.compare <- RandomSkewers(cov.x = cov.no.na, repeat.vector = rep.no.na, num.vectors = 1000, parallel = TRUE)
