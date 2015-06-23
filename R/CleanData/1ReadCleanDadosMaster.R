@@ -31,6 +31,9 @@ table(is.na(raw.data$Tombo))
 raw.data$Especie %<>% gsub("\\.", "", .)
 raw.data$Tombo <- factor (raw.data$Tombo, levels = unique(raw.data$Tombo) )
 
+
+
+
 #contando quantos tem por espécie e por Take (pra ter certeza de que se removeu um cara sairam as duas replicas)
 raw.data %>% count(Especie) 
 raw.data %>% count(Take)

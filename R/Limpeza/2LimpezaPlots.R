@@ -88,9 +88,9 @@ raw.data %>%
   theme(axis.text.x = element_text(angle = 90))
 
 ######## Biplot PC1 x PC2 ##############
-current.data <- master.main.data$All
+current.data <-extant.main.data$All
 #PRCOMP <- princomp(current.data$ed %>% na.omit) # extraindo os componentes principais a partir dos dados (medias ed)
-PRCOMP <- princomp(data.frame(na.omit(current.data$sizeless ) ) )
+PRCOMP <- princomp(data.frame(na.omit(current.data$ed ) ) )
 resp <- current.data$info[current.data$info$Tombo %in% dimnames(PRCOMP$scores)[[1]], ] #respectivos dados aos participantes da PCA
 resp %<>% mutate(., PC1 = PRCOMP$scores[,1], PC2=PRCOMP$scores[,2]) 
 hulls <-ddply(resp, .(Familia), plyr::summarise, "hpc1"=PC1[chull(PC1,PC2)],
@@ -102,10 +102,10 @@ fig <- ggplot(resp, aes(PC1, PC2, color = Familia)) +
 fig
 
 
-lin_data = ldply(master.main.data, function(x) tbl_df(cbind(x$info, x$ed))) 
+lin_data = ldply(extant.main.data, function(x) tbl_df(cbind(x$info, x$ed))) 
 lin_data$Especie %<>% gsub("\\.", "", .)
-lin_data %<>% mutate (., .info = paste(Familia, Genero, Especie, sep = "."))
-individual_ID <- unlist(llply(master.main.data, function(x) x$info$Tombo))
+lin_data %<>% mutate (., .info = paste(Familia, Genero, sep = "."))
+individual_ID <- unlist(llply(extant.main.data, function(x) x$info$Tombo))
 myformula = paste0('~', paste(names(select(lin_data, IS_PM:BA_OPI)), collapse = '+'))
 rownames(lin_data) <- individual_ID
 PRCOMP <- princomp(as.formula(myformula), data = lin_data, scale = T)
@@ -115,7 +115,7 @@ current.data <- select(lin_data, .info, IS_PM:BA_OPI)
 rownames(current.data) <- rownames(lin_data)
 #PRCOMP %>% biplot
 #resp %<>% mutate(., PC1 = PRCOMP$scores[,1], PC2=PRCOMP$scores[,2]) 
-Wmat = CalculateMatrix(manova(as.matrix(master.main.data$All$ed)  ~ Especie, data = as.data.frame(master.main.data$All$info) ) )
+Wmat = CalculateMatrix(manova(as.matrix(extant.main.data$All$ed)  ~ Especie, data = as.data.frame(extant.main.data$All$info) ) )
 resp <- as.data.frame(as.matrix(na.omit(select(current.data, IS_PM:BA_OPI) ) ) %*% eigen(Wmat)$vectors[,1:2])
 resp %<>% mutate(., ID = rownames(resp) )
 names(resp) <- c("PC1", "PC2", ".id")
@@ -124,12 +124,16 @@ resp.info <- resp.info[resp.info$Tombo %in% resp$.id, ]
 plot.W <- cbind(resp.info, resp)
 hulls <- ddply(plot.W, .(.info), plyr::summarise, "hpc1"=PC1[chull(PC1,PC2)],
               "hpc2"=PC2[chull(PC1,PC2)])
-hulls %<>% separate(.info, c('Familia', 'Genero', 'Especie'), sep = "\\.")
+hulls %<>% separate(.info, c('Familia', 'Genero'), sep = "\\.")
 
 pc_plot <- ggplot(plot.W, aes(PC1, PC2)) +
-  geom_polygon(aes(hpc1, hpc2, fill = Familia, color = Familia, group= Especie ), data = hulls, alpha=.3) + 
-  geom_point(data = ddply(plot.W, .(Especie), numcolwise(mean)),
-             aes(PC1, PC2, group= Especie), size = 3) + 
+  geom_polygon(aes(hpc1, hpc2, fill = Familia, color = Familia, group= Genero ), data = hulls, alpha=.3) + 
+  geom_point(data = ddply(plot.W, .(Genero), numcolwise(mean)),
+             aes(PC1, PC2, group= Genero), size = 3) + 
+  geom_text(data = ddply(plot.W, .(Especie), numcolwise(mean)),
+            aes(PC1, PC2, label= Especie), size = 3) +
+  geom_point(data = ddply(plot.W, .(Tombo), numcolwise(mean)),
+             aes(PC1, PC2, group= Tombo), size = 1) + 
              theme_bw() + ggtitle("Cranial traits Within-group PC scores")
 pc_plot
 
@@ -138,6 +142,50 @@ pc_plot <- ggplot(plot.W, aes(PC1, PC2)) +
   geom_polygon(aes(hpc1, hpc2, fill = Familia, color = Familia, group= Especie ), data = hulls, alpha=.3) + 
   geom_text(data = ddply(plot.W, .(Especie), numcolwise(mean)),
             aes(PC1, PC2, label= Especie), size = 3) +
+  theme_bw() + ggtitle("Cranial traits Within-group PC scores")
+pc_plot
+
+#################################### Sizeless ##################################
+
+madagascar.main.data$All$info$Familia <- factor (madagascar.main.data$All$info$Familia, levels = unique(madagascar.main.data$All$info$Familia) )
+madagascar.main.data$All$info$Genero <- factor (madagascar.main.data$All$info$Genero, levels = unique(madagascar.main.data$All$info$Genero) )
+
+lin_data = ldply(madagascar.main.data, function(x) tbl_df(cbind(x$info, x$ed))) 
+lin_data$Especie %<>% gsub("\\.", "", .)
+lin_data %<>% mutate (., .info = paste(Familia, Genero, sep = "."))
+individual_ID <- unlist(llply(madagascar.main.data, function(x) x$info$Tombo))
+myformula = paste0('~', paste(names(select(lin_data, IS_PM:BA_OPI)), collapse = '+'))
+rownames(lin_data) <- individual_ID
+PRCOMP <- princomp(as.formula(myformula), data = lin_data, scale = T)
+#PRCOMP$scores
+######## Biplot PC1 x PC2 ##############
+current.data <- select(lin_data, .info, IS_PM:BA_OPI)
+rownames(current.data) <- rownames(lin_data)
+#PRCOMP %>% biplot
+#resp %<>% mutate(., PC1 = PRCOMP$scores[,1], PC2=PRCOMP$scores[,2]) 
+Wmat = CalculateMatrix(manova(as.matrix(madagascar.main.data$All$ed)  ~ Especie, data = as.data.frame(madagascar.main.data$All$info) ) )
+resp <- as.data.frame(as.matrix(na.omit(select(current.data, IS_PM:BA_OPI) ) ) %*% eigen(Wmat)$vectors[,1:2])
+resp %<>% mutate(., ID = rownames(resp) )
+names(resp) <- c("PC1", "PC2", ".id")
+resp.info <- select(lin_data, c(.info,Arquivo:Data_dado) )
+resp.info <- resp.info[resp.info$Tombo %in% resp$.id, ]
+plot.W <- cbind(resp.info, resp)
+hulls <- ddply(plot.W, .(.info), plyr::summarise, "hpc1"=PC1[chull(PC1,PC2)],
+               "hpc2"=PC2[chull(PC1,PC2)])
+hulls %<>% separate(.info, c('Familia', 'Genero'), sep = "\\.")
+
+pc_plot <- ggplot(plot.W, aes(PC1, PC2)) +
+  geom_polygon(aes(hpc1, hpc2, fill = Familia, color = Familia, group= Genero), data = hulls, alpha=.3) + 
+  geom_point(data = ddply(plot.W, .(Especie), numcolwise(mean)),
+             aes(PC1, PC2, group= Especie), size = 3) + 
+  theme_bw() + ggtitle("Cranial traits Within-group PC scores")
+pc_plot
+
+
+pc_plot <- ggplot(plot.W, aes(PC1, PC2)) +
+  geom_polygon(aes(hpc1, hpc2, fill = Familia, color = Familia, group= Genero ), data = hulls, alpha=.2) + 
+  geom_text(data = ddply(plot.W, .(Genero), numcolwise(mean)),
+            aes(PC1, PC2, label= Genero), size = 7) +
   theme_bw() + ggtitle("Cranial traits Within-group PC scores")
 pc_plot
 
