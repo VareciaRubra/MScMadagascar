@@ -36,17 +36,45 @@ cov.no.na <- cov.mx[mask.na.cov]
 rep.no.na <- mx.rep[mask.na.cov,2]
 names(rep.no.na) <- mx.rep[,1][mask.na.cov]
 ##### ED means ######
-ed.means <- ed.means[mask.na.cov]
+ed.means.no.na <- ed.means[mask.na.cov]
 
 treefile = read.nexus(file = "~/ataches/fbd369agerange_gooddates.tre")
 plot(treefile)
+
 species <- treefile$tip.label[treefile$tip.label %in% names(sample.no.na)]
 
 pruned.tree<-drop.tip(treefile,treefile$tip.label[-match(species, treefile$tip.label)])
 plot(pruned.tree)
 
-tree.drift.test<- TreeDriftTest(tree = pruned.tree, mean.list = ed.means , cov.matrix.list = cov.no.na, sample.sizes = sample.no.na)
+tree.drift.test<- TreeDriftTest(tree = pruned.tree, mean.list = ed.means.no.na , cov.matrix.list = cov.no.na, sample.sizes = sample.no.na)
 results <- llply(tree.drift.test, function(x) x$drift_rejected)
 PlotTreeDriftTest(test.list = tree.drift.test, tree = pruned.tree)
 nodelabels()
-tree.drift.test$`49`
+tree.drift.test$`36`+
+coord_fixed()
+table(ldply(tree.drift.test, function(x) x$drift_rejected))
+
+mask.n.size <- n.size[,2]>40
+###Sample sizes #####
+sample.40 <- n.size[mask.n.size,2]
+names(sample.40) <- n.size[mask.n.size,1]
+##### Cov mx ########
+cov.40 <- cov.mx[mask.n.size]
+##### Mx repetabilities via RS ######
+rep.40 <- mx.rep[mask.n.size,2]
+names(rep.40) <- mx.rep[,1][mask.n.size]
+##### ED means ######
+ed.means.40 <- ed.means[mask.n.size]
+
+names(ed.means.40) == names(rep.40) == names(cov.mx[mask.n.size]) == mx.rep[,1][mask.n.size]
+
+species.40 <- treefile$tip.label[treefile$tip.label %in% names(sample.40)]
+pruned.tree.40<-drop.tip(treefile,treefile$tip.label[-match(species.40, treefile$tip.label)])
+plot(pruned.tree.40)
+
+tree.drift.test.40<- TreeDriftTest(tree = pruned.tree.40, mean.list = ed.means.40 , cov.matrix.list = cov.40, sample.sizes = sample.40)
+results <- llply(tree.drift.test, function(x) x$drift_rejected)
+PlotTreeDriftTest(test.list = tree.drift.test.40, tree = pruned.tree.40)
+nodelabels()
+
+

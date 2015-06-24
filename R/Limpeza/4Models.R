@@ -65,3 +65,6 @@ plot.matrix.cor(cor.mx = all.main.data$Indri$matrix$cor)
 
 RS.compare <- RandomSkewers(cov.x = cov.no.na, repeat.vector = rep.no.na, num.vectors = 1000, parallel = TRUE)
 plot.matrix.cor(RS.compare$correlations, main = "V/CV Matrix compared by Random Skewers", brewer = "BrBG")
+
+RS.compare.40 <- RandomSkewers(cov.x = cov.40, repeat.vector = rep.40, num.vectors = 1000, parallel = TRUE)
+plot.matrix.cor(RS.compare.40$correlations, main = "V/CV Matrix compared by Random Skewers", brewer = "BrBG")

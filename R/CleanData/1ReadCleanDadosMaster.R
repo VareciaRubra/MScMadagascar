@@ -18,19 +18,21 @@ registerDoParallel(cores = 15)
 
 arquivo.bruto = "Data/1Master_Organized_Factors.csv"
 arquivo.saida =  "Data/1Master_Organized_Factors.csv"
-raw.regular <- read.csv(arquivo.bruto, head = T)
-
 #read csv and create table dataframe
-raw.data <- tbl_df(read_csv(arquivo.bruto))
-table(is.na(raw.data$Tombo))
+raw.regular <- read.csv(arquivo.bruto, head = T)
 raw.data<- tbl_df(raw.regular)
-table(is.na(raw.data$Tombo))
-# forçando a ordem dos fatores como sendo a ordem que aparece 
+raw.data$Especie %<>% gsub("\\.", "", .)
+# forçando a ordem dos fatores  como sendo a ordem que aparece 
 # no proprio dataframe-------> 
 #isso evita que funçoes da classe apply reoordenem os resultados numérica/alfabeticamente.
-raw.data$Especie %<>% gsub("\\.", "", .)
+
 raw.data$Tombo <- factor (raw.data$Tombo, levels = unique(raw.data$Tombo) )
 
+################## Árvore James ##################
+treefile = read.nexus(file = "~/ataches/fbd369agerange_gooddates.tre")
+species <- treefile$tip.label[treefile$tip.label %in% unique(raw.data$Especie)]
+pruned.tree<-drop.tip(treefile,treefile$tip.label[-match(species, treefile$tip.label)])
+plot(pruned.tree)
 raw.data %<>% 
   filter(Tombo != "044001b") %>% #comentario de pq foi removido
   filter(Tombo != "2386(16b)") %>%

@@ -19,18 +19,5 @@ R2<- stats %>% ldply(CalcR2, .progress = progress_text(char = "."), .inform = T)
 R2 %>% ggplot() +geom_point( aes(x= .id, y = V1))
 plot(R2)
 
-
-###Sample sizes #####
-sample.no.na <- n.size[mask.na.cov,2]
-names(sample.no.na) <- n.size[,1][mask.na.cov]
-##### Cov mx ########
-cov.no.na <- cov.mx[mask.na.cov]
-##### Mx repetabilities via RS ######
-rep.no.na <- mx.rep[mask.na.cov,2]
-names(rep.no.na) <- mx.rep[,1][mask.na.cov]
-##### ED means ######
-ed.means <- ed.means[mask.na.cov]
-
-names(ed.means) == names(rep.no.na) == names(cov.mx[mask.na.cov]) == mx.rep[,1][mask.na.cov]
-
-RS.compare <- RandomSkewers(cov.x = cov.no.na, repeat.vector = rep.no.na, num.vectors = 1000, parallel = TRUE)
+RS.compare <- RandomSkewers(cov.x = cov.40, repeat.vector = rep.40, num.vectors = 1000, parallel = TRUE)
+coord
