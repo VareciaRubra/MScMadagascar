@@ -1,32 +1,26 @@
 
-
-Wmat.All.Fuckers = CalculateMatrix(manova(as.matrix(all.main.data$All$ed)  ~ Especie, data = as.data.frame(all.main.data$All$info) ) )
-Wmat.extant.Fuckers = CalculateMatrix(manova(as.matrix(extant.main.data$All$ed)  ~ Especie, data = as.data.frame(extant.main.data$All$info) ) )
-Wmat.madagascar.Fuckers = CalculateMatrix(manova(as.matrix(madagascar.main.data$All$ed)  ~ Especie, data = as.data.frame(madagascar.main.data$All$info) ) )
-Wmat.extant.madagascar.Fuckers = CalculateMatrix(manova(as.matrix(extant.madagascar.main.data$All$ed)  ~ Especie, data = as.data.frame(extant.madagascar.main.data$All$info) ) )
-
-mask.extant<- unique(All.raw.main.data$All$Especie[All.raw.main.data$All$Status != "Extinct"])
-mask.madagascar<- unique(All.raw.main.data$All$Especie[All.raw.main.data$All$Regiao == "Madagascar"])
-mask.madagascar.extant <- unique(All.raw.main.data$All$Especie[All.raw.main.data$All$Status != "Extinct" &All.raw.main.data$All$Regiao == "Madagascar"])
-
-means.All.Fuckers<- sp.master.main.data %>% llply(function(x) x$ed.means )
-means.extant.Fuckers<- means.All.Fuckers[mask.extant] 
-means.madagascar.Fuckers<- means.All.Fuckers[mask.madagascar]
-means.extant.madagascar.Fuckers<- means.All.Fuckers[mask.madagascar.extant]
-  
-DriftTest(means = means.All.Fuckers, cov.matrix = Wmat.All.Fuckers, show.plot = TRUE)
-DriftTest(means = means.extant.Fuckers, cov.matrix = Wmat.extant.Fuckers, show.plot = TRUE)
+#Teste na raiz apenas, usando a matriz ancestral:
+### nao roda pq? Error in lm.fit(x, y, offset = offset, singular.ok = singular.ok, ...) : 0 (non-NA) cases
+DriftTest(means = means.All.Fuckers, cov.matrix = Wmat.All.Fuckers, show.plot = TRUE) 
+#rodam, e rejeita em todos:
 DriftTest(means = means.madagascar.Fuckers, cov.matrix = Wmat.madagascar.Fuckers, show.plot = TRUE)
 DriftTest(means = means.extant.madagascar.Fuckers, cov.matrix = Wmat.extant.madagascar.Fuckers, show.plot = TRUE)
 DriftTest(means = means.extant.madagascar.Fuckers, cov.matrix = Wmat.madagascar.Fuckers, show.plot = TRUE)
 
+current.data<- sp.main.data
 
-cov.mx <- sp.master.main.data %>% llply(function(x) x$matrix$cov)
-mx.rep <- sp.master.main.data %>% ldply(function(x) x$Mx.Rep$BootsRep[1]) 
-n.size <- sp.master.main.data %>% ldply(function(x) x$sample.size) 
-ed.means <- sp.master.main.data %>% llply(function(x) x$ed.means) 
-gm.mean <- sp.master.main.data %>% ldply(function(x) x$gm.mean) 
+# selecting parts of the main.data.list to perform the matrices comparrison and drift test 
+cov.mx <- current.data %>% llply(function(x) x$matrix$cov)
+mx.rep <- current.data %>% ldply(function(x) x$Mx.Rep$BootsRep[1]) 
+n.size <- current.data %>% ldply(function(x) x$sample.size) 
+ed.means <- current.data %>% llply(function(x) x$ed.means) 
+gm.mean <- current.data %>% ldply(function(x) x$gm.mean) 
 
+# creating the masks to index the current set of matrices, means and repetabilities
+mask.n.size <- n.size[,2]>40
+mask.na.cov <- ldply(cov.mx, function(x) !is.na(x[1]))[,2]
+mask.rep <- !is.na(mx.rep)[,2]
+#Selecting accordingly to masks
 ###Sample sizes #####
 sample.no.na <- n.size[mask.na.cov,2]
 names(sample.no.na) <- n.size[,1][mask.na.cov]
@@ -38,11 +32,9 @@ names(rep.no.na) <- mx.rep[,1][mask.na.cov]
 ##### ED means ######
 ed.means.no.na <- ed.means[mask.na.cov]
 
+# Árvore James: 
 treefile = read.nexus(file = "~/ataches/fbd369agerange_gooddates.tre")
-plot(treefile)
-
 species <- treefile$tip.label[treefile$tip.label %in% names(sample.no.na)]
-
 pruned.tree<-drop.tip(treefile,treefile$tip.label[-match(species, treefile$tip.label)])
 plot(pruned.tree)
 

@@ -1,12 +1,22 @@
 ####### Selecionando o que que vc quer plotar #########
 current.data <- 
-################### Arrumando a ordem das especies de acordo com a filogenia ##############
-tiporder<- treefile$edge[,2][ treefile$edge[, 2] %in% 1:length(treefile$tip.label) ]
-ordered.species <- as.data.frame(as.character(treefile$tip.label[tiporder]) )
-names(ordered.species)<- ".id"
-my.species <- names(sp.master.main.data)
-species <- ordered.species[ordered.species$.id %in% my.species,]
-###########################################################################################
+  
+#The diffent grids for ploting in W space: all, only extants, and only madagascar extant and with extinct.
+Wmat.All.Fuckers = CalculateMatrix(manova(as.matrix(all.main.data$All$ed)  ~ Especie, data = as.data.frame(all.main.data$All$info) ) )
+Wmat.extant.Fuckers = CalculateMatrix(manova(as.matrix(extant.main.data$All$ed)  ~ Especie, data = as.data.frame(extant.main.data$All$info) ) )
+Wmat.madagascar.Fuckers = CalculateMatrix(manova(as.matrix(madagascar.main.data$All$ed)  ~ Especie, data = as.data.frame(madagascar.main.data$All$info) ) )
+Wmat.extant.madagascar.Fuckers = CalculateMatrix(manova(as.matrix(extant.madagascar.main.data$All$ed)  ~ Especie, data = as.data.frame(extant.madagascar.main.data$All$info) ) )
+
+# creating the masks to index the current set of matrices, means and repetabilities
+mask.extant<- unique(All.raw.main.data$All$Especie[All.raw.main.data$All$Status != "Extinct"])
+mask.madagascar<- unique(All.raw.main.data$All$Especie[All.raw.main.data$All$Regiao == "Madagascar"])
+mask.madagascar.extant <- unique(All.raw.main.data$All$Especie[All.raw.main.data$All$Status != "Extinct" &All.raw.main.data$All$Regiao == "Madagascar"])
+
+#selecionando todas as médias, dependendo do grid
+means.All.Fuckers<- current.data %>% llply(function(x) x$ed.means )
+means.extant.Fuckers<- means.All.Fuckers[mask.extant] 
+means.madagascar.Fuckers<- means.All.Fuckers[mask.madagascar]
+means.extant.madagascar.Fuckers<- means.All.Fuckers[mask.madagascar.extant]
 
 current.data$All$info$Familia <- factor (current.data$All$info$Familia, levels = unique(current.data$All$info$Familia) )
 current.data$All$info$Genero <- factor (current.data$All$info$Genero, levels = unique(current.data$All$info$Genero) )

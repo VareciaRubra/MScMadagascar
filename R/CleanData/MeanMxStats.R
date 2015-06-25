@@ -1,10 +1,10 @@
-sp.master.main.data <- Strepsirrhini.image$specie.lists
+current.data <- Strepsirrhini.image.complete$specie.lists
 
-cov.mx <- sp.master.main.data %>% llply(function(x) x$matrix$cov)
-mx.rep <- sp.master.main.data %>% ldply(function(x) x$Mx.Rep$BootsRep[1]) 
-n.size <- sp.master.main.data %>% ldply(function(x) x$sample.size) 
-ed.means <- sp.master.main.data %>% llply(function(x) x$ed.means) 
-gm.mean <- sp.master.main.data %>% ldply(function(x) x$gm.mean) 
+cov.mx <- current.data %>% llply(function(x) x$matrix$cov)
+mx.rep <- current.data %>% ldply(function(x) x$Mx.Rep$BootsRep[1]) 
+n.size <- current.data %>% ldply(function(x) x$sample.size) 
+ed.means <- current.data %>% llply(function(x) x$ed.means) 
+gm.mean <- current.data %>% ldply(function(x) x$gm.mean) 
 
 mask.n.size <- n.size[,2]>40
 mask.na.cov <- ldply(cov.mx, function(x) !is.na(x[1]))[,2]
