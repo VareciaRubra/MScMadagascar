@@ -31,7 +31,7 @@ rep.no.na <- mx.rep[mask.na.cov,2]
 names(rep.no.na) <- mx.rep[,1][mask.na.cov]
 ##### ED means ######
 ed.means.no.na <- ed.means[mask.na.cov]
-
+gm.mean.no.na <- gm.mean [mask.na.cov, 2]
 # Árvore James: 
 treefile = read.nexus(file = "~/ataches/fbd369agerange_gooddates.tre")
 species <- treefile$tip.label[treefile$tip.label %in% names(sample.no.na)]
@@ -42,9 +42,57 @@ tree.drift.test<- TreeDriftTest(tree = pruned.tree, mean.list = ed.means.no.na ,
 results <- llply(tree.drift.test, function(x) x$drift_rejected)
 PlotTreeDriftTest(test.list = tree.drift.test, tree = pruned.tree)
 nodelabels()
-tree.drift.test$`36`+
-coord_fixed()
-table(ldply(tree.drift.test, function(x) x$drift_rejected))
+tree.drift.test$`45`
+
+######### changing plot 
+tested.nodes <- as.numeric(names(tree.drift.test))
+non.drift.nodes <- laply(tree.drift.test, function(x) x$drift_rejected)
+i.c.5 <- ldply(tree.drift.test, function(x) x$coefficient_CI_95[2,])
+i.c.5<- ldply(tree.drift.test, function(x) x$coefficient_CI_95[1,])
+names(i.c.5) <- c('node', 'min', 'max')
+names(intercept.ic) <- c('node', 'min', 'max')
+i.c.5$min <- round(i.c.5$min, digits=2)
+i.c.5$max <- round(i.c.5$max, digits=2)
+
+par(mfrow = c(1,1))
+par(oma=c(1,1,1,1))
+par(mar=c(0,2,1,1)+0.1)
+plot(pruned.tree, font = 3, label.offset = 7, no.margin = T, edge.color = "grey80", edge.width = 5, cex= 1.1)
+#nodelabels(node = tested.nodes, thermo = as.numeric(non.drift.nodes))
+i.c.5 <- ldply(tree.drift.test, function(x) x$coefficient_CI_95[2,])
+names(i.c.5) <- c('node', 'min', 'max')
+names(intercept.ic) <- c('node', 'min', 'max')
+i.c.5$min <- round(i.c.5$min, digits=2)
+i.c.5$max <- round(i.c.5$max, digits=2)
+nodelabels(node = tested.nodes , text = i.c.5$min, adj = 1.2, bg = "transparent", col = 'red', frame = "n", cex = i.c.5$min)
+nodelabels(node = tested.nodes, i.c.5$max, adj = -0.2, bg = "transparent", col = 'blue', frame = "n", cex = i.c.5$max)
+nodelabels(node = tested.nodes, pch = (as.numeric(non.drift.nodes)+17), cex=1.4, col = (as.numeric(non.drift.nodes)+5) )
+compare.stuff<- cbind( n.size[n.size[,1] %in% pruned.tree$tip.label, ], gm.mean[gm.mean[,1] %in% pruned.tree$tip.label, 2])
+names(compare.stuff) <- c('Especie', 'n', 'gm')
+compare.stuff$Especie <- as.character(compare.stuff$Especie)
+compare.stuff<- compare.stuff[with(compare.stuff, order(Especie)), ]
+tiplabels(pch = 21, cex =compare.stuff$n/30, adj = 4)
+tiplabels(pch = 15, cex = compare.stuff$gm/10, adj = 6)
+compare.stuff$Especie <- compare.stuff[sort(compare.stuff[,1]),]
+
+par(mar=c(0,0,1,3)+0.1)
+plot(pruned.tree, font = 3, label.offset = -3, no.margin = T, edge.color = "grey80", edge.width = 5, cex= 1.1, direction ="leftwards", show.tip.label = T, col = "white")
+#nodelabels(node = tested.nodes, thermo = as.numeric(non.drift.nodes))
+i.c.5<- ldply(tree.drift.test, function(x) x$coefficient_CI_95[1,])
+names(i.c.5) <- c('node', 'min', 'max')
+names(intercept.ic) <- c('node', 'min', 'max')
+i.c.5$min <- round(i.c.5$min, digits=2)
+i.c.5$max <- round(i.c.5$max, digits=2)
+nodelabels(node = tested.nodes , i.c.5$min, adj = -0.2, bg = "transparent", col = 'red', frame = "n", cex = i.c.5$min*0.6)
+nodelabels(node = tested.nodes, i.c.5$max, adj = 1.2, bg = "transparent", col = 'blue', frame = "n", cex = i.c.5$max*0.6)
+nodelabels(node = tested.nodes, pch = (as.numeric(non.drift.nodes)+17), cex=1.4, col = (as.numeric(non.drift.nodes)+9) )
+tiplabels(pch = 19, cex = gm.mean.no.na/10, adj = -2.5)
+
+
+
+tree.drift.test$`63`
+nodelabels()
+
 
 mask.n.size <- n.size[,2]>40
 ###Sample sizes #####
