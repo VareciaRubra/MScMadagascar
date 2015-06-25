@@ -108,8 +108,8 @@ extant.madagascar.main.data<- dlply(extant.madagascar.main.data, .(All), tbl_df)
 extant.madagascar.main.data<- llply(extant.madagascar.main.data, specie = TRUE, final = FALSE, makeMainData, .progress = 'text')
 
 all.main.data <- llply(All.raw.main.data, specie = TRUE, final = FALSE, makeMainData, .progress = 'text')
-sp.master.main.data <- llply(Sp.raw.main.data, specie = TRUE, final = FALSE, makeMainData, .progress = 'text', .inform = T)
-gen.master.main.data <- llply(Gen.raw.main.data, specie = FALSE, final = FALSE, makeMainData, .progress = 'text', .inform = T)
+#sp.master.main.data <- llply(Sp.raw.main.data, specie = TRUE, final = FALSE, makeMainData, .progress = 'text', .inform = T)
+#gen.master.main.data <- llply(Gen.raw.main.data, specie = FALSE, final = FALSE, makeMainData, .progress = 'text', .inform = T)
 
 
 #############################################
@@ -128,13 +128,13 @@ gen.master.main.data <- llply(Gen.raw.main.data, specie = FALSE, final = FALSE, 
 ############# TERCEIRA PARTE ################
 ## Colocando Mx bem estimadas para os n<27###
 #############################################
-#registerDoParallel(cores = 15)
-sp.master.main.data <- llply(Sp.raw.main.data, specie = TRUE, compare.size = TRUE, final = TRUE, makeMainData, .progress = progress_text(char = "."), .inform = T)
-gen.master.main.data <- llply(Gen.raw.main.data, specie = FALSE, compare.size = TRUE, final = TRUE, makeMainData, .progress = progress_text(char = "."), .inform = T)
+#registerDoParallel(cores = 20)
+sp.main.data <- llply(Sp.raw.main.data, specie = TRUE, compare.size = TRUE, final = TRUE, makeMainData, .progress = progress_text(char = "."), .inform = T)
+gen.main.data <- llply(Gen.raw.main.data, specie = FALSE, compare.size = TRUE, final = TRUE, makeMainData, .progress = progress_text(char = "."), .inform = T)
   
-Strepsirrhini.image <- list (specie.lists = sp.master.main.data,   
-                               genus.list = gen.master.main.data)
+Strepsirrhini.image.complete <- list (specie.lists = sp.main.data,   
+                               genus.list = gen.main.data)
                              
-save( Strepsirrhini.image,
-     file = "~/atachesStrepsirrhini_image_2.RData")
+save( Strepsirrhini.image.complete,
+     file = "~/ataches/Strepsirrhini_image_complete.RData")
 
