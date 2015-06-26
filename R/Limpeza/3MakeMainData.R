@@ -77,7 +77,7 @@ makeMainData <- function (current.data, specie = TRUE, compare.size = FALSE, fin
   names(x)[16] <- c('Mx.Rep')
   names(x[[16]])[[1]] <- c('BootsRep')
   colnames(x[[16]][[1]])[1:5] <- c('rs', 'krz','pcas', 'cor.mantel', 'cor.krz')
-  names(x[[17]]) <- 'BootsR2'
+  names(x)[17] <- 'BootsR2'
   names(x[[17]])[1:3] <- c('ed.means', 'sizeless','log')
       
   return(x)
@@ -107,7 +107,7 @@ extant.madagascar.main.data<- raw.data %>% filter( Regiao == "Madagascar") %>% f
 extant.madagascar.main.data<- dlply(extant.madagascar.main.data, .(All), tbl_df)
 extant.madagascar.main.data<- llply(extant.madagascar.main.data, specie = TRUE, final = FALSE, makeMainData, .progress = 'text')
 
-all.main.data <- llply(All.raw.main.data, specie = TRUE, final = FALSE, makeMainData, .progress = 'text')
+all.main.data <- llply(All.raw.main.data, specie = TRUE, final = TRUE, makeMainData, .progress = 'text')
 #sp.master.main.data <- llply(Sp.raw.main.data, specie = TRUE, final = FALSE, makeMainData, .progress = 'text', .inform = T)
 #gen.master.main.data <- llply(Gen.raw.main.data, specie = FALSE, final = FALSE, makeMainData, .progress = 'text', .inform = T)
 

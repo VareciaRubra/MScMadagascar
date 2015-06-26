@@ -54,10 +54,10 @@ names(intercept.ic) <- c('node', 'min', 'max')
 i.c.5$min <- round(i.c.5$min, digits=2)
 i.c.5$max <- round(i.c.5$max, digits=2)
 
-par(mfrow = c(1,1))
-par(oma=c(1,1,1,1))
-par(mar=c(0,2,1,1)+0.1)
-plot(pruned.tree, font = 3, label.offset = 7, no.margin = T, edge.color = "grey80", edge.width = 5, cex= 1.1)
+# par(mfrow = c(1,1))
+# par(oma=c(1,1,1,1))
+# par(mar=c(0,2,1,1)+0.1)
+plot(pruned.tree, font = 3, label.offset = 15, no.margin = T, edge.color = "grey80", edge.width = 5, cex= 1.1)
 #nodelabels(node = tested.nodes, thermo = as.numeric(non.drift.nodes))
 i.c.5 <- ldply(tree.drift.test, function(x) x$coefficient_CI_95[2,])
 names(i.c.5) <- c('node', 'min', 'max')
@@ -71,9 +71,10 @@ compare.stuff<- cbind( n.size[n.size[,1] %in% pruned.tree$tip.label, ], gm.mean[
 names(compare.stuff) <- c('Especie', 'n', 'gm')
 compare.stuff$Especie <- as.character(compare.stuff$Especie)
 compare.stuff<- compare.stuff[with(compare.stuff, order(Especie)), ]
-tiplabels(pch = 21, cex =compare.stuff$n/30, adj = 4)
-tiplabels(pch = 15, cex = compare.stuff$gm/10, adj = 6)
-compare.stuff$Especie <- compare.stuff[sort(compare.stuff[,1]),]
+tiplabels(pch = 21, cex =compare.stuff$n/18, adj = 6)
+tiplabels(pch = 15, cex = compare.stuff$gm/9, adj = 10)
+nodelabels(node = tested.nodes, col = 'grey30', adj = c(0.5, 1.25), cex = 0.5, frame = "n")
+# compare.stuff$Especie <- compare.stuff[sort(compare.stuff[,1]),]
 
 par(mar=c(0,0,1,3)+0.1)
 plot(pruned.tree, font = 3, label.offset = -3, no.margin = T, edge.color = "grey80", edge.width = 5, cex= 1.1, direction ="leftwards", show.tip.label = T, col = "white")
@@ -90,7 +91,7 @@ tiplabels(pch = 19, cex = gm.mean.no.na/10, adj = -2.5)
 
 
 
-tree.drift.test$`63`
+tree.drift.test$`47`
 nodelabels()
 
 

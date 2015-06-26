@@ -21,6 +21,8 @@ arquivo.saida =  "Data/1MasterDB_following_JHerrera_PhylOrder.csv"
 #read csv and create table dataframe
 raw.regular <- read.csv(arquivo.bruto, head = T)
 raw.regular$Especie %<>% gsub("\\.", "", .)
+ str(raw.regular)
+
 ########## Renomeando minhas especies de acordo com a arvore do James ############
 recoderFunc <- function(data, oldvalue, newvalue) {
   # convert any factors to characters

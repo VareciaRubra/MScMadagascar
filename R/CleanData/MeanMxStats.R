@@ -1,4 +1,4 @@
-current.data <- Strepsirrhini.image.complete$specie.lists
+current.data <- sp.main.data
 
 cov.mx <- current.data %>% llply(function(x) x$matrix$cov)
 mx.rep <- current.data %>% ldply(function(x) x$Mx.Rep$BootsRep[1]) 
@@ -11,7 +11,8 @@ mask.na.cov <- ldply(cov.mx, function(x) !is.na(x[1]))[,2]
 mask.rep <- !is.na(mx.rep)[,2]
 
 distance <- llply(cov.mx[mask.na.cov], MatrixDistance, distance = "OverlapDist")
-RS<- llply(cov.mx[mask.n.size], RandomSkewers, num.vectors = 1000, repeat.vector = )
+RS<- llply(cov.x= cov.mx[mask.n.size], RandomSkewers, num.vectors = 1000, repeat.vector = mx.rep[mask.n.size] )
+plot.matrix.cor(RS$correlations, main = "V/CV Matrix compared by Random Skewers", brewer = "RdBu")
 mask2 <- ldply(stats, function(x) !is.na(x[1]))[,2]
 stats <- stats[mask1]
 

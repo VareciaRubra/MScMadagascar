@@ -38,22 +38,25 @@ plot.matrix.cor<- function(cor.mx = NULL, main = "", title = "", brewer = "BrBG"
   library("RColorBrewer")
   paleta.of.choice  <- rev(brewer.pal(11, brewer))
   colfunc <- colorRampPalette(paleta.of.choice)
-  paleta  <- colfunc(200)
+  paleta  <- colfunc(90)
   
   nCores  <- length(paleta)
-  intervalMarks  <- seq(from = -1, to = 1, length.out = nCores)
+  intervalMarks  <- seq(from = 0.1, to = 1, length.out = nCores)
   dados<- as.vector(cor.mx)
   intervals  <- findInterval(dados , intervalMarks, rightmost.closed = T, all.inside = T)
   cores  <- paleta[intervals]
   
   mx.dimentions <- dim(cor.mx)[1]
   
-  color2D.matplot(x = cor.mx, axes = F, cellcol = cores, show.values= show.values, vcex= 0.5, xlab = "", ylab = "", xaxt = "n", yaxt = "n")
+  color2D.matplot(x = cor.mx, axes = F, cellcol = cores, show.values= show.values, vcex= 0.8, xlab = "", ylab = "", xaxt = "n", yaxt = "n")
   title(main = main , sub =  title)
-  axis(1, 1:mx.dimentions, rownames(cor.mx), las = 3, cex.axis = 0.4, tick = FALSE, line = 0)
-  axis(2, mx.dimentions:1, rownames(cor.mx), las = 1, cex.axis = 0.4, tick = FALSE, line = 0)
-  }
+  axis(1, 1:mx.dimentions, paste("(n=", sample.40,")",1:length(rownames(cor.mx)), sep = " "), las = 2, cex.axis = 0.7, tick = FALSE, line = 0)
+  #axis(2, mx.dimentions:1, length(rownames(cor.mx)):1, las = 1, cex.axis = 1, tick = FALSE, line = 0)
   
+  axis(2, mx.dimentions:1, paste(rownames(cor.mx), 1:18), las = 1, cex.axis = 1, tick = FALSE, line = 0)
+  }
+plot.matrix.cor(RS.compare.40$correlations, main = "V/CV Matrix compared by Random Skewers", brewer = "RdBu")
+
 
 par(mfrow= c(1,2))
 plot.matrix.cor(cor.mx = cov2cor(CalculateMatrix(y[[1]][[1]])) )
@@ -67,4 +70,6 @@ RS.compare <- RandomSkewers(cov.x = cov.no.na, repeat.vector = rep.no.na, num.ve
 plot.matrix.cor(RS.compare$correlations, main = "V/CV Matrix compared by Random Skewers", brewer = "BrBG")
 
 RS.compare.40 <- RandomSkewers(cov.x = cov.40, repeat.vector = rep.40, num.vectors = 1000, parallel = TRUE)
-plot.matrix.cor(RS.compare.40$correlations, main = "V/CV Matrix compared by Random Skewers", brewer = "BrBG")
+plot.matrix.cor(RS.compare.40$correlations, main = "V/CV Matrix compared by Random Skewers", brewer = "RdBu")
+
+

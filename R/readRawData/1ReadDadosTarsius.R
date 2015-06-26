@@ -23,6 +23,7 @@ raw.regular <- read.csv(arquivo.bruto, head = T)
 #read csv and create table dataframe
 raw.data <- tbl_df(read_csv(arquivo.bruto))
 table(is.na(raw.data$Tombo))
+table((raw.regular$IS_PM))
 raw.data<- tbl_df(raw.regular)
 table(is.na(raw.data$Tombo))
 # forçando a ordem dos fatores como sendo a ordem que aparece 
