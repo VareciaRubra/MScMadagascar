@@ -38,7 +38,7 @@ species <- treefile$tip.label[treefile$tip.label %in% names(sample.no.na)]
 pruned.tree<-drop.tip(treefile,treefile$tip.label[-match(species, treefile$tip.label)])
 plot(pruned.tree)
 
-tree.drift.test<- TreeDriftTest(tree = pruned.tree, mean.list = ed.means.no.na , cov.matrix.list = cov.no.na, sample.sizes = sample.no.na)
+tree.drift.test<- TreeDriftTest(tree = pruned.tree, mean.list = ed.means.no.na , cov.matrix.list = cov.no.na, sample.sizes = sample.no.na, )
 results <- llply(tree.drift.test, function(x) x$drift_rejected)
 PlotTreeDriftTest(test.list = tree.drift.test, tree = pruned.tree)
 nodelabels()
@@ -92,6 +92,7 @@ tiplabels(pch = 19, cex = gm.mean.no.na/10, adj = -2.5)
 
 
 tree.drift.test$`47`
+
 nodelabels()
 
 
@@ -118,4 +119,39 @@ results <- llply(tree.drift.test, function(x) x$drift_rejected)
 PlotTreeDriftTest(test.list = tree.drift.test.40, tree = pruned.tree.40)
 nodelabels()
 
+tree.drift.test<- TreeDriftTest(tree = pruned.tree, mean.list = ed.means.no.na , cov.matrix.list = cov.no.na, sample.sizes = sample.no.na)
+tree.drift.test$`62`
 
+DriftTest<- function (means, cov.matrix, show.plot = TRUE) 
+{
+  if (is.data.frame(means) | (!is.array(means) & !is.list(means))) 
+    stop("means must be in a list or an array.")
+  if (!isSymmetric(cov.matrix)) 
+    stop("covariance matrix must be symmetric.")
+  if (is.list(means)) {
+    mean.array <- laply(means, identity)
+  }
+  else {
+    mean.array <- means
+  }
+  W.pc <- eigen(cov.matrix)
+  projection.Wpc <- as.matrix(mean.array) %*% W.pc$vectors
+  log.B_variance <- log(apply(projection.Wpc, 2, var))
+  log.W_eVals <- log(W.pc$values)
+  regression <- lm(log.B_variance ~ log.W_eVals)
+  reg.plot <- ggplot(data.frame(log.B_variance, log.W_eVals, 
+                                names = 1:(dim(mean.array)[2])), aes_string("log.W_eVals", 
+                                                                            "log.B_variance")) + geom_text(aes_string(label = "names", size = 5)) + 
+    geom_smooth(method = "lm", color = "black") + labs(x = "log(W Eigenvalues)", 
+                                                       y = "log(B variances)") + theme_bw()
+  if (show.plot) 
+    print(reg.plot)
+  containsOne <- function(x) ifelse(x[1] < 1 & x[2] > 1, TRUE, 
+                                    FALSE)
+  test <- !containsOne(confint(regression)[2, ])
+  names(test) <- "5 %"
+  objeto <- list(regression = regression, coefficient_CI_95 = confint(regression), 
+                 log.between_group_variance = log.B_variance, log.W_eVals = log.W_eVals, 
+                 drift_rejected = test, plot = reg.plot)
+  return(objeto)
+}
