@@ -1,6 +1,6 @@
 ################ ?Organizando tudo em listas por ranking taxonomico ##############
 
-current.data <- Gen.raw.main.data$Allocebus
+current.data <- Sp.raw.main.data$Eulemur_rubriventer
 makeMainData <- function (current.data, specie = TRUE, compare.size = FALSE, final = FALSE ) 
   {
   x = vector("list", 17 )
@@ -69,7 +69,7 @@ makeMainData <- function (current.data, specie = TRUE, compare.size = FALSE, fin
     x[[17]][[1]] <- if(x[[9]]>15) BootstrapR2(ind.data= x[[4]], iterations = 1000, parallel = TRUE) else NA
     x[[17]][[2]] <- if(x[[9]]>15) BootstrapR2(ind.data= x[[5]], iterations = 1000, parallel = TRUE) else NA
     x[[17]][[3]] <- if(x[[9]]>15) BootstrapR2(ind.data= x[[6]], iterations = 1000, parallel = TRUE) else NA
-  
+    
   }  
   
   names(x)[15] <- c('rarefaction')
@@ -108,8 +108,8 @@ extant.madagascar.main.data<- dlply(extant.madagascar.main.data, .(All), tbl_df)
 extant.madagascar.main.data<- llply(extant.madagascar.main.data, specie = TRUE, final = FALSE, makeMainData, .progress = 'text')
 
 all.main.data <- llply(All.raw.main.data, specie = TRUE, final = TRUE, makeMainData, .progress = 'text')
-#sp.master.main.data <- llply(Sp.raw.main.data, specie = TRUE, final = FALSE, makeMainData, .progress = 'text', .inform = T)
-#gen.master.main.data <- llply(Gen.raw.main.data, specie = FALSE, final = FALSE, makeMainData, .progress = 'text', .inform = T)
+sp.master.main.data <- llply(Sp.raw.main.data, specie = TRUE, final = FALSE, makeMainData, .progress = 'text', .inform = T)
+gen.master.main.data <- llply(Gen.raw.main.data, specie = FALSE, final = FALSE, makeMainData, .progress = 'text', .inform = T)
 
 
 #############################################
@@ -136,5 +136,5 @@ Strepsirrhini.image.complete <- list (specie.lists = sp.main.data,
                                genus.list = gen.main.data)
                              
 save( Strepsirrhini.image.complete,
-     file = "~/ataches/Strepsirrhini_image_complete.RData")
+     file = "~/ataches/Strepsirrhini_image_complete_II.RData")
 

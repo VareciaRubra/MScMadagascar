@@ -13,7 +13,7 @@ if(!require(doParallel)) {install.packages('doParallel'); library(doParallel)}
 #Registrando o numero de cores : 3 em casa, 7 no lab e até 10 no darwin
 #para descobrir rodar no terminal: nproc
 #abrir no terminal htop para ver os cores trabalhando
-registerDoParallel(cores = 15)
+registerDoParallel(cores = 30)
 #abrir no terminal htop para ver os cores trabalhando
 
 arquivo.bruto = "Data/1Master_Organized_Factors.csv"
@@ -83,7 +83,6 @@ unique(raw.data$Regiao)
 All.raw.main.data<- dlply(raw.data, .(All), tbl_df)
 Gen.raw.main.data<- dlply(raw.data, .(Genero), tbl_df)
 Sp.raw.main.data<- dlply(raw.data, .(Especie), tbl_df)
-
 
 write.csv(raw.data, arquivo.saida , row.names= F)
 
