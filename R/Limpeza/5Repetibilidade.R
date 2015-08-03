@@ -1,4 +1,4 @@
-current.data <- raw.main.data[[2]]
+current.data <- Sp.raw.main.data[[6]]
 DoubleRep <- function (current.data, detailed = FALSE) {
   x = vector("list", 10)
   x[[1]] <- dplyr::select(current.data, c(Arquivo:Take)) # pegando as info de cada replica
@@ -22,10 +22,10 @@ DoubleRep <- function (current.data, detailed = FALSE) {
   doub.rep<- X2dists
     
   ##### testes logicos pra ver se rola de calcular a repetibilidade:
-  ###### 1. ver se tem diferença entre as reploicas de pelo menos algum indivíduo, 
-  ###### 2. ver se tem diferença entre as reploicas de pelo menos algum indivíduo, 
+  ###### 1. ver se tem diferença entre as replicas de pelo menos algum indivíduo, 
+  ###### 2. ver se tem diferença entre as replicas de pelo menos algum indivíduo, 
   ###### 3. ver se tem mais de 4 bichos medidos com replica
-  if( dim( table(x[[5]] !=0) ) !=1 | sum((x[[5]] !=0) == TRUE) !=0 & sum(X2dists) >= (39*4)  )
+  if( dim( table(x[[5]] !=0) ) !=1 & sum((x[[5]] !=0) == TRUE) !=0 & sum(X2dists) >= (39*4)  )
   { 
    ####### matriz para indexar quais replicas sao diferentes entre si #############
    indexX2<- aggregate(x[[2]], by =list(x[[1]]$Tombo) , FUN = function (x) x[1] != x[2])
@@ -51,7 +51,6 @@ DoubleRep <- function (current.data, detailed = FALSE) {
    {
      clean.matrix [!(x[[1]]$Tombo %in% x2 [[i]]), i] <- NA
    }
-   
    doub.rep<- CalcRepeatability(x[[1]]$Tombo, clean.matrix)
    all.rep<- CalcRepeatability(x[[1]]$Tombo, x[[2]])
    reps<- cbind(names(doub.rep) , as.data.frame(doub.rep), as.data.frame(all.rep), total,  X2dists, quantos  )
@@ -60,27 +59,42 @@ DoubleRep <- function (current.data, detailed = FALSE) {
    
 } 
 
-mask.rep = ldply(raw.main.data, count, Especie)[,2] > 14
+mask.rep = ldply(Sp.raw.main.data, count, Especie)[,2] > 14
 
 DoubleRep(raw.main.data[[2]], detailed = F)
-rep.sp <- ldply(raw.main.data, DoubleRep, detailed = TRUE)
-rep.gen <- ldply(raw.main.data[mask.rep], DoubleRep, detailed = FALSE) 
-rep.gen[,3] <- c( names(raw.main.data[[1]][12:50]) )
+rep.sp <- ldply(Sp.raw.main.data, DoubleRep, detailed = TRUE)
+rep.gen <- ldply(Gen.raw.main.data, DoubleRep, detailed = FALSE) 
+rep.sp <- rep.sp[,-2]
+REP <- rep.sp
 
-rep.gen[,3] <- factor (rep.gen[,3], levels = unique(rep.gen[,3]) )
+names(REP)[1]<- "Specie"
+names(REP)[2]<- "Trait"
+names(REP)[3]<- "Repetability"
+
+REP[,2] <- c( names(raw.main.data[[1]][12:50]) )
+REP[,2] <- factor (REP[,2], levels = unique(REP[,2]) )
 
 ####### Plotando os valores de repetibilidade
-rep.gen<- tbl_df(rep.gen)
-rep.gen %>% na.omit(.) %>%
-  ggplot(., aes_string( x= names(.)[3], y="doub.rep", color=".id")) +
-  geom_line(aes(group = .id)) +
+
+REP<- tbl_df(REP)
+REP %>% na.omit(.) %>%
+  ggplot(., aes_string( x= "Trait", y="Repetability", color="Specie")) +
+  geom_line(aes(group = Specie, size=2)) +
   theme_bw() +
   theme(axis.text.x = element_text(angle = 90))
 
-rep.gen %>% na.omit(.) %>%
-
-  ggplot(., aes_string( x= names(.)[3], y="doub.rep", color=".id")) +
-  geom_line(aes(group = .id)) +
-  facet_wrap(~.id) +
+REP %>% na.omit(.) %>%
+  ggplot(., aes_string( x= "Trait", y="Repetability", color = "Specie")) +
+  geom_line(aes(group = Specie)) +
+  geom_point(aes(group = Specie, size=1) ) +
+  facet_wrap(~Specie, scale="free_y") +
   theme_bw() +
-  theme(axis.text.x = element_text(angle = 90))
+  theme(axis.text.y = element_text(size =15), 
+        axis.title.y = element_text(size = 25)) +
+  theme(axis.text.x = element_text(angle = 90, size =7),
+        axis.title.x = element_text(size = 25)) +
+  guides(colour = guide_legend(override.aes = list(size=3))) +
+  theme(legend.text=element_text(size=14)) +
+  ggtitle("Traits Repetabilities by Specie") + 
+  theme(plot.title = element_text(lineheight=.8, face="bold", size = 30))
+
