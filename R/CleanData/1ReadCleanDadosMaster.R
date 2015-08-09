@@ -55,7 +55,7 @@ species <- ordered.species[ordered.species$.id %in% my.species,]
 raw.regular$Especie <- factor (raw.regular$Especie, levels = species )
 ######### salvando no formato tbl_df
 raw.data<- tbl_df(raw.regular)
-raw.data %<>% arrange(., raw.data$Especie )
+raw.data %<>% arrange(. , Especie)
 # forçando a ordem dos fatores  como sendo a ordem que aparece 
 # no proprio dataframe------->  ordenado de acordo com a arvore do James ################
 #isso evita que funçoes da classe apply reoordenem os resultados numérica/alfabeticamente.
