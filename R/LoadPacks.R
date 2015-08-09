@@ -1,0 +1,12 @@
+if(!require(plyr)) {install.packages('plyr'); library(plyr)}
+if(!require(dplyr)) {install.packages('dplyr'); library(dplyr)}
+if(!require(magrittr)) {install.packages('magrittr'); library(magrittr)}
+if(!require(lme4)) {install.packages('lme4'); library(lme4)}
+if(!require(ggplot2)) {install.packages('ggplot2'); library(ggplot2)}
+if(!require(tidyr)) {install.packages('tidyr'); library(tidyr)}
+#if(!require(MCMCglmm)) {install.packages('MCMCglmm'); library(MCMCglmm)}
+if(!require(reshape2)) {install.packages('reshape2'); library(reshape2)}
+if(!require(evolqg)) {install.packages('evolqg'); library(evolqg)}
+#if(!require(evolqg)) {devtools::install_github('lem-usp/evolqg'); library(evolqg)}
+if(!require(readr)) {devtools::install_github('hadley/readr'); library(readr)}
+if(!require(doParallel)) {install.packages('doParallel'); library(doParallel)}
