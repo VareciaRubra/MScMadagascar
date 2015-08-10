@@ -11,14 +11,21 @@
   
 # mesmo plot mas com os labels de cada indivíduo, bom para identificar os outliers e remove-los individualmente
 raw.data %>%
-  #filter(., is.na(Sexo) ) %>% 
+  #filter(., Especie != "Cherogaleus_crosseley" ) %>% 
+  #filter(., Especie != "Cheirogaleus_adipicaudatus_" ) %>% 
   gather(key=ed, value=value, 12:50 ) %>% 
-  ggplot(., aes( x= Especie, y=value, color=Especie, label = Tombo), varwidth = T) + 
-  geom_text(aes(size =.4, vjust = 1) )  +
+  ggplot(., aes( x= ed, y=value, color=Especie, label = Tombo), varwidth = T) + 
+  geom_text(aes(size =.4, hjust =1) )  +
+  #geom_boxplot(aes(alpha = 0)) + 
   geom_violin(aes(alpha = 0)) + 
   geom_jitter() +
-  facet_wrap(~ed, scale="free_y") + 
-  theme(axis.text.x = element_text(angle = 90)) 
+  facet_wrap(~ed,  scales="free") + 
+  theme(axis.text.x = element_text(angle = 90)) +
+  ggtitle("Species traits distribuition") +
+  #theme(axis.title.x = element_blank(), ) +
+  theme(axis.ticks = element_blank(), axis.text.x = element_blank(), axis.title.x = element_blank()) +
+    theme(plot.title = element_text(lineheight=.8, face="bold"))
+  
 
 # mesmo plot com os labels de cada indivíduo mas por variável bom para identificar os outliers e remove-los individualmente
 raw.data %>%

@@ -5,20 +5,29 @@
 #############################################
 options(contrasts=c("contr.sum", "contr.poly"))
 
-current.data <-Gen.raw.main.data$Archaeolemur
-
-
-  y = vector("list", 4)
-  y[[1]] = vector("list", 4)
-  y[[1]] [[1]] <- manova(as.matrix(current.data$ed)  ~ Especie, data = as.data.frame(current.data$info) ) 
+current.data <- sp.main.data$Varecia_variegata
+  y = vector("list", 7)
+  y[[1]] = vector("list", 10)
+  y[[1]] [[1]] <- manova(as.matrix(current.data$ed)  ~ Sexo, data = as.data.frame(current.data$info) ) 
   y[[1]] [[2]] <- Manova(y[[1]] [[1]], type=3, test.statistic="Wilks",icontrasts=c("contr.sum", "contr.poly"))
-  y[[1]] [[3]]  <- apply(as.matrix(current.data$ed ), 2, function (x) return (Anova(lm(x ~ Especie, data = as.data.frame(current.data$info) ), type= 3, test.statistic="Wilks",icontrasts=c("contr.sum", "contr.poly" ))))
+  y[[1]] [[3]]  <- apply(as.matrix(current.data$ed ), 2, function (x) return (Anova(lm(x ~ Sexo, data = as.data.frame(current.data$info) ), type= 3, test.statistic="Wilks",icontrasts=c("contr.sum", "contr.poly" ))))
   y[[1]] [[4]] <- CalculateMatrix(y[[1]] [[1]]) 
-  names(y)[[1]][1:4] <- c("fit", "multi", "uni", "cov.mx")
+  y[[1]] [[5]] <- current.data$matrix$cov
+  names(y)[1] <- "factors"
+  names(y[[1]])[1:5] <- c("fit", "multi", "uni",  "cov.fit.mx", "cov.mx")
+  y$RS <- RandomSkewers (cov.x = y$factors$cov.fit.mx, cov.y = y$factors$cov.mx , num.vectors = 10000, parallel = TRUE)
+  y$KRZ <- KrzProjection(cov.x = y$factors$cov.fit.mx, cov.y = y$factors$cov.mx )$total.variation
+  y$PCA.s <- PCAsimilarity(cov.x = y$factors$cov.fit.mx, cov.y = y$factors$cov.mx )
+  y$cor.KRZ <- KrzProjection(cov.x = cov2cor(y$factors$cov.fit.mx), cov.y = cov2cor(y$factors$cov.mx) ) $total.variation
+  y$cor.PCA.s <- PCAsimilarity(cov.x = cov2cor(y$factors$cov.fit.mx), cov.y = cov2cor(y$factors$cov.mx) )
+  
+  MeanMatrixStatistics(y$factors$cov.mx)
+  plot.matrix.cor(y[[1]] [[5]])
+  
 
-
-
-
+  sig.test <-  Manova(manova(as.matrix(x$ed) ~ Sexo, data = x$info), type=3, test.statistic="Wilks",icontrasts=c("contr.sum", "contr.poly"))
+  summary.Anova <- summary(Anova(lm(as.matrix(sp.main.data$Microcebus_griseorufus$ed)~ Sexo, data = sp.main.data$Microcebus_griseorufus$info) , type=3, test.statistic="Wilks",icontrasts=c("contr.sum", "contr.poly") ) )
+  Linhas <- cat(capture.output(summary.Anova)[], sep = "\n")
 #############################################
 ############## SEGUNDA PARTE ################
 ## MATRIZ de genero: residual de especies  ##

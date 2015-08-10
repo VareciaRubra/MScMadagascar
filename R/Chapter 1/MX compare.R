@@ -115,7 +115,7 @@ PcPercent.1to4 %>%
   theme(axis.title.x = element_blank()) +
   theme(legend.position="none")
 
-MMxStats<- cov.mx[mask.na.cov] %>% ldply(function(x) MeanMatrixStatistics(x))
+MMxStats<- cov.mx[mask] %>% ldply(function(x) MeanMatrixStatistics(x))
 names(MMxStats)[1] <- ".sp"
 names(MMxStats)[3] <- "PC1.percent"
 MMxStats %>% 
@@ -123,11 +123,12 @@ gather(key= .MMxStats, value=value, 2:10 ) %>%
 ggplot( ., aes(x= .MMxStats, y = value, color = .MMxStats, label = .sp), varwidth = T) +
   geom_text(aes(size =.9, vjust = 1) )  +
   theme_bw() +
-  geom_boxplot() +
-  facet_wrap(~.MMxStats, scale="free_y") +
+  geom_boxplot(aes(alpha = 0)) +
+  facet_wrap(~.MMxStats, scales="free") +
   ggtitle("Mean matrix evolutionary statistics by specie") +
   theme(axis.ticks = element_blank(), axis.text.x = element_blank(), axis.title.x = element_blank()) +
-  theme(plot.title = element_text(lineheight=.8, face="bold"))
+  theme(plot.title = element_text(lineheight=.8, face="bold")) + 
+  theme(legend.position="none")
 
 MMxStats<- cov.mx[mask] %>% ldply(function(x) MeanMatrixStatistics(x))
 names(MMxStats)[1] <- ".sp"
@@ -193,6 +194,14 @@ MMxStats.gm<- cbind(MMxStats, gm.mean[mask.na.cov, 2])
 names(MMxStats.gm)[11] <- "gm.mean"
 
 MMxStats.gm %>% 
+  #filter(.sp != "Cheirogaleus_major") %>%
+  #filter(.sp != "Cheirogaleus_medius") %>%
+  #filter(.sp != "Eulemur_rufifrons") %>%
+  #filter(.sp != "Phaner_furcifer") %>%
+  #filter(.sp != "Loris_tardigradus") %>%
+  #filter(.sp != "Lepilemur_leucopus") %>%
+  #filter(.sp != "Loris_tardigradus") %>%
+  #filter(PC1.percent <=0.4)%>%
   ggplot( ., aes(x = gm.mean, y = PC1.percent, color = .sp, label = .sp), varwidth = T) +
   geom_text(aes(size =.9, vjust = 1) )  +
   stat_smooth(method="lm", aes(group=1)) +
