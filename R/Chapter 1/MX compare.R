@@ -93,10 +93,10 @@ PcPercent.1to4 %>%
 gather(key="Percent_var_PC", value=value, 2:5 ) %>%
   ggplot( ., aes(x= Percent_var_PC, y = value, color = Percent_var_PC, label = .sp), varwidth = T) +
   scale_y_continuous(labels=percent) +
-  geom_text(aes(size =.9, vjust = 1) )  +
+  geom_text(size =.9, vjust = 1 )  +
   theme_bw() +
   geom_jitter() +
-  geom_violin(aes(alpha = 0), ) +
+  geom_violin(alpha = 0) +
   ggtitle("% of variance on first 4 PC by specie") +
   theme(plot.title = element_text(lineheight=.8, face="bold"))
 
@@ -121,9 +121,9 @@ names(MMxStats)[3] <- "PC1.percent"
 MMxStats %>% 
 gather(key= .MMxStats, value=value, 2:10 ) %>%
 ggplot( ., aes(x= .MMxStats, y = value, color = .MMxStats, label = .sp), varwidth = T) +
-  geom_text(aes(size =.9, vjust = 1) )  +
+  geom_text(size =.9, vjust = 1)  +
   theme_bw() +
-  geom_boxplot(aes(alpha = 0)) +
+  geom_boxplot(alpha = 0) +
   facet_wrap(~.MMxStats, scales="free") +
   ggtitle("Mean matrix evolutionary statistics by specie") +
   theme(axis.ticks = element_blank(), axis.text.x = element_blank(), axis.title.x = element_blank()) +
