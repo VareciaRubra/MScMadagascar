@@ -15,9 +15,9 @@ raw.data %>%
   #filter(., Especie != "Cheirogaleus_adipicaudatus_" ) %>% 
   gather(key=ed, value=value, 12:50 ) %>% 
   ggplot(., aes( x= Especie, y=value, color=Especie, label = Tombo)) + 
-  #geom_boxplot(alpha = 0) + 
   geom_text(angle = 0, size =4)  +
-  geom_violin( alpha = 0) + 
+  geom_boxplot(alpha = 0.5) + 
+  #geom_violin( alpha = 0) + 
   #geom_jitter() +
   facet_wrap(~ed,  scales="free") + 
   theme(axis.text.x = element_text(angle = 90)) +
