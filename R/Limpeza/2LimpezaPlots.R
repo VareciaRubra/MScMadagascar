@@ -14,11 +14,11 @@ raw.data %>%
   #filter(., Especie != "Cherogaleus_crosseley" ) %>% 
   #filter(., Especie != "Cheirogaleus_adipicaudatus_" ) %>% 
   gather(key=ed, value=value, 12:50 ) %>% 
-  ggplot(., aes( x= ed, y=value, color=Especie, label = Tombo), varwidth = T) + 
-  geom_text(aes(size =.4, hjust =1) )  +
-  #geom_boxplot(aes(alpha = 0)) + 
-  geom_violin(aes(alpha = 0)) + 
-  geom_jitter() +
+  ggplot(., aes( x= Especie, y=value, color=Especie, label = Tombo)) + 
+  #geom_boxplot(alpha = 0) + 
+  geom_text(angle = 0, size =4)  +
+  geom_violin( alpha = 0) + 
+  #geom_jitter() +
   facet_wrap(~ed,  scales="free") + 
   theme(axis.text.x = element_text(angle = 90)) +
   ggtitle("Species traits distribuition") +
