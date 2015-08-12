@@ -18,10 +18,11 @@ registerDoParallel(cores = 30)
 
 arquivo.bruto = "Data/1Master_Organized_Factors.csv"
 arquivo.saida =  "Data/1MasterDB_following_JHerrera_PhylOrder.csv"
+arquivo.saida.2 = "Data/2Master_Organized_Factors.csv"
 #read csv and create table dataframe
 raw.regular <- read.csv(arquivo.bruto, head = T)
+original.names<- unique(raw.regular$Especie)
 raw.regular$Especie %<>% gsub("\\.", "", .)
- str(raw.regular)
 
 ########## Renomeando minhas especies de acordo com a arvore do James ############
 recoderFunc <- function(data, oldvalue, newvalue) {
@@ -37,8 +38,9 @@ recoderFunc <- function(data, oldvalue, newvalue) {
   for (i in unique(oldvalue)) newvec[data == i ] <- newvalue[oldvalue == i ]
   newvec
 }
-rename.james<- read.csv("Data/myspecies.csv", head = T)
-raw.regular$Especie<- recoderFunc(data = raw.regular$Especie, oldvalue = rename.james$Anna, newvalue = rename.james$James)
+
+rename.james <- read.csv("myspecies.csv", header = TRUE)
+raw.regular$Especie<- recoderFunc(data = raw.regular$Especie, oldvalue = rename.james$Anna, newvalue = rename.james$James.Edited)
 
 ################################ Colocando a ordem dos fatores de espécie como sendo a ordem em que eles aparecem na árvore
 ################## Árvore James ##################
@@ -49,9 +51,15 @@ pruned.tree<-drop.tip(treefile,treefile$tip.label[-match(species, treefile$tip.l
 plot(pruned.tree)
 tiporder<- treefile$edge[,2][ treefile$edge[, 2] %in% 1:length(treefile$tip.label) ]
 ordered.species <- as.data.frame(as.character(treefile$tip.label[tiporder]) )
-names(ordered.species)<- ".id"
+
+ordered.species<- read.csv("ordered_species_james_plus.csv", header = TRUE)
+james.original.order<- as.data.frame(!is.na(ordered.species$.id))
+james.edited.order <- as.data.frame(ordered.species$.editedid)
+current.order <- james.edited.order
+names(current.order)<- ".id"
+
 my.species <- unique(raw.regular$Especie)
-species <- ordered.species[ordered.species$.id %in% my.species,]
+species <- current.order[current.order$.id %in% my.species,]
 raw.regular$Especie <- factor (raw.regular$Especie, levels = species )
 ######### salvando no formato tbl_df
 raw.data<- tbl_df(raw.regular)
@@ -84,5 +92,6 @@ All.raw.main.data<- dlply(raw.data, .(All), tbl_df)
 Gen.raw.main.data<- dlply(raw.data, .(Genero), tbl_df)
 Sp.raw.main.data<- dlply(raw.data, .(Especie), tbl_df)
 
-write.csv(raw.data, arquivo.saida , row.names= F)
+
+write.csv(raw.data, arquivo.saida.2 , row.names= F)
 

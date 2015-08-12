@@ -11,18 +11,19 @@
   
 # mesmo plot mas com os labels de cada indivíduo, bom para identificar os outliers e remove-los individualmente
 raw.data %>%
-  #filter(., Especie != "Cherogaleus_crosseley" ) %>% 
-  #filter(., Especie != "Cheirogaleus_adipicaudatus_" ) %>% 
+  #filter(., !is.na(Localidade) ) %>%
+  mutate(Loc.info = !is.na(Localidade)) %>%
   gather(key=ed, value=value, 12:50 ) %>% 
-  ggplot(., aes( x= Especie, y=value, color=Especie, label = Tombo)) + 
+  ggplot(., aes( x= interaction(Loc.info, Especie) , y=value, label = Tombo) ) + 
   geom_text(angle = 0, size =4)  +
-  geom_boxplot(alpha = 0.5) + 
-  #geom_violin( alpha = 0) + 
-  #geom_jitter() +
+  geom_boxplot(aes(x= interaction(Loc.info, Especie) , y=value, fill = Loc.info ), alpha = 0.5) + 
+  #geom_violin( aes(x= Especie, y=value), alpha = 0) + 
+  geom_jitter(aes(shape= Especie, color = Museu) )+
+  scale_shape(guide = "legend", name = "Specie") +
   facet_wrap(~ed,  scales="free") + 
-  theme(axis.text.x = element_text(angle = 90)) +
+  #theme(axis.text.x = element_text(angle = 90)) +
   ggtitle("Species traits distribuition") +
-  #theme(axis.title.x = element_blank(), ) +
+  #theme(axis.title.x = element_blank() ) +
   theme(axis.ticks = element_blank(), axis.text.x = element_blank(), axis.title.x = element_blank()) +
     theme(plot.title = element_text(lineheight=.8, face="bold"))
   

@@ -107,9 +107,9 @@ extant.madagascar.main.data<- raw.data %>% filter( Regiao == "Madagascar") %>% f
 extant.madagascar.main.data<- dlply(extant.madagascar.main.data, .(All), tbl_df)
 extant.madagascar.main.data<- llply(extant.madagascar.main.data, specie = TRUE, final = FALSE, makeMainData, .progress = 'text')
 
-all.main.data <- llply(All.raw.main.data, specie = TRUE, final = TRUE, makeMainData, .progress = 'text')
-sp.master.main.data <- llply(Sp.raw.main.data, specie = TRUE, final = FALSE, makeMainData, .progress = 'text', .inform = T)
-gen.master.main.data <- llply(Gen.raw.main.data, specie = FALSE, final = FALSE, makeMainData, .progress = 'text', .inform = T)
+#all.main.data <- llply(All.raw.main.data, specie = TRUE, final = TRUE, makeMainData, .progress = 'text')
+#sp.master.main.data <- llply(Sp.raw.main.data, specie = TRUE, final = FALSE, makeMainData, .progress = 'text', .inform = T)
+#gen.master.main.data <- llply(Gen.raw.main.data, specie = FALSE, final = FALSE, makeMainData, .progress = 'text', .inform = T)
 
 
 #############################################
