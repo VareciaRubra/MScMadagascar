@@ -10,15 +10,34 @@
 #   theme(axis.text.x = element_text(angle = 90)) 
   
 # mesmo plot mas com os labels de cada indivíduo, bom para identificar os outliers e remove-los individualmente
+
 raw.data %>%
-  #filter(., !is.na(Localidade) ) %>%
+  filter(., Genero == "Cheirogaleus" ) %>%
   mutate(Loc.info = !is.na(Localidade)) %>%
-  gather(key=ed, value=value, 12:50 ) %>% 
+  gather(key=ed, value=value, (16:51) ) %>% 
+  ggplot(., aes( x= Especie , y=value, label = Tombo) ) + 
+  geom_text(angle = 0, size =1)  +
+  geom_boxplot(aes(x= Especie , y=value), alpha = 0.5) + 
+  #geom_violin( aes(x= Especie, y=value), alpha = 0) + 
+  geom_jitter(size = 1, aes(color = Especie) )+
+  scale_shape(guide = "legend", name = "Specie") +
+  facet_wrap(~ed,  scales="free") + 
+  theme(axis.text.x = element_text(angle = 0)) +
+  ggtitle("Species traits distribuition") +
+  #theme(axis.title.x = element_blank() ) +
+  theme(axis.ticks = element_blank(), axis.text.x = element_blank()) +
+  theme(plot.title = element_text(lineheight=.8, face="bold"))
+
+###########################Vendo os caras que nao tem info de localidade
+raw.data %>%
+  filter(., Genero == "Cheirogaleus" ) %>%
+  mutate(Loc.info = !is.na(Localidade)) %>%
+  gather(key=ed, value=value, (16:62) ) %>% 
   ggplot(., aes( x= interaction(Loc.info, Especie) , y=value, label = Tombo) ) + 
-  geom_text(angle = 0, size =4)  +
+  geom_text(angle = 0, size =1)  +
   geom_boxplot(aes(x= interaction(Loc.info, Especie) , y=value, fill = Loc.info ), alpha = 0.5) + 
   #geom_violin( aes(x= Especie, y=value), alpha = 0) + 
-  geom_jitter(aes(shape= Especie, color = Museu) )+
+  geom_jitter(aes(shape= Especie) )+
   scale_shape(guide = "legend", name = "Specie") +
   facet_wrap(~ed,  scales="free") + 
   #theme(axis.text.x = element_text(angle = 90)) +

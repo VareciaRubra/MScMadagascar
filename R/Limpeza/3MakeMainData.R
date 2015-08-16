@@ -138,3 +138,8 @@ Strepsirrhini.image.complete <- list (specie.lists = sp.main.data,
 save( Strepsirrhini.image.complete,
      file = "~/ataches/Strepsirrhini_image_complete_III.RData")
 
+
+sp.main.data$Cheirogaleus_major <- makeMainData(Sp.raw.main.data$Cheirogaleus_major, specie = TRUE, compare.size = TRUE, final = TRUE)
+sp.main.data$Cheirogaleus_medius <- makeMainData(Sp.raw.main.data$Cheirogaleus_medius, specie = TRUE, compare.size = TRUE, final = TRUE)
+
+gen.main.data$Cheirogaleus<- makeMainData(Gen.raw.main.data$Cheirogaleus, specie = FALSE, compare.size = TRUE, final = TRUE)

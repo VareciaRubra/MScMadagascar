@@ -108,12 +108,13 @@ Iso.Compare <- function(x) {
       if(corr[i] <0) {re.oriented[[i]] <- as.numeric(as.matrix(x[[i]]) %*% -1)}  else x[[i]]
     }
     
-  #rownames (corr) <- paste ("PC", 1:length(x), sep = "")
+  names (corr) <- paste ("PC", 1:length(x), sep = "")
   names (re.oriented) <- paste ("PC", 1:length(x), sep = "") 
   
   return(results= list("corr" = corr, "re.oriented" = re.oriented)) }
 PCs1to4<- current.data[mask] %>% llply(function(x) as.data.frame(eigen(x$matrix$cov)$vectors[,1:4]) ) %>% llply(function(x) as.list(x) )
 Iso.Compare.reoriented <- llply(PCs1to4, Iso.Compare) %>% ldply(function(x) as.data.frame(x$re.oriented)) 
+
 names(Iso.Compare.reoriented) <- c(".sp", "PC1", "PC2", "PC3", "PC4")
 Iso.Compare.reoriented$.ed <- ed.names
 Iso.Compare.reoriented %>% gather(key=".pcScore", value=value, 2:5 )
@@ -122,15 +123,32 @@ Iso.Compare.reoriented$.ed <- factor(Iso.Compare.reoriented$.ed, levels = rev(ed
 myPalette <- colorRampPalette(rev(brewer.pal(11, "Spectral")), space="Lab")
 Iso.Compare.reoriented %>% gather(key=".pcScore", value=value, 2:5 ) %>%
   ggplot (.) +
-  geom_tile(aes(x = .sp, y = .ed, fill = value)) +
-  facet_wrap(~.pcScore) +
+  geom_tile(aes(x = .pcScore, y = .ed, fill = value)) +
+  facet_wrap(~.sp) +
   theme_bw() +
   scale_fill_gradientn(name = 'PC.Score', colours = myPalette(1000)) +
   ylab ('PC.Scores') + xlab ('') + labs(title = "First 4 PC's scores") +
   #scale_y_discrete(limits = levels(PCs1to4$.pcScore))) +
   theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5),
         axis.ticks = element_line(size = 0),
-        axis.text.y = element_text(size= 7)) 
+        axis.text.y = element_text(size= 7),
+        strip.text= element_text(size=7)) +
+  coord_flip()
+
+Iso.Compare.cor.iso <- llply(PCs1to4, Iso.Compare) %>% ldply(function(x) x$corr) 
+names(Iso.Compare.cor.iso) <- c(".sp", "PC1", "PC2", "PC3", "PC4")
+Iso.Compare.cor.iso$.sp <- factor(Iso.Compare.cor.iso$.sp, levels = rev(unique(Iso.Compare.cor.iso$.sp))) 
+Iso.Compare.cor.iso %>% gather(key="Isometric.Correlation", value=value, 2:5 ) %>%
+  ggplot (.) +
+  geom_tile(aes(x = Isometric.Correlation, y = .sp, fill = abs(value) ) ) +
+  theme_bw() +
+  scale_fill_gradientn(name = 'Isometric.Correlation', colours = myPalette(1000)) +
+  ylab ('Isometric.Correlation') + xlab ('') + labs(title = "First 4 PC's Correlation with isometric vector") +
+  #scale_y_discrete(limits = levels(PCs1to4$.pcScore))) +
+  theme(axis.text.x = element_text(angle = 0, hjust = 0.5, vjust = 1, size = 10),
+        axis.text.x = element_text(size = 10),
+        axis.ticks = element_line(size = 0),
+        axis.text.y = element_text(size= 10))
 
 PCs1to4<- current.data[mask] %>% ldply(function(x) as.data.frame(eigen(x$matrix$cov)$vectors[,1:4]) )  
 names(PCs1to4) <- c(".sp", "PC1", "PC2", "PC3", "PC4")
@@ -149,6 +167,20 @@ PCs1to4 %>% gather(key=".pcScore", value=value, 2:5 ) %>%
   #scale_y_discrete(limits = levels(PCs1to4$.pcScore))) +
   theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5),
         axis.ticks = element_line(size = 0))
+
+data.frame ('n.size' = n.size [mask, -1], Iso.Compare.cor.iso) %>%
+  gather(key = '.pc', value=value, c(3:6)) %>%
+  ggplot (.) +
+  #geom_text(aes (x = n.size, y = abs(value), label = .sp)) +
+  geom_point(aes (x = n.size, y = abs(value), size = n.size) ) +
+  geom_text(aes (x = n.size, y = abs(value), label = .sp, color = value)) +
+  scale_color_brewer(name = 'PC.Score' , type = "div"  , palette =  myPalette(1000)) +
+  facet_wrap(~ .pc) +
+  theme_bw()
+
+rarefaction.all.rs <- llply(sp.main.data, function (x) x$rarefacation$rs)
+
+rarefaction.RS <- laply(rarefaction.all.rs[mask], PlotRarefaction)
 ########################################################################################################################################
 ########################################################################################################################################
 ########################################################################################################################################

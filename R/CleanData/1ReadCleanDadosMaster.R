@@ -16,9 +16,8 @@ if(!require(doParallel)) {install.packages('doParallel'); library(doParallel)}
 registerDoParallel(cores = 30)
 #abrir no terminal htop para ver os cores trabalhando
 
-arquivo.bruto = "Data/1Master_Organized_Factors.csv"
-arquivo.saida =  "Data/1MasterDB_following_JHerrera_PhylOrder.csv"
-arquivo.saida.2 = "Data/2Master_Organized_Factors.csv"
+arquivo.bruto = "Data/2Master_Organized_Factors.csv"
+arquivo.saida =  "Data/3MasterDB_following_JHerrera_PhylOrder.csv"
 #read csv and create table dataframe
 raw.regular <- read.csv(arquivo.bruto, head = T)
 original.names<- unique(raw.regular$Especie)
