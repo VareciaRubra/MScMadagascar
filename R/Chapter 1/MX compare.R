@@ -26,6 +26,21 @@
   for (i in 1:5)  {mx.compare[[i]]$mx.class <- mx.class[i]}
   
   
+  log.cov.mx <- current.data %>% llply(function(x) x$matrix$cov.log)
+  log.cor.mx <- llply(log.cov.mx[mask], cov2cor)
+  mx.compare.log = vector("list", 5)
+  mx.compare.log[1:5] <- NA
+  mx.compare.log[[1]] <- RandomSkewers(cov.x= log.cov.mx[mask], num.vectors = 1000, repeat.vector = mx.rep[mask, 2] )
+  mx.compare.log[[2]]$correlations <- as.matrix(KrzCor(cov.x= log.cov.mx[mask], num.vectors = 1000, repeat.vector = mx.rep[mask, 3] ))
+  mx.compare.log[[3]]$correlations <- as.matrix(PCAsimilarity(cov.x= log.cov.mx[mask], num.vectors = 1000, repeat.vector = mx.rep[mask, 4] ) )
+  mx.compare.log[[4]]$correlations <- as.matrix(MatrixCor(cor.x= log.cor.mx, correlation = TRUE, num.vectors = 1000, repeat.vector = mx.rep[mask, 5] ) )
+  mx.compare.log[[5]]$correlations <- as.matrix(KrzCor(cov.x= log.cor.mx, correlation = TRUE, num.vectors = 1000, repeat.vector = mx.rep[mask, 6] ))
+  names(mx.compare.log)[1:5] <-  c('RS', 'KRZ','PCA.s', 'Mantel', 'KRZ')
+  mx.class<- c('V/CV', 'V/CV','V/CV', 'COR', 'COR')
+  for (i in 1:5)  {mx.compare.log[[i]]$method <- names(mx.compare.log)[i]}
+  for (i in 1:5)  {mx.compare.log[[i]]$mx.class <- mx.class[i]}
+  
+  
 ##################################
 #Função para plotar matrizes 
 #com respectivos valores seguindo 
@@ -54,9 +69,10 @@ plot.matrix<- function(mx = NULL, brewer = "RdBu", show.values = TRUE)
   axis(2, mx.dimentions:1, paste(rownames(mx.cor), 1:length(rownames(mx.cor))), las = 1, cex.axis = 0.7, tick = FALSE, line = 0)
 
 }
-par(mar = c(5,15,3,2))
+par(mar = c(7,12,3,2))
 par(mfrow = c(3,1))
   lapply(mx.compare, plot.matrix)
+  lapply(mx.compare.log, plot.matrix)
 #Calculando a similaridade média das matrizes.
 mean.sim<-function(x) {
     x[upper.tri(x)]<-t(x)[upper.tri(x)]
@@ -66,10 +82,12 @@ mean.sim<-function(x) {
 }
 
 ##########Plotando os valores médios de comparaçao por metodo por matriz
-lapply(mx.compare, mean.sim)
-mean.comp.values.cov<- mx.compare[c(1:3)] %>% ldply (function (x) mean.sim(x$correlations) )
-mean.comp.values.cor<- mx.compare[c(4:5)] %>% ldply (function (x) mean.sim(x$correlations) )
-mean.comp.values <- mean.comp.values.cor
+current.mx.list <- mx.compare
+current.mx.list <- mx.compare.log
+
+mean.comp.values.cov<- current.mx.list[c(1:3)] %>% ldply (function (x) mean.sim(x$correlations) )
+mean.comp.values.cor<- current.mx.list[c(4:5)] %>% ldply (function (x) mean.sim(x$correlations) )
+mean.comp.values <- mean.comp.values.cov
 names(mean.comp.values)[1] <- "method"
 
 method.mean <- data.frame("method"  = mean.comp.values[,1], "mean"=apply(mean.comp.values[,-1], 1, mean))
@@ -77,11 +95,11 @@ Mean.Mx.Plots <- mean.comp.values %>%
   gather(key=.sp, value = value, 2:43) %>%
   ggplot( .,aes(x= method, y = value, shape = method), varwidth = T) +
   geom_violin(aes(label = .sp, color = method, shape = method), alpha = 0.5) +
-  geom_text( aes(label = .sp), size =5, vjust = 1, alpha = 0.4)  +
+  geom_text( aes(label = .sp), size =2, vjust = 1, alpha = 0.4)  +
   geom_jitter(aes(shape = method, color = method)) +
   #geom_line(aes(group = .sp, color =.sp)) +
   scale_shape( guide = "none", name = "Mean value by method") +
-  ggtitle("Mean value of comparisson for each species and by method") +
+  ggtitle("Mean value of comparisson") +
   theme_bw() +
   theme(plot.title = element_text(lineheight=.8, face="bold"))
 
@@ -113,7 +131,9 @@ Iso.Compare <- function(x) {
   
   return(results= list("corr" = corr, "re.oriented" = re.oriented)) }
 PCs1to4<- current.data[mask] %>% llply(function(x) as.data.frame(eigen(x$matrix$cov)$vectors[,1:4]) ) %>% llply(function(x) as.list(x) )
-Iso.Compare.reoriented <- llply(PCs1to4, Iso.Compare) %>% ldply(function(x) as.data.frame(x$re.oriented)) 
+PCs1to4.log<- current.data[mask] %>% llply(function(x) as.data.frame(eigen(x$matrix$cov.log)$vectors[,1:4]) ) %>% llply(function(x) as.list(x) )
+
+Iso.Compare.reoriented <- llply(PCs1to4.log, Iso.Compare) %>% ldply(function(x) as.data.frame(x$re.oriented)) 
 
 names(Iso.Compare.reoriented) <- c(".sp", "PC1", "PC2", "PC3", "PC4")
 Iso.Compare.reoriented$.ed <- ed.names
@@ -143,12 +163,13 @@ Iso.Compare.cor.iso %>% gather(key="Isometric.Correlation", value=value, 2:5 ) %
   geom_tile(aes(x = Isometric.Correlation, y = .sp, fill = abs(value) ) ) +
   theme_bw() +
   scale_fill_gradientn(name = 'Isometric.Correlation', colours = myPalette(1000)) +
-  ylab ('Isometric.Correlation') + xlab ('') + labs(title = "First 4 PC's Correlation with isometric vector") +
+  ylab ('') + xlab ('') + labs(title = "Matrix of log values correlation with isometric vector") +
   #scale_y_discrete(limits = levels(PCs1to4$.pcScore))) +
   theme(axis.text.x = element_text(angle = 0, hjust = 0.5, vjust = 1, size = 10),
         axis.text.x = element_text(size = 10),
         axis.ticks = element_line(size = 0),
-        axis.text.y = element_text(size= 10))
+        axis.text.y = element_text(size= 10)) +
+  theme(plot.title = element_text(lineheight=.8, face="bold"))
 
 PCs1to4<- current.data[mask] %>% ldply(function(x) as.data.frame(eigen(x$matrix$cov)$vectors[,1:4]) )  
 names(PCs1to4) <- c(".sp", "PC1", "PC2", "PC3", "PC4")
@@ -172,15 +193,65 @@ data.frame ('n.size' = n.size [mask, -1], Iso.Compare.cor.iso) %>%
   gather(key = '.pc', value=value, c(3:6)) %>%
   ggplot (.) +
   #geom_text(aes (x = n.size, y = abs(value), label = .sp)) +
-  geom_point(aes (x = n.size, y = abs(value), size = n.size) ) +
-  geom_text(aes (x = n.size, y = abs(value), label = .sp, color = value)) +
-  scale_color_brewer(name = 'PC.Score' , type = "div"  , palette =  myPalette(1000)) +
+  geom_point(aes (x = n.size, y = abs(value), size = n.size, color = abs(value) ) ) +
+  geom_text(aes (x = n.size, y = abs(value), label = .sp), alpha = 0.4, size =2) +
+  #scale_color_brewer(name = 'PC.Score' , type = "div"  , palette =  myPalette(1000)) +
+  ylab ('Absolute value of correlation') + xlab ('Sample size') + labs(title = "First 4 PC's correlation with Isometric vector sample size") +
   facet_wrap(~ .pc) +
-  theme_bw()
+  theme_bw() +
+  theme(plot.title = element_text(lineheight=.8, face="bold"))
 
 rarefaction.all.rs <- llply(sp.main.data, function (x) x$rarefacation$rs)
 
-rarefaction.RS <- laply(rarefaction.all.rs[mask], PlotRarefaction)
+rarefaction.1 <- PlotRarefaction(sp.main.data$Euoticus_elegantulus$rarefaction$rs) + labs(title = "Euoticus senegalensis") 
+rarefaction.2 <-PlotRarefaction(sp.main.data$Loris_tardigradus$rarefaction$rs) + labs(title = "Loris tardigradus") 
+rarefaction.3 <-PlotRarefaction(sp.main.data$Daubentonia_madagascariensis$rarefaction$rs) + labs(title = "D. madagascariensis") 
+rarefaction.4 <-PlotRarefaction(sp.main.data$Phaner_furcifer$rarefaction$rs) + labs(title = "Phaner furcifer") 
+rarefaction.5 <-PlotRarefaction(sp.main.data$Microcebus_griseorufus$rarefaction$rs) + labs(title = "Microcebus griseorufus") 
+rarefaction.6 <-PlotRarefaction(sp.main.data$Indri_indri$rarefaction$rs) + labs(title = "Indri indri") 
+
+
+
+multiplot <- function(..., plotlist=NULL, file, cols=1, layout=NULL) {
+  library(grid)
+  
+  # Make a list from the ... arguments and plotlist
+  plots <- c(list(...), plotlist)
+  
+  numPlots = length(plots)
+  
+  # If layout is NULL, then use 'cols' to determine layout
+  if (is.null(layout)) {
+    # Make the panel
+    # ncol: Number of columns of plots
+    # nrow: Number of rows needed, calculated from # of cols
+    layout <- matrix(seq(1, cols * ceiling(numPlots/cols)),
+                     ncol = cols, nrow = ceiling(numPlots/cols))
+  }
+  
+  if (numPlots==1) {
+    print(plots[[1]])
+    
+  } else {
+    # Set up the page
+    grid.newpage()
+    pushViewport(viewport(layout = grid.layout(nrow(layout), ncol(layout))))
+    
+    # Make each plot, in the correct location
+    for (i in 1:numPlots) {
+      # Get the i,j matrix positions of the regions that contain this subplot
+      matchidx <- as.data.frame(which(layout == i, arr.ind = TRUE))
+      
+      print(plots[[i]], vp = viewport(layout.pos.row = matchidx$row,
+                                      layout.pos.col = matchidx$col))
+    }
+  }
+}
+
+
+multiplot(rarefaction.5, rarefaction.6, cols = 2)
+
+
 ########################################################################################################################################
 ########################################################################################################################################
 ########################################################################################################################################
@@ -195,12 +266,13 @@ rarefaction.RS <- laply(rarefaction.all.rs[mask], PlotRarefaction)
   gather(key="Percent_var_PC", value=value, 2:5 ) %>%
     ggplot( ., aes(x= Percent_var_PC, y = value, color = Percent_var_PC, label = .sp), varwidth = T) +
     scale_y_continuous(labels=percent) +
-    geom_text(size = 5, vjust = 1 )  +
+    geom_text(size = 2, vjust = 1, alpha = 0.4 )  +
     theme_bw() +
     geom_jitter() +
     geom_violin(alpha = 0) +
     ggtitle("% of variance on first 4 PC by specie") +
-    theme(plot.title = element_text(lineheight=.8, face="bold"))
+    theme(plot.title = element_text(lineheight=.8, face="bold"), axis.title.x = element_blank()) +
+    theme(legend.position="none")
 
 PcPercent.1to4<- cov.mx[mask] %>% ldply(function(x) eigen(x)$values[1:4]/sum(eigen(x)$values) )
 names(PcPercent.1to4) <- c(".sp", "PC1", "PC2", "PC3", "PC4")
@@ -224,7 +296,7 @@ names(MMxStats)[3] <- "PC1.percent"
 MMxStats %>% 
 gather(key= .MMxStats, value=value, 2:10 ) %>%
 ggplot( ., aes(x= .MMxStats, y = value, color = .MMxStats, label = .sp), varwidth = T) +
-  geom_text(size =5, vjust = 1)  +
+  geom_text(size =2, vjust = 1)  +
   theme_bw() +
   geom_boxplot(alpha = 0) +
   facet_wrap(~.MMxStats, scales="free") +
@@ -239,8 +311,8 @@ MMxStats %>%
   ggplot( ., aes(x = MeanSquaredCorrelation, y = ICV, color = .sp, label = .sp), varwidth = T) +
   geom_text(size =4, vjust = 1 )  +
   stat_smooth(method="lm", aes(group=1)) +
-  scale_x_continuous(limits = c(0.03, 0.6)) +
-  scale_y_continuous(limits = c(1.5, 5)) +
+  scale_x_continuous(limits = c(0.03, 0.4)) +
+  scale_y_continuous(limits = c(1.5, 4.5)) +
   theme_bw() +
   geom_point() +
   #geom_text(x = 0.5, y = 3, label = "r.squared = 0.899 \n 38 DF,  p-value: < 2.2e-16") + 
@@ -253,7 +325,7 @@ MMxStats %>%
   ggplot( ., aes(x = flexibility, y = evolvability, color = .sp, label = .sp), varwidth = T) +
   geom_text(size =5, vjust = 1) +
   stat_smooth(method="lm", aes(group=1)) +
-  scale_x_continuous(limits = c(0.23, 0.5)) +
+  #scale_x_continuous(limits = c(0.23, 0.5)) +
   #scale_y_continuous(limits = c(1, 7)) +
   theme_bw() +
   geom_point() +
@@ -263,6 +335,7 @@ MMxStats %>%
   theme(legend.position  ="none") 
 summary(lm(flexibility ~ evolvability , data = MMxStats))
 
+names (MMxStats)[3] <- "PC1.percent"
 MMxStats %>% 
   ggplot( ., aes(x = flexibility, y = PC1.percent, color = .sp, label = .sp), varwidth = T) +
   geom_text(size =4, vjust = 1)  +
@@ -283,15 +356,8 @@ gm.mean <- current.data[mask] %>% ldply(function(x) x$gm.mean)
 MMxStats.gm<- cbind(MMxStats, gm.mean[,2])
 names(MMxStats.gm)[11] <- "gm.mean"
 
-MMxStats.gm %>% 
-  #filter(.sp != "Cheirogaleus_major") %>%
-  #filter(.sp != "Cheirogaleus_medius") %>%
-  #filter(.sp != "Eulemur_rufifrons") %>%
-  #filter(.sp != "Phaner_furcifer") %>%
-  #filter(.sp != "Loris_tardigradus") %>%
-  #filter(.sp != "Lepilemur_leucopus") %>%
-  #filter(.sp != "Loris_tardigradus") %>%
-  #filter(PC1.percent <=0.4)%>%
+names (MMxStats.gm)[3] <- "PC1.percent"
+MMxStats.gm %>%
   ggplot( ., aes(x = gm.mean, y = PC1.percent, color = .sp, label = .sp), varwidth = T) +
   geom_text(size =5, vjust = 1)  +
   stat_smooth(method="lm", aes(group=1)) +

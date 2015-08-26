@@ -86,15 +86,14 @@ REP %>% na.omit(.) %>%
 REP %>% na.omit(.) %>%
   ggplot(., aes_string( x= "Trait", y="Repetability", color = "Specie")) +
   geom_line(aes(group = Specie)) +
-  geom_point(aes(group = Specie, size=1) ) +
-  facet_wrap(~Specie, scale="free_y") +
+  geom_point(aes(group = Specie),  size=1 ) +
+  facet_wrap(~Specie, scale="free_y", nrow = 5, ncol = 7) +
   theme_bw() +
-  theme(axis.text.y = element_text(size =15), 
-        axis.title.y = element_text(size = 25)) +
-  theme(axis.text.x = element_text(angle = 90, size =7),
-        axis.title.x = element_text(size = 25)) +
-  guides(colour = guide_legend(override.aes = list(size=3))) +
-  theme(legend.text=element_text(size=14)) +
+  theme(legend.position="none") +
+  theme(axis.text.x = element_text(angle = 90, size = 4), 
+        axis.text.y = element_text(size = 7),
+        axis.title.x = element_blank(),
+        strip.text= element_text(size=7)) +
   ggtitle("Traits Repetabilities by Specie") + 
-  theme(plot.title = element_text(lineheight=.8, face="bold", size = 30))
+  theme(plot.title = element_text(lineheight=.8, face="bold", size = 8)) 
 

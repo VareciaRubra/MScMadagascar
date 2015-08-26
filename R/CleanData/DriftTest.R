@@ -32,13 +32,19 @@ names(rep.no.na) <- mx.rep[,1][mask.na.cov]
 ##### ED means ######
 ed.means.no.na <- ed.means[mask.na.cov]
 gm.mean.no.na <- gm.mean [mask.na.cov, 2]
-# Árvore James: 
+# Árvore James: Personal comunication
+#I recommend the first phylogeny, fbd421agerange.tre, as the 'best' summary tree. 
+#You'll see that in fbd369agerange.tre, Plesiopithecus teras sneaks into lemurs as sister to Daubentonia, 
+#and this affects the age estimates. The phylogenies from tip-dating (td in file name) are much older than 
+#expected and may not be the best estimates. 
+
 treefile = read.nexus(file = "~/ataches/fbd369agerange_gooddates.tre")
+treefile = read.nexus(file = "~/ataches/fbd421agerange.tre")
 species <- treefile$tip.label[treefile$tip.label %in% names(sample.no.na)]
 pruned.tree<-drop.tip(treefile,treefile$tip.label[-match(species, treefile$tip.label)])
 plot(pruned.tree)
 
-tree.drift.test<- TreeDriftTest(tree = pruned.tree, mean.list = ed.means.no.na , cov.matrix.list = cov.no.na, sample.sizes = sample.no.na, )
+tree.drift.test<- TreeDriftTest(tree = pruned.tree, mean.list = ed.means.no.na , cov.matrix.list = cov.no.na, sample.sizes = sample.no.na)
 results <- llply(tree.drift.test, function(x) x$drift_rejected)
 PlotTreeDriftTest(test.list = tree.drift.test, tree = pruned.tree)
 nodelabels()

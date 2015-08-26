@@ -76,7 +76,8 @@ raw.data %<>%
   filter(Tombo != "2386(16b)") %>%
   filter(Tombo != "16351") %>%
   filter(Tombo != "043004d") %>%
-  filter(Tombo != "11882") #%>%
+  filter(Tombo != "11882") 
+  
   
 
 #contando quantos tem por espécie e por Take (pra ter certeza de que se removeu um cara sairam as duas replicas)

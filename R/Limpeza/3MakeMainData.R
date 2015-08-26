@@ -121,7 +121,7 @@ extant.madagascar.main.data<- llply(extant.madagascar.main.data, specie = TRUE, 
 
 #main.data<- llply(raw.main.data, makeMainData, specie = TRUE, compare.size = FALSE, final = TRUE, .progress = 'text')
 
-#all.main.data<- llply(all.raw.main.data, makeMainData, specie = FALSE, compare.size = FALSE, final = TRUE, .progress = 'text')
+all.main.data<- llply(all.raw.main.data, makeMainData, specie = FALSE, compare.size = FALSE, final = TRUE, .progress = 'text')
 
 
 #############################################
