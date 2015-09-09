@@ -17,52 +17,60 @@ registerDoParallel(cores = 30)
 #abrir no terminal htop para ver os cores trabalhando
 
 arquivo.bruto = "Data/2Master_Organized_Factors.csv"
-arquivo.saida =  "Data/3MasterDB_following_JHerrera_PhylOrder.csv"
+#arquivo.saida =  "Data/3MasterDB_following_JHerrera_PhylOrder.csv"
 #read csv and create table dataframe
 raw.regular <- read.csv(arquivo.bruto, head = T)
 original.names<- unique(raw.regular$Especie)
-raw.regular$Especie %<>% gsub("\\.", "", .)
-
-########## Renomeando minhas especies de acordo com a arvore do James ############
-recoderFunc <- function(data, oldvalue, newvalue) {
-  # convert any factors to characters
-  if (is.factor(data))     data     <- as.character(data)
-  if (is.factor(oldvalue)) oldvalue <- as.character(oldvalue)
-  if (is.factor(newvalue)) newvalue <- as.character(newvalue)
-  
-  # create the return vector
-  data[data == 0] <- NA
-  newvec <- data
-  # put recoded values into the correct position in the return vector
-  for (i in unique(oldvalue)) newvec[data == i ] <- newvalue[oldvalue == i ]
-  newvec
-}
-
-rename.james <- read.csv("myspecies.csv", header = TRUE)
-raw.regular$Especie<- recoderFunc(data = raw.regular$Especie, oldvalue = rename.james$Anna, newvalue = rename.james$James.Edited)
-
-################################ Colocando a ordem dos fatores de espécie como sendo a ordem em que eles aparecem na árvore
-################## Árvore James ##################
-treefile = read.nexus(file = "~/ataches/fbd369agerange_gooddates.tre")
-species <- treefile$tip.label[treefile$tip.label %in% unique(raw.regular$Especie)]
-################# Arvore indexada pelas especies que eu tenho na amostra #############
-pruned.tree<-drop.tip(treefile,treefile$tip.label[-match(species, treefile$tip.label)])
-plot(pruned.tree)
-tiporder<- treefile$edge[,2][ treefile$edge[, 2] %in% 1:length(treefile$tip.label) ]
-ordered.species <- as.data.frame(as.character(treefile$tip.label[tiporder]) )
-
-ordered.species<- read.csv("ordered_species_james_plus.csv", header = TRUE)
-james.original.order<- as.data.frame(!is.na(ordered.species$.id))
-james.edited.order <- as.data.frame(ordered.species$.editedid)
-current.order <- james.edited.order
-names(current.order)<- ".id"
-
-my.species <- unique(raw.regular$Especie)
-species <- current.order[current.order$.id %in% my.species,]
-raw.regular$Especie <- factor (raw.regular$Especie, levels = species )
+raw.regular$Especie <- factor (raw.regular$Especie, levels = original.names )
 ######### salvando no formato tbl_df
 raw.data<- tbl_df(raw.regular)
 raw.data %<>% arrange(. , Especie)
+
+
+# raw.regular$Especie %<>% gsub("\\.", "", .)
+# 
+# ########## Renomeando minhas especies de acordo com a arvore do James ############
+# recoderFunc <- function(data, oldvalue, newvalue) {
+#   # convert any factors to characters
+#   if (is.factor(data))     data     <- as.character(data)
+#   if (is.factor(oldvalue)) oldvalue <- as.character(oldvalue)
+#   if (is.factor(newvalue)) newvalue <- as.character(newvalue)
+#   
+#   # create the return vector
+#   data[data == 0] <- NA
+#   newvec <- data
+#   # put recoded values into the correct position in the return vector
+#   for (i in unique(oldvalue)) newvec[data == i ] <- newvalue[oldvalue == i ]
+#   newvec
+# }
+# 
+# rename.james <- read.csv("myspecies.csv", header = TRUE)
+# raw.regular$Especie<- recoderFunc(data = raw.regular$Especie, oldvalue = rename.james$Anna, newvalue = rename.james$James.Edited)
+# 
+# ################################ Colocando a ordem dos fatores de espécie como sendo a ordem em que eles aparecem na árvore
+# ################## Árvore James ##################
+# treefile = read.nexus(file = "~/ataches/fbd369agerange_gooddates.tre")
+# 
+# treefile.best = read.nexus(file = "~/ataches/fbd421agerange.tre")
+# species <- treefile$tip.label[treefile$tip.label %in% unique(raw.regular$Especie)]
+# ################# Arvore indexada pelas especies que eu tenho na amostra #############
+# pruned.tree<-drop.tip(treefile,treefile$tip.label[-match(species, treefile$tip.label)])
+# plot(pruned.tree)
+# tiporder<- treefile$edge[,2][ treefile$edge[, 2] %in% 1:length(treefile$tip.label) ]
+# ordered.species <- as.data.frame(as.character(treefile$tip.label[tiporder]) )
+# 
+# ordered.species<- read.csv("ordered_species_james_plus.csv", header = TRUE)
+# james.original.order<- as.data.frame(!is.na(ordered.species$.id))
+# james.edited.order <- as.data.frame(ordered.species$.editedid)
+# current.order <- james.edited.order
+# names(current.order)<- ".id"
+# 
+# my.species <- unique(raw.regular$Especie)
+# species <- current.order[current.order$.id %in% my.species,]
+# raw.regular$Especie <- factor (raw.regular$Especie, levels = species )
+# ######### salvando no formato tbl_df
+# raw.data<- tbl_df(raw.regular)
+# raw.data %<>% arrange(. , Especie)
 # forçando a ordem dos fatores  como sendo a ordem que aparece 
 # no proprio dataframe------->  ordenado de acordo com a arvore do James ################
 #isso evita que funçoes da classe apply reoordenem os resultados numérica/alfabeticamente.
