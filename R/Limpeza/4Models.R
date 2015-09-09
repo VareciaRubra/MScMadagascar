@@ -2,83 +2,71 @@
 #############################################
 ############# PRIMEIRA PARTE ################
 ##### testando modelos de efeitos fixos #####
+################ SEXO ######################
 #############################################
-options(contrasts=c("contr.sum", "contr.poly"))
-
-current.data <- sp.main.data$Varecia_variegata
-  y = vector("list", 7)
-  y[[1]] = vector("list", 10)
-  y[[1]] [[1]] <- manova(as.matrix(current.data$ed)  ~ Sexo, data = as.data.frame(current.data$info) ) 
-  y[[1]] [[2]] <- Manova(y[[1]] [[1]], type=3, test.statistic="Wilks",icontrasts=c("contr.sum", "contr.poly"))
-  y[[1]] [[3]]  <- apply(as.matrix(current.data$ed ), 2, function (x) return (Anova(lm(x ~ Sexo, data = as.data.frame(current.data$info) ), type= 3, test.statistic="Wilks",icontrasts=c("contr.sum", "contr.poly" ))))
-  y[[1]] [[4]] <- CalculateMatrix(y[[1]] [[1]]) 
-  y[[1]] [[5]] <- current.data$matrix$cov
-  names(y)[1] <- "factors"
-  names(y[[1]])[1:5] <- c("fit", "multi", "uni",  "cov.fit.mx", "cov.mx")
-  y$RS <- RandomSkewers (cov.x = y$factors$cov.fit.mx, cov.y = y$factors$cov.mx , num.vectors = 10000, parallel = TRUE)
-  y$KRZ <- KrzProjection(cov.x = y$factors$cov.fit.mx, cov.y = y$factors$cov.mx )$total.variation
-  y$PCA.s <- PCAsimilarity(cov.x = y$factors$cov.fit.mx, cov.y = y$factors$cov.mx )
-  y$cor.KRZ <- KrzProjection(cov.x = cov2cor(y$factors$cov.fit.mx), cov.y = cov2cor(y$factors$cov.mx) ) $total.variation
-  y$cor.PCA.s <- PCAsimilarity(cov.x = cov2cor(y$factors$cov.fit.mx), cov.y = cov2cor(y$factors$cov.mx) )
+current.data <- sp.main.data$
+SexSig <- function (current.data) 
+{
+  y = vector("list", 12)
+  y [[1]] <-  if (sum(table(current.data$info$Sexo))>= 43) manova(as.matrix(current.data$ed) ~ Sexo, data = as.data.frame(current.data$info) ) else NA
+  y [[2]] <- if (sum(table(current.data$info$Sexo))>= 43) Manova(y[[1]], type=3, test.statistic="Wilks",icontrasts=c("contr.sum", "contr.poly")) else NA
+  y [[3]]  <- if (table(current.data$info$Sexo)[1] >= 3 & table(current.data$info$Sexo)[2] >= 3) 
+              apply(as.matrix(current.data$ed ), 2, function (x) return (Anova(lm(x ~ Sexo, data = as.data.frame(current.data$info) ), type= 3, test.statistic="Wilks",icontrasts=c("contr.sum", "contr.poly" ))) ) else NA
+  y [[4]] <- if (sum(table(current.data$info$Sexo))>=43)  CalculateMatrix(y[[1]]) else current.data$matrix$cov
+  y [[5]] <- current.data$matrix$cov
+  names(y)[1:5] <- c("fit", "multi", "uni",  "cov.fit", "cov")
+  y[[6]] <- if (!is.na(y$cov.fit[1]) ) RandomSkewers (cov.x = y$cov.fit, cov.y = y$cov , num.vectors = 10000, parallel = TRUE)$correlation else NA
+  y[[7]] <- if (!is.na(y$cov.fit[1]) ) KrzProjection(cov.x = y$cov.fit,  cov.y = y$cov)$total.variation else NA
+  y[[8]] <- if (!is.na(y$cov.fit[1]) ) PCAsimilarity(cov.x = y$cov.fit, cov.y = y$cov ) else NA
+  y[[9]] <- if (!is.na(y$cov.fit[1]) ) KrzProjection(cov.x = cov2cor(y$cov.fit), cov.y = cov2cor(y$cov) ) $total.variation else NA
+  y[[10]] <- if (!is.na(y$cov.fit[1]) ) PCAsimilarity(cov.x = cov2cor(y$cov.fit), cov.y = cov2cor(y$cov) ) else NA
+  names(y)[6:10] <- c("RS", "KRZ", "PCA.s",  "cor.KRZ", "cor.PCA.s")
+  sig <- as.data.frame(cbind(names(current.data$ed), names(current.data$ed)))
+  sig[,2] <- NA
+  names(sig) <- c(".ed", "V1")
+  y[[11]] <- if(!is.na( y [[4]][1]) & !is.na(y$uni)) ldply(y$uni, .fun = function(x) x[4][2,] ) else sig
+  names(y)[11] <- "sig.sex.uni"
+  y[[12]] <- 
+  names(y)[12] <- "sig.sex.multi"
+  print (unique(current.data$info$Especie))
+  return(y)
   
-  MeanMatrixStatistics(y$factors$cov.mx)
-  plot.matrix.cor(y[[1]] [[5]])
-  
+}
 
-  sig.test <-  Manova(manova(as.matrix(x$ed) ~ Sexo, data = x$info), type=3, test.statistic="Wilks",icontrasts=c("contr.sum", "contr.poly"))
-  summary.Anova <- summary(Anova(lm(as.matrix(sp.main.data$Microcebus_griseorufus$ed)~ Sexo, data = sp.main.data$Microcebus_griseorufus$info) , type=3, test.statistic="Wilks",icontrasts=c("contr.sum", "contr.poly") ) )
-  Linhas <- cat(capture.output(summary.Anova)[], sep = "\n")
-#############################################
-############## SEGUNDA PARTE ################
-## MATRIZ de genero: residual de especies  ##
-#############################################
+sex.sig <- llply(sp.main.data, SexSig, .progress = 'text')
 
+sex.sig %>% ldply(function(x) x$RS[1])
+sex.sig %>% ldply(function(x) x$sig.sex[,2]) 
+multi.sig <- sex.sig %>% llply(function(x) summary(x$multi) ) 
+multi.sig <- sex.sig %>% llply(function(x) x$multi )
+multi.sig %>% !is.na() %>% ldply(!is.na(multi.sig), getTable)
 
-require (plotrix)
-
-RandomSkewers (CalculateMatrix(y[[1]]), 
-               var (current.data$ed [current.data$info$Museu != 'MCZ', ]))
-
-RandomSkewers (CalculateMatrix(y[[1]]), 
-               var (current.data$ed))
-
-plot.matrix.cor<- function(cor.mx = NULL, main = "", title = "", brewer = "BrBG", show.values = TRUE )
-  {
-  library("RColorBrewer")
-  paleta.of.choice  <- rev(brewer.pal(11, brewer))
-  colfunc <- colorRampPalette(paleta.of.choice)
-  paleta  <- colfunc(90)
-  
-  nCores  <- length(paleta)
-  intervalMarks  <- seq(from = 0.1, to = 1, length.out = nCores)
-  dados<- as.vector(cor.mx)
-  intervals  <- findInterval(dados , intervalMarks, rightmost.closed = T, all.inside = T)
-  cores  <- paleta[intervals]
-  
-  mx.dimentions <- dim(cor.mx)[1]
-  
-  color2D.matplot(x = cor.mx, axes = F, cellcol = cores, show.values= show.values, vcex= 0.8, xlab = "", ylab = "", xaxt = "n", yaxt = "n")
-  title(main = main , sub =  title)
-  axis(1, 1:mx.dimentions, paste("(n=", sample.40,")",1:length(rownames(cor.mx)), sep = " "), las = 2, cex.axis = 0.7, tick = FALSE, line = 0)
-  #axis(2, mx.dimentions:1, length(rownames(cor.mx)):1, las = 1, cex.axis = 1, tick = FALSE, line = 0)
-  
-  axis(2, mx.dimentions:1, paste(rownames(cor.mx), 1:18), las = 1, cex.axis = 1, tick = FALSE, line = 0)
+getTable <- function (x, ...) 
+{
+  if ((!is.null(x$singular)) && x$singular) 
+    stop("singular error SSP matrix; multivariate tests unavailable\ntry summary(object, multivariate=FALSE)")
+  test <- x$test
+  repeated <- x$repeated
+  ntests <- length(x$terms)
+  tests <- matrix(NA, ntests, 4)
+  if (!repeated) 
+    SSPE.qr <- qr(x$SSPE)
+  for (term in 1:ntests) {
+    eigs <- Re(eigen(qr.coef(if (repeated) qr(x$SSPE[[term]]) else SSPE.qr, 
+                             x$SSP[[term]]), symmetric = FALSE)$values)
+    tests[term, 1:4] <- switch(test, Wilks = car:::Wilks(eigs, x$df[term],  x$error.df), x$error.df)
   }
-plot.matrix.cor(RS.compare.40$correlations, main = "V/CV Matrix compared by Random Skewers", brewer = "RdBu")
-
-
-par(mfrow= c(1,2))
-plot.matrix.cor(cor.mx = cov2cor(CalculateMatrix(y[[1]][[1]])) )
-
-plot.matrix.cor(cor.mx = all.main.data$Indri$matrix$cor)
-
-
-
-
-RS.compare <- RandomSkewers(cov.x = cov.no.na, repeat.vector = rep.no.na, num.vectors = 1000, parallel = TRUE)
-plot.matrix.cor(RS.compare$correlations, main = "V/CV Matrix compared by Random Skewers", brewer = "BrBG")
-
-RS.compare.40 <- RandomSkewers(cov.x = cov.40, repeat.vector = rep.40, num.vectors = 1000, parallel = TRUE)
-plot.matrix.cor(RS.compare.40$correlations, main = "V/CV Matrix compared by Random Skewers", brewer = "RdBu")
-
-
+  ok <- tests[, 2] >= 0 & tests[, 3] > 0 & tests[, 4] > 0
+  ok <- !is.na(ok) & ok
+  tests <- cbind(x$df, tests, pf(tests[ok, 2], tests[ok, 3], 
+                                 tests[ok, 4], lower.tail = FALSE))
+  rownames(tests) <- x$terms
+  colnames(tests) <- c("Df", "test stat", "approx F", "num Df", 
+                       "den Df", "Pr(>F)")
+  tests <- structure(as.data.frame(tests), heading = paste("\nType ", 
+                                                           x$type, if (repeated) 
+                                                             " Repeated Measures", " MANOVA Tests: ", test, " test statistic", 
+                                                           sep = ""), class = c("anova", "data.frame"))
+  tests
+}
+ 
