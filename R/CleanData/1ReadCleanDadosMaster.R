@@ -51,19 +51,19 @@ raw.data %<>% arrange(. , Especie)
 # ################## Árvore James ##################
 # treefile = read.nexus(file = "~/ataches/fbd369agerange_gooddates.tre")
 # 
-# treefile.best = read.nexus(file = "~/ataches/fbd421agerange.tre")
-# species <- treefile$tip.label[treefile$tip.label %in% unique(raw.regular$Especie)]
-# ################# Arvore indexada pelas especies que eu tenho na amostra #############
-# pruned.tree<-drop.tip(treefile,treefile$tip.label[-match(species, treefile$tip.label)])
-# plot(pruned.tree)
-# tiporder<- treefile$edge[,2][ treefile$edge[, 2] %in% 1:length(treefile$tip.label) ]
-# ordered.species <- as.data.frame(as.character(treefile$tip.label[tiporder]) )
-# 
-# ordered.species<- read.csv("ordered_species_james_plus.csv", header = TRUE)
-# james.original.order<- as.data.frame(!is.na(ordered.species$.id))
-# james.edited.order <- as.data.frame(ordered.species$.editedid)
-# current.order <- james.edited.order
-# names(current.order)<- ".id"
+treefile.best = read.nexus(file = "~/ataches/fbd421agerange.tre")
+species <- treefile$tip.label[treefile$tip.label %in% unique(raw.regular$Especie)]
+################# Arvore indexada pelas especies que eu tenho na amostra #############
+pruned.tree<-drop.tip(treefile,treefile$tip.label[-match(species, treefile$tip.label)])
+plot(pruned.tree)
+tiporder<- treefile$edge[,2][ treefile$edge[, 2] %in% 1:length(treefile$tip.label) ]
+ordered.species <- as.data.frame(as.character(treefile$tip.label[tiporder]) )
+
+ordered.species<- read.csv("ordered_species_james_plus.csv", header = TRUE)
+james.original.order<- as.data.frame(!is.na(ordered.species$.id))
+james.edited.order <- as.data.frame(ordered.species$.editedid)
+current.order <- james.edited.order
+names(current.order)<- ".id"
 # 
 # my.species <- unique(raw.regular$Especie)
 # species <- current.order[current.order$.id %in% my.species,]
