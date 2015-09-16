@@ -7,23 +7,94 @@
   cor.mx <- current.data %>% llply(function(x) x$matrix$cor)
   mx.rep <- current.data %>% ldply(function(x) x$Mx.Rep$BootsRep) 
   n.size <- current.data %>% ldply(function(x) x$sample.size) 
+  
+  boot.R2 <- current.data %>% llply(function(x) x$BootsR2)
   # criando mascaras para selecionar só parte do dataset.
   #Todas que tem matriz, mesmo as mal estimadas
   mask <- ldply(cov.mx, function(x) !is.na(x[1]))[,2]
   #Só mtrizes com mais de 40 indivíduos
   mask.n.size <- n.size[,2]>40
   
+  Saguinus_G.cov <- read.csv(file = "Data/Saguinus_G.csv", header = F)
+  Saguinus_G.cov <- as.matrix(Saguinus_G.cov)
+  dimnames(Saguinus_G.cov) <- dimnames(cov.list[[1]])
+  Saguinus_G.cor <- cov2cor(Saguinus_G.cov)
+  
+  Saguinus_P.cov <- read.csv(file = "Data/Saguinus_P.csv", header = F)
+  Saguinus_P.cov <- as.matrix(Saguinus_P.cov)
+  Saguinus_P.cov.t <- t(Saguinus_P.cov)
+  Saguinus_P.cov[upper.tri(diag(39))] <- Saguinus_P.cov.t[upper.tri(diag(39))]
+  
+  dimnames(Saguinus_P.cov) <- dimnames(cov.list[[1]])
+  Saguinus_P.cor <- cov2cor(Saguinus_P.cov)
+  
+  cov.list <- cov.mx[mask]
+  cov.list$Saguinus_P.cov <- Saguinus_P.cov
+  cov.list$Saguinus_G.cov <- Saguinus_G.cov
+  
+  cor.list <- cor.mx[mask]
+  cor.list$Saguinus_P.cor <- Saguinus_P.cor
+  cor.list$Saguinus_G.cor <- Saguinus_G.cor
+  
+  rep.list <- mx.rep[mask, ]
+  row.names(rep.list) <- rep.list$Especie
+  rep.list$Especie <- as.character(rep.list$Especie)
+  rep.list[dim(rep.list)[1] +1, ] <- c("Saguinus_P", rep(0.97, 5) )
+  rep.list[dim(rep.list)[1] +1, ] <- c("Saguinus_G", rep(0.75, 5) )
+  row.names(rep.list) <- rep.list$Especie
+  rep.list$Especie <- factor(rep.list$Especie, levels = unique(rep.list$Especie) )
+  rep.list$rs <- as.numeric(rep.list$rs)
+  rep.list$krz <- as.numeric(rep.list$krz)
+  rep.list$pcas <- as.numeric(rep.list$pcas)
+  rep.list$cor.mantel <- as.numeric(rep.list$cor.mantel)
+  rep.list$cor.krz <- as.numeric(rep.list$cor.krz)
+  
+  str(rep.list)
+  
+  
   mx.compare = vector("list", 5)
   mx.compare[1:5] <- NA
-  mx.compare[[1]] <- RandomSkewers(cov.x= cov.mx[mask], num.vectors = 1000, repeat.vector = mx.rep[mask, 2] )
-  mx.compare[[2]]$correlations <- as.matrix(KrzCor(cov.x= cov.mx[mask], num.vectors = 1000, repeat.vector = mx.rep[mask, 3] ))
-  mx.compare[[3]]$correlations <- as.matrix(PCAsimilarity(cov.x= cov.mx[mask], num.vectors = 1000, repeat.vector = mx.rep[mask, 4] ) )
-  mx.compare[[4]]$correlations <- as.matrix(MatrixCor(cor.x= cor.mx[mask], correlation = TRUE, num.vectors = 1000, repeat.vector = mx.rep[mask, 5] ) )
-  mx.compare[[5]]$correlations <- as.matrix(KrzCor(cov.x= cor.mx[mask], correlation = TRUE, num.vectors = 1000, repeat.vector = mx.rep[mask, 6] ))
+  mx.compare[[1]] <- RandomSkewers(cov.x= cov.list, num.vectors = 1000, repeat.vector = rep.list[, 2] )
+  mx.compare[[2]]$correlations <- as.matrix(KrzCor(cov.x= cov.list, num.vectors = 1000, repeat.vector = rep.list[, 3] ))
+  mx.compare[[3]]$correlations <- as.matrix(PCAsimilarity(cov.x= cov.list, num.vectors = 1000, repeat.vector = rep.list[, 4] ) )
+  mx.compare[[4]]$correlations <- as.matrix(MatrixCor(cor.x= cor.list, correlation = TRUE, num.vectors = 1000, repeat.vector = rep.list[, 5] ) )
+  mx.compare[[5]]$correlations <- as.matrix(KrzCor(cov.x= cor.list, correlation = TRUE, num.vectors = 1000, repeat.vector = rep.list[, 6] ))
   names(mx.compare)[1:5] <-  c('RS', 'KRZ','PCA.s', 'Mantel', 'KRZ')
   mx.class<- c('V/CV', 'V/CV','V/CV', 'COR', 'COR')
   for (i in 1:5)  {mx.compare[[i]]$method <- names(mx.compare)[i]}
   for (i in 1:5)  {mx.compare[[i]]$mx.class <- mx.class[i]}
+  
+  
+  mat_data <- mx.compare[[1]] 
+  mat_data[lower.tri(mat_data)] <- t(krz_data)[lower.tri(krz_data)]
+  diag(mat_data) <- NA
+  
+  m.rs = melt(mat_data) 
+  m.rs$Var1<- factor(m.rs$Var1, levels = levels(m.rs$Var1)[5:1])
+  m.rs.position = m.rs
+  m.rs.position$Var1 <- as.numeric(m.rs.position$Var1)
+  m.rs.position$Var2 <- as.numeric(m.rs.position$Var2)
+  m.rs.position$value= round(m.rs.position$value, 3)
+  m.rs.position$value[is.na(m.rs.position$value)] <- c("Control", "Increase h", "Increase s", "Reduce h", "Reduce s")
+  matrix_comparisons <- ggplot (m.rs) +
+    geom_tile(aes(x = Var2, y = Var1, fill = value)) +
+    scale_fill_gradientn(name = '', colours = myPalette) +
+    ylab ('') + xlab ('') + labs(title = "Matrix comparisons") + 
+    geom_text(data = m.rs.position, size = 3, aes(x = Var2, y = Var1, label = value)) + 
+    theme(axis.text.x = element_blank(),
+          axis.text.y = element_blank(),
+          axis.ticks = element_line(size = 0),
+          legend.title = element_text(size = 7),
+          legend.text = element_text(size = 7),
+          rect = element_blank(), line = element_blank())
+  
+  
+  
+  
+  
+  
+  
+  
   
   
   log.cov.mx <- current.data %>% llply(function(x) x$matrix$cov.log)
@@ -203,7 +274,7 @@ data.frame ('n.size' = n.size [mask, -1], Iso.Compare.cor.iso) %>%
 
 rarefaction.all.rs <- llply(sp.main.data, function (x) x$rarefacation$rs)
 
-rarefaction.1 <- PlotRarefaction(sp.main.data$Euoticus_elegantulus$rarefaction$rs) + labs(title = "Euoticus senegalensis") 
+rarefaction.1 <-PlotRarefaction(sp.main.data$Euoticus_elegantulus$rarefaction$rs) + labs(title = "Euoticus senegalensis") 
 rarefaction.2 <-PlotRarefaction(sp.main.data$Loris_tardigradus$rarefaction$rs) + labs(title = "Loris tardigradus") 
 rarefaction.3 <-PlotRarefaction(sp.main.data$Daubentonia_madagascariensis$rarefaction$rs) + labs(title = "D. madagascariensis") 
 rarefaction.4 <-PlotRarefaction(sp.main.data$Phaner_furcifer$rarefaction$rs) + labs(title = "Phaner furcifer") 
@@ -304,6 +375,30 @@ ggplot( ., aes(x= .MMxStats, y = value, color = .MMxStats, label = .sp), varwidt
   theme(axis.ticks = element_blank(), axis.text.x = element_blank(), axis.title.x = element_blank()) +
   theme(plot.title = element_text(lineheight=.8, face="bold")) + 
   theme(legend.position="none")
+
+
+MMxStats<- cov.mx[mask] %>% ldply(function(x) MeanMatrixStatistics(x))
+names(MMxStats)[1] <- ".sp"
+MMxStats[,1] <- factor(unique(MMxStats[,1]), levels = unique(MMxStats[,1]))
+names(MMxStats)[2] <- "R^2"
+names(MMxStats)[3] <- "PC1.percent"
+
+MMxStats %>% .[, c(1:3,9)] %>%
+  gather(key= .MMxStats, value=value, 2:4 ) %>% 
+  ggplot( ., aes(x=  value, y = .sp, fill = .MMxStats ), varwidth = T) +
+  geom_bar(stat="identity")+
+  theme_bw() +
+  facet_wrap(~.MMxStats, scales="free_x", ncol = 3) +
+  ggtitle("Mean matrix evolutionary statistics by specie") +
+  scale_y_continuous(breaks = seq(0,2, by = 0.1) )+
+  theme(axis.text.y = element_text(face = "italic")) +
+  theme(axis.title.x = element_blank()) +
+  theme(plot.title = element_text(lineheight=.8, face="bold")) +
+  scale_fill_brewer(palette="Spectral") +
+  scale_colour_brewer(name = "Mean Matrix Statistics")
+
+
+
 
 MMxStats<- cov.mx[mask] %>% ldply(function(x) MeanMatrixStatistics(x))
 names(MMxStats)[1] <- ".sp"

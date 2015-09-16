@@ -37,67 +37,64 @@ makeMainData <- function (current.data, specie = TRUE, compare.size = FALSE, fin
   names(x)[11] <- 'matrix'
   names(x[[11]])[1:7] <- c('cov','cor', 'cov.sizeless.sp', 'cov.sizeless', 'cov.log', 'fit', 'ext.cov.mx')
 
-  x[[13]] <- vector("list", 4)
+  x[[13]] <- vector("list", 5)
   names(x[[13]])[1:5] <-  c('cov','cor', 'cov.sizeless.sp', 'cov.sizeless', 'cov.log')
   if (compare.size == TRUE)
-  {x[[12]] <- if(x[[9]]>40) ldply(.data = x[[11]][-c(2,5,6)], .fun = MeanMatrixStatistics, parallel = TRUE, full.results = FALSE) else NA
+  {x[[12]] <- if(x[[9]]>40) ldply(.data = x[[11]][-c(2,6,7)], .fun = MeanMatrixStatistics, parallel = TRUE, full.results = FALSE) else NA
    x[[13]][1]<- if(x[[9]]>14) BootstrapRep( x[[4]], ComparisonFunc = RandomSkewers, iterations = 1000, parallel = TRUE) else NA
    x[[13]][2]<- if(x[[9]]>14) BootstrapRep( x[[4]], ComparisonFunc = MantelCor, iterations = 1000, correlation = TRUE, parallel = T) else NA
    x[[13]][3]<- if(x[[9]]>14) BootstrapRep( t(apply(x[[4]], 1, FUN = function(z) z/ x[[8]])), ComparisonFunc = RandomSkewers, iterations = 1000, correlation = TRUE, parallel = T) else NA
    x[[13]][4]<- if(x[[9]]>14) BootstrapRep( x[[5]], ComparisonFunc = RandomSkewers, iterations = 1000, parallel = TRUE) else NA
    x[[13]][5]<- if(x[[9]]>14) BootstrapRep( x[[6]], ComparisonFunc = RandomSkewers, iterations = 1000, parallel = TRUE) else NA
-   x[[14]] <- if(x[[9]]>14) RandomSkewers(cov.x = x[[11]][c(1,3,4)], num.vectors = 1000, repeat.vector = unlist(x[[13]])[c(1,3,4)])$correlations  else NA
+   x[[14]] <- if(x[[9]]>14) RandomSkewers(cov.x = x[[11]][c(1,3,4,5)], num.vectors = 1000, repeat.vector = unlist(x[[13]])[c(1,3,4,5)])$correlations  else NA
   }   
   names (x)[12:14] <- c('mean.mx.stats', 'size.mx.rep.rs', 'rs.size.comparisson')
   
-  x[[15]] <- vector("list", 5)
-  x[[16]] <- vector("list", 1)
+  x[[15]] <- t(apply(x[[4]], 1, FUN = function(z) z/ x[[8]]))
+  names(x[[15]]) <- 'ed.means.gm.sp'
+  
+  x[[16]] <- vector("list", 2)
   x[[16]][[1]] <- matrix(NA, nrow = 1, ncol= 5)
-  x[[17]] <- vector ("list", 3)
+  x[[16]][[2]] <- matrix(NA, nrow = 1, ncol= 5)
+  x[[17]] <- vector ("list", 4)
   if (final == TRUE)
   {
-    x[[16]][[1]][1] <- MonteCarloRep( x[[11]][[1]], sample.size = x[[9]], ComparisonFunc = RandomSkewers, iterations = 1000, parallel = T) 
-    x[[16]][[1]][2] <- MonteCarloRep( x[[11]][[1]], sample.size = x[[9]], ComparisonFunc = KrzCor, iterations = 1000, parallel = T) 
-    x[[16]][[1]][3] <- MonteCarloRep( x[[11]][[1]], sample.size = x[[9]], ComparisonFunc = PCAsimilarity, iterations = 1000, parallel = T) 
-    x[[16]][[1]][4] <- MonteCarloRep( x[[11]][[1]], sample.size = x[[9]], ComparisonFunc = MantelCor, iterations = 1000, correlation = TRUE, parallel = T) 
-    x[[16]][[1]][5] <- MonteCarloRep( x[[11]][[1]], sample.size = x[[9]], ComparisonFunc = KrzCor, iterations = 1000, correlation = TRUE, parallel = T)
-        
     x[[16]][[1]][1] <- BootstrapRep( x[[4]], ComparisonFunc = RandomSkewers, iterations = 1000, parallel = T) 
     x[[16]][[1]][2] <- BootstrapRep( x[[4]], ComparisonFunc = KrzCor, iterations = 1000, parallel = T) 
     x[[16]][[1]][3] <- BootstrapRep( x[[4]], ComparisonFunc = PCAsimilarity, iterations = 1000, parallel = T) 
     x[[16]][[1]][4] <- BootstrapRep( x[[4]], ComparisonFunc = MantelCor, iterations = 1000, correlation = TRUE, parallel = T) 
     x[[16]][[1]][5] <- BootstrapRep( x[[4]], ComparisonFunc = KrzCor, iterations = 1000, correlation = TRUE, parallel = T) 
     
+    x[[16]][[2]][1] <- MonteCarloRep( x[[11]][[1]], sample.size = x[[9]], ComparisonFunc = RandomSkewers, iterations = 1000, parallel = T) 
+    x[[16]][[2]][2] <- MonteCarloRep( x[[11]][[1]], sample.size = x[[9]], ComparisonFunc = KrzCor, iterations = 1000, parallel = T) 
+    x[[16]][[2]][3] <- MonteCarloRep( x[[11]][[1]], sample.size = x[[9]], ComparisonFunc = PCAsimilarity, iterations = 1000, parallel = T) 
+    x[[16]][[2]][4] <- MonteCarloRep( x[[11]][[1]], sample.size = x[[9]], ComparisonFunc = MantelCor, iterations = 1000, correlation = TRUE, parallel = T) 
+    x[[16]][[2]][5] <- MonteCarloRep( x[[11]][[1]], sample.size = x[[9]], ComparisonFunc = KrzCor, iterations = 1000, correlation = TRUE, parallel = T)
+    
     x[[17]][[1]] <- if(x[[9]]>14) BootstrapR2(ind.data= x[[4]], iterations = 1000, parallel = TRUE) else NA
-    x[[17]][[2]] <- if(x[[9]]>14) BootstrapR2(ind.data= x[[5]], iterations = 1000, parallel = TRUE) else NA
-    x[[17]][[3]] <- if(x[[9]]>14) BootstrapR2(ind.data= x[[6]], iterations = 1000, parallel = TRUE) else NA
+    x[[17]][[2]] <- if(x[[9]]>14) BootstrapR2(ind.data= x[[15]], iterations = 1000, parallel = TRUE) else NA
+    x[[17]][[3]] <- if(x[[9]]>14) BootstrapR2(ind.data= x[[5]], iterations = 1000, parallel = TRUE) else NA
+    x[[17]][[4]] <- if(x[[9]]>14) BootstrapR2(ind.data= x[[6]], iterations = 1000, parallel = TRUE) else NA
     
   }  
   
-  names(x)[15] <- c('rarefaction')
-  names(x[[15]])[1:5] <- c('rs', 'krz','pcas', 'cor.mantel', 'cor.krz')
   names(x)[16] <- c('Mx.Rep')
-  names(x[[16]])[[1]] <- c('BootsRep')
+  names(x[[16]])[1:2] <- c('BootsRep', 'MCRep')
   colnames(x[[16]][[1]])[1:5] <- c('rs', 'krz','pcas', 'cor.mantel', 'cor.krz')
+  colnames(x[[16]][[2]])[1:5] <- c('rs', 'krz','pcas', 'cor.mantel', 'cor.krz')
   names(x)[17] <- 'BootsR2'
-  names(x[[17]])[1:3] <- c('ed.means', 'sizeless','log')
+  names(x[[17]])[1:4] <- c('ed.means', 'sizeles.sp', 'sizeless','log')
   
   
-  print (unique(current.data$info$Especie))    
+  if(specie == TRUE ) print (unique(x$info$Especie)) else print (unique(x$info$Genero))
   return(x)
   
 }
-
-
-
-
 
 #############################################
 ############# PRIMEIRA PARTE ################
 ####### OLHANDO PRO PLOT DE PC1 X PC2 #######
 #############################################
-
-
 
 extant.main.data<- raw.data %>% filter( Status != "Extinct") %>% filter( Genero != "Tarsius")
 extant.main.data<- dlply(extant.main.data, .(All), tbl_df)
