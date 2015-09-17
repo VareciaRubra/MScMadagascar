@@ -48,9 +48,10 @@
   rep.list$pcas <- as.numeric(rep.list$pcas)
   rep.list$cor.mantel <- as.numeric(rep.list$cor.mantel)
   rep.list$cor.krz <- as.numeric(rep.list$cor.krz)
-  
   str(rep.list)
-  
+
+  sample.size.list <- c(n.size[mask,2], 130, 230)
+    
   
   mx.compare = vector("list", 5)
   mx.compare[1:5] <- NA
@@ -65,37 +66,31 @@
   for (i in 1:5)  {mx.compare[[i]]$mx.class <- mx.class[i]}
   
   
-  mat_data <- mx.compare[[1]] 
-  mat_data[lower.tri(mat_data)] <- t(krz_data)[lower.tri(krz_data)]
-  diag(mat_data) <- NA
+  mat_data <- mx.compare$RS$correlations
+  mat_data[lower.tri(mat_data)] <- t(mx.compare$KRZ$correlations)[lower.tri(mx.compare$KRZ$correlations)]
+  #diag(mat_data) <- NA
   
-  m.rs = melt(mat_data) 
-  m.rs$Var1<- factor(m.rs$Var1, levels = levels(m.rs$Var1)[5:1])
-  m.rs.position = m.rs
-  m.rs.position$Var1 <- as.numeric(m.rs.position$Var1)
-  m.rs.position$Var2 <- as.numeric(m.rs.position$Var2)
-  m.rs.position$value= round(m.rs.position$value, 3)
-  m.rs.position$value[is.na(m.rs.position$value)] <- c("Control", "Increase h", "Increase s", "Reduce h", "Reduce s")
-  matrix_comparisons <- ggplot (m.rs) +
+  
+  
+   m.rs.krz = melt(mat_data) 
+   m.rs.krz$Var1<- factor( m.rs.krz$Var1, levels = levels( m.rs.krz$Var1)[44:1])
+   m.rs.krz.position =  m.rs.krz
+   m.rs.krz.position$Var1 <- as.numeric( m.rs.krz.position$Var1)
+   m.rs.krz.position$Var2 <- as.numeric( m.rs.krz.position$Var2)
+   m.rs.krz.position$value= round( m.rs.krz.position$value, 3)
+   
+   myPalette <- colorRampPalette(brewer.pal(11, 'Spectral'), space = 'Lab')(n = 100)
+   matrix_comparisons <- ggplot ( m.rs.krz) +
     geom_tile(aes(x = Var2, y = Var1, fill = value)) +
     scale_fill_gradientn(name = '', colours = myPalette) +
     ylab ('') + xlab ('') + labs(title = "Matrix comparisons") + 
-    geom_text(data = m.rs.position, size = 3, aes(x = Var2, y = Var1, label = value)) + 
+    geom_text(data =  m.rs.krz.position, size = 3, aes(x = Var2, y = Var1, label = round(value, 2)) ) + 
     theme(axis.text.x = element_blank(),
-          axis.text.y = element_blank(),
+          #axis.text.y = element_blank(),
           axis.ticks = element_line(size = 0),
           legend.title = element_text(size = 7),
           legend.text = element_text(size = 7),
           rect = element_blank(), line = element_blank())
-  
-  
-  
-  
-  
-  
-  
-  
-  
   
   log.cov.mx <- current.data %>% llply(function(x) x$matrix$cov.log)
   log.cor.mx <- llply(log.cov.mx[mask], cov2cor)
@@ -117,7 +112,9 @@
 #com respectivos valores seguindo 
 # palleta de padrao de cor
 ###################################
-plot.matrix<- function(mx = NULL, brewer = "RdBu", show.values = TRUE)
+myPalette <- colorRampPalette(c("yellow", "white", "purple"))(n = 100)
+myPalette <- "RdBu"  
+plot.matrix<- function(mx = NULL, sample.size = NULL, brewer = myPalette, show.values = TRUE)
 { require (plotrix)
   library("RColorBrewer")
   paleta.of.choice  <- rev(brewer.pal(11, brewer))
@@ -126,25 +123,29 @@ plot.matrix<- function(mx = NULL, brewer = "RdBu", show.values = TRUE)
   nCores  <- length(paleta)
   intervalMarks  <- seq(from = 0.1, to = 1, length.out = nCores)
   
-  mx.cor <- mx$correlations
+  mx.cor <- mx
   mx.dimentions <- dim(mx.cor)[1]
   
   dados<- as.vector(mx.cor)
   intervals  <- findInterval(dados , intervalMarks, rightmost.closed = T, all.inside = T)
   cores  <- paleta[intervals]
   
-  color2D.matplot(x = mx.cor, axes = F, cellcol = cores, show.values= 2, vcex= 0.4, xlab = "", ylab = "", xaxt = "n", yaxt = "n")
-  title(main = paste(mx$mx.class, "Matrices compared by", mx$method, "method"))
-  axis(1, 1:mx.dimentions, paste("(n=", n.size[mask,2],")",1:length(rownames(mx.cor)), sep = " "), las = 2, cex.axis = 0.7, tick = FALSE, line = 0)
+  color2D.matplot(x = mx.cor, axes = F, cellcol = cores, show.values= 2, vcex= 0.6, xlab = "", ylab = "", xaxt = "n", yaxt = "n")
+  #title(main = paste(mx$mx.class, "Matrices compared by", mx$method, "method"))
+  title(main = "Matrix comparison via KRZ (lower) and RS (upper)")
+  axis(1, 1:mx.dimentions, paste("(n=", sample.size,")",1:length(rownames(mx.cor)), sep = " "), las = 2, cex.axis = 0.9, tick = FALSE, line = 0)
   #axis(2, mx.dimentions:1, length(rownames(mx.cor)):1, las = 1, cex.axis = 1, tick = FALSE, line = 0)
-  axis(2, mx.dimentions:1, paste(rownames(mx.cor), 1:length(rownames(mx.cor))), las = 1, cex.axis = 0.7, tick = FALSE, line = 0)
+  axis(2, mx.dimentions:1, paste(rownames(mx.cor), 1:length(rownames(mx.cor))), las = 1, cex.axis = 0.9, tick = FALSE, line = 0)
 
 }
-par(mar = c(7,12,3,2))
+par(mar = c(7,17,3,2))
 par(mfrow = c(3,1))
   lapply(mx.compare, plot.matrix)
   lapply(mx.compare.log, plot.matrix)
-#Calculando a similaridade média das matrizes.
+  
+  
+  plot.matrix(mx = mat_data, sample.size = sample.size.list, show.values = TRUE)
+  #Calculando a similaridade média das matrizes.
 mean.sim<-function(x) {
     x[upper.tri(x)]<-t(x)[upper.tri(x)]
     diag(x)<-NA
@@ -377,7 +378,7 @@ ggplot( ., aes(x= .MMxStats, y = value, color = .MMxStats, label = .sp), varwidt
   theme(legend.position="none")
 
 
-MMxStats<- cov.mx[mask] %>% ldply(function(x) MeanMatrixStatistics(x))
+MMxStats<- cov.list %>% ldply(function(x) MeanMatrixStatistics(x))
 names(MMxStats)[1] <- ".sp"
 MMxStats[,1] <- factor(unique(MMxStats[,1]), levels = unique(MMxStats[,1]))
 names(MMxStats)[2] <- "R^2"
@@ -385,17 +386,21 @@ names(MMxStats)[3] <- "PC1.percent"
 
 MMxStats %>% .[, c(1:3,9)] %>%
   gather(key= .MMxStats, value=value, 2:4 ) %>% 
-  ggplot( ., aes(x=  value, y = .sp, fill = .MMxStats ), varwidth = T) +
-  geom_bar(stat="identity")+
+  ggplot(aes(y=  value, x = .sp, fill = .MMxStats ), varwidth = T) +
+  geom_bar(aes(y=  value, x = .sp, fill = .MMxStats ), stat = "identity", position="dodge")+
+  #scale_y_continuous(breaks = seq(0,0.6, by = 0.1) )+
   theme_bw() +
-  facet_wrap(~.MMxStats, scales="free_x", ncol = 3) +
+  facet_grid(~.MMxStats) +
+  coord_flip() +
   ggtitle("Mean matrix evolutionary statistics by specie") +
-  scale_y_continuous(breaks = seq(0,2, by = 0.1) )+
-  theme(axis.text.y = element_text(face = "italic")) +
+    theme(axis.text.y = element_text(face = "italic")) +
   theme(axis.title.x = element_blank()) +
+  theme(axis.title.y = element_blank()) +
   theme(plot.title = element_text(lineheight=.8, face="bold")) +
-  scale_fill_brewer(palette="Spectral") +
-  scale_colour_brewer(name = "Mean Matrix Statistics")
+  scale_fill_grey() +
+  #scale_fill_brewer(palette="Spectral") +
+  scale_colour_brewer(name = "Mean Matrix Statistics") + 
+  theme(legend.position="none")
 
 
 
