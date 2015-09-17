@@ -39,7 +39,7 @@ gm.mean.no.na <- gm.mean [mask.na.cov, 2]
 #expected and may not be the best estimates. 
 
 treefile = read.nexus(file = "~/ataches/fbd369agerange_gooddates.tre")
-treefile = read.nexus(file = "~/ataches/fbd421agerange.tre")
+treefile = read.nexus(file = "attaches/fbd421agerange_edited.tre")
 species <- treefile$tip.label[treefile$tip.label %in% names(sample.no.na)]
 pruned.tree<-drop.tip(treefile,treefile$tip.label[-match(species, treefile$tip.label)])
 plot(pruned.tree)

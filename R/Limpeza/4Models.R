@@ -41,10 +41,10 @@ xtable(na.omit(sex.sig), digits = 2)
 multi.sig <- sex.sig %>% llply(function(x) summary(x$multi) ) 
 multi.sig <- sex.sig %>% llply(function(x) x$multi )
 multi.sig %>% !is.na() %>% ldply(!is.na(multi.sig), getTable)
-
+#############################Tabela pra meter no relatório ################################
 rownames(sex.sig) <- sex.sig[,1]
 colnames(sex.sig) <- c("Especie", dimnames(sp.main.data$Tarsius_bancanus$matrix$cov)[[1]]) 
-xtable(na.omit(sex.sig)[,-1], digits = 3)
+table.sex.sig <- xtable(na.omit(sex.sig)[,-1], digits = 3)
 
 
 getTable <- function (x, ...) 

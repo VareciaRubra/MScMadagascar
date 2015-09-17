@@ -7,9 +7,21 @@ mask.extant <- ldply(current.data, function(x) unique(x$info$Status) == "Extant"
 cov.mx <- current.data[mask.extant] %>% llply(function(x) x$matrix$cov)
 mask.is.na.cov <- ldply(cov.mx, function(x) is.na(x[1]))[,2]
 mask.no.na.cov <- ldply(cov.mx, function(x) !is.na(x[1]))[,2]
+n.size <- current.data %>% ldply(function(x) x$sample.size) 
+ed.means <- current.data %>% llply(function(x) x$ed.means) 
 
 #Matrizes de genero a serem atribuidas por espécie
 names(cov.mx)[mask.is.na.cov]
+
+treefile = read.nexus(file = "~/ataches/fbd369agerange_gooddates.tre")
+treefile = read.nexus(file = "attaches/fbd421agerange_edited.tre")
+species <- treefile$tip.label[treefile$tip.label %in% names(sample.no.na)]
+pruned.tree<-drop.tip(treefile,treefile$tip.label[-match(species, treefile$tip.label)])
+plot(pruned.tree)
+nodelabels()
+
+Ancestral.Matrices<- PhyloW(tree = pruned.tree, tip.data = cov.mx[mask.no.na.cov], tip.sample.size = n.size[mask.no.na.cov,2])
+
 
 #Passo 1: verificar quais sao as especies que tem tamanho amostral muito pequeno para ter matriz
 trimed.sp.main.data <- sp.main.data
