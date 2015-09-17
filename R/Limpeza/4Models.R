@@ -36,10 +36,16 @@ SexSig <- function (current.data)
 sex.sig <- llply(sp.main.data, SexSig, .progress = 'text')
 
 sex.sig %>% ldply(function(x) x$RS[1])
-sex.sig %>% ldply(function(x) x$sig.sex[,2]) 
+sex.sig %<>% ldply(function(x) x$sig.sex[,2]) 
+xtable(na.omit(sex.sig), digits = 2)
 multi.sig <- sex.sig %>% llply(function(x) summary(x$multi) ) 
 multi.sig <- sex.sig %>% llply(function(x) x$multi )
 multi.sig %>% !is.na() %>% ldply(!is.na(multi.sig), getTable)
+
+rownames(sex.sig) <- sex.sig[,1]
+colnames(sex.sig) <- c("Especie", dimnames(sp.main.data$Tarsius_bancanus$matrix$cov)[[1]]) 
+xtable(na.omit(sex.sig)[,-1], digits = 3)
+
 
 getTable <- function (x, ...) 
 {
