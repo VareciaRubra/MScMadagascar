@@ -1,53 +1,79 @@
-####### Selecionando o que que vc quer plotar #########
-current.data <- madagascar.main.data
+#Entrando a árvore
+#Arvore
+treefile = read.nexus(file = "attaches/fbd421agerange_edited.tre")
+species <- treefile$tip.label[treefile$tip.label %in% names(sample.no.na)]
+pruned.tree<-drop.tip(treefile,treefile$tip.label[-match(species, treefile$tip.label)])
+plot(pruned.tree)
+nodelabels()
+#matrizes ancestrais ponderadas pela filogenia para cada nó da arvore: 
+#fazer a chamada pelo numero correspondente do nó na filogenia
+Ancestral.Matrices<- PhyloW(tree = pruned.tree, tip.data = cov.no.na, tip.sample.size = sample.no.na)
+#matriz W selecionada a partir da PhyloW do pacote ATENÇÃO QUE A GRAFIA TEM QUE SER COM ASPAS PARA NUMERO DO NÓ
+Wmat <- Ancestral.Matrices$"42" 
+GeralMorphoSpace = CalculateMatrix(manova(as.matrix(all.main.data$All$ed)  ~ Especie, data = as.data.frame(all.main.data$All$info) ) )
+Wmat <- GeralMorphoSpace
+#definindo qual o conjunto de dados que quero plotar no espaçõ da matriz determinada:
+current.data <- all.main.data #todo o banco de dados
+current.data <- extant.main.data #apenas os viventes
+current.data<- madagascar.main.data # apenas os de madagascar
+current.data <- extant.madagascar.main.data # apenas os viventes de madagascar
 
+current.data$All$info$Familia <- factor(current.data$All$info$Familia, levels = unique(current.data$All$info$Familia))
+
+#juntando as informações de cada indivíduo com suas respectivas distancias
 lin_data = ldply(current.data, function(x) tbl_df(cbind(x$info, x$ed))) 
-lin_data %<>% mutate (., .info = paste(Familia, Genero, Especie, sep = "."))
-individual_ID <- unlist(llply(current.data, function(x) x$info$Tombo))
-myformula = paste0('~', paste(names(select(lin_data, IS_PM:BA_OPI)), collapse = '+'))
-rownames(lin_data) <- individual_ID
-PRCOMP <- princomp(as.formula(myformula), data = lin_data, scale = T)
-#PRCOMP$scores
-######## Biplot PC1 x PC2 ##############
-current.data <- select(lin_data, .info, IS_PM:BA_OPI)
-rownames(current.data) <- rownames(lin_data)
-#PRCOMP %>% biplot
-#resp %<>% mutate(., PC1 = PRCOMP$scores[,1], PC2=PRCOMP$scores[,2]) 
-#The diffent grids for ploting in W space: all, only extants, and only madagascar extant and with extinct.
-Wmat.All.Fuckers = CalculateMatrix(manova(as.matrix(all.main.data$All$ed)  ~ Especie, data = as.data.frame(all.main.data$All$info) ) )
-Wmat.extant.madagascar.Fuckers = CalculateMatrix(manova(as.matrix(extant.madagascar.main.data$All$ed)  ~ Especie, data = as.data.frame(extant.madagascar.main.data$All$info) ) )
-Wmat = CalculateMatrix(manova(as.matrix(current.data$All$ed)  ~ Especie, data = as.data.frame(current.data$All$info) ) )
-GeralMorphoSpace = cov(as.matrix(current.data$All$ed))
+#Complete info
+lin_data %<>% mutate (., .Cinfo = paste(Status, Regiao, Familia, Genero, Especie, sep = ".")) #criando uma coluna de info que vai ter dados taxonomicos de familia e genero (para depois separar o plot em cores)
+#Resumed info
+lin_data %<>% mutate (., .Rinfo = paste(Familia, Genero, Especie, sep = ".")) #criando uma coluna de info que vai ter dados taxonomicos de familia e genero (para depois separar o plot em cores)
+#myformula = paste0('~', paste(names(select(lin_data, IS_PM:BA_OPI)), collapse = '+'))
+rownames(lin_data) <- lin_data$Tombo
 
-
-resp <- as.data.frame(as.matrix(na.omit(select(current.data, IS_PM:BA_OPI) ) ) %*% eigen(Wmat.extant.madagascar.Fuckers)$vectors[,c(1:39)])
+######## Biplot dos scores de cada indivíduo no espaço da W desejada##############
+lin_data <- select(lin_data, .Cinfo, .Rinfo, Tombo, Sexo, Especie, IS_PM:BA_OPI)
+#resp <- as.data.frame(as.matrix(na.omit(select(current.data$All$ed, IS_PM:BA_OPI) ) ) %*% eigen(Wmat)$vectors[,c(1:39)])
+mx.all <- as.matrix(na.omit(select(current.data$All$ed, IS_PM:BA_OPI) ) )
+mx.all<- scale(mx.all, center = TRUE, scale = FALSE)
+resp <- as.data.frame(mx.all %*% eigen(Wmat)$vectors[,c(1:39)])
 resp %<>% mutate(., .id = rownames(resp) )
 names(resp) %<>% gsub("V", "PC", .)
-resp.info <- select(lin_data, c(.info,Arquivo:Data_dado) )
+resp.info <- select(lin_data, c(.Cinfo, Tombo) )
 resp.info <- resp.info[resp.info$Tombo %in% resp$.id, ]
 plot.W <- cbind(resp.info, resp)
-hulls <- ddply(plot.W, .(.info), plyr::summarise, "hpc1"=PC1[chull(PC1,PC2)],
-               "hpc2"=PC2[chull(PC1,PC2)])
-hulls %<>% separate(.info, c('Familia', 'Genero', "Especie"), sep = "\\.")
+plot.W$PC1 <- plot.W$PC1 *(-1)
+plot.W$PC4 <- plot.W$PC4 *(-1)
 
-# levels(plot.W$Especie) <- as.factor(unique(resp.info$Especie))
-# levels(plot.W$Genero) <- as.factor(unique(resp.info$Genero))
-# levels(plot.W$Familia) <- as.factor(unique(resp.info$Familia))
-# hulls$Genero <- factor (hulls$Genero, levels = hulls$Genero )
-hulls$Especie <- unique (hulls$Especie, levels = unique(as.factor(hulls$Especie) ) )
+hulls <- ddply(plot.W, .(.Cinfo), plyr::summarise, "hPC1"=PC1[chull(PC1,PC2)],
+               "hPC2"=PC2[chull(PC1,PC2)])
+hulls %<>% separate(.Cinfo, c('Status', 'Regiao', 'Familia', 'Genero', 'Especie'), sep = "\\.")
+hulls$Familia <- factor(hulls$Familia, levels = unique(current.data$All$info$Familia))
+
+points.info <- ddply(plot.W, .(.Cinfo), numcolwise(mean))
+points.info %<>% separate(.Cinfo, c('Status', 'Regiao', 'Familia', 'Genero', 'Especie'), sep = "\\.")
+
 pc_plot <- ggplot(plot.W, aes(PC1, PC2)) +
-  geom_polygon(aes(hpc1, hpc2, fill = Familia, color = Familia, group= Genero), data = hulls, alpha=.3) + 
-  geom_point(data = ddply(plot.W, .(Especie), numcolwise(mean)),
-             aes(PC1, PC2, group= Especie), size = 3) + 
-  theme_bw() + ggtitle("Cranial traits Within-group PC scores") + 
-  coord_fixed()
-pc_plot
+  geom_polygon(aes(hPC1, hPC2, fill = Familia, color = Familia, group= Especie), 
+               data = hulls, alpha=0.2) + 
+  geom_point(data = points.info,
+             aes(PC1, PC2, group= Especie, shape = interaction(Status, Regiao), color = Familia), 
+             size = 5, alpha = 0.3) + 
+  geom_text(data = ddply(points.info, .(Genero), numcolwise(mean)),
+            aes(PC1, PC2, label= Genero, size = log(abs(PC1+200)) ), alpha = 0.4) +
+  scale_shape(name = "Localização e status", labels = c("Madagascar - Viventes", "Madagascar - Extintos", "Fora de Madagascar -  Viventes")) +
+  scale_size(name = "Tamanho médio do crânio por gênero", breaks = c(5.2, 5.6, 6.0),
+             labels = c("Pequeno", "Médio", "Grande")) +
+  theme_bw() + 
+  theme(axis.title.x = element_text(face="bold", size=10) ) + labs(x = "PC1 = Tamanho") +
+  theme(axis.title.y = element_text(face="bold", size=10) ) + labs(y = "PC2 = Comprimento do Focinho x Volume da Abobada") +
+  ggtitle("Projeção no Espaço da Matriz Ancestral") +
+  theme(plot.title = element_text(lineheight=.8, face="bold")) 
 
+pc_plot 
 
-pc_plot <- ggplot(plot.W, aes(PC1, PC4))+
+pc_plot <- ggplot(plot.W, aes(PC1, PC4)) +
   geom_polygon(aes(hpc1, hpc2, fill = Familia, color = Familia, group= Especie ), data = hulls, alpha=.2) + 
   geom_point(data = ddply(plot.W, .(Tombo), numcolwise(mean)),
-             aes(PC1, PC4, group= Tombo), size = 1, color = "grey", aplha = 0.3) +
+             aes(PC1, PC4, group= Tombo), size = 1, color = "grey", alpha = 0.3) +
   #   geom_text(data = ddply(plot.W, .(Tombo), numcolwise(mean)),
   #              aes(PC1, PC2, label= Tombo), size = 3) 
   #   geom_point(data = ddply(plot.W, .(Genero), numcolwise(mean)),
@@ -72,23 +98,37 @@ pc_plot <- ggplot(plot.W, aes(PC1, PC2)) +
 pc_plot
 
 
+#################################################################################################################
+# INTERPRETANDO OS PCs DA W
+#################################################################################################################
+#Escolha a matriz que voce quer, meu bem:
+plot(pruned.tree)
+nodelabels()
+Wmat <- Ancestral.Matrices$"42" 
+Wmat <- GeralMorphoSpace
+WPCs <- as.matrix(eigen(Wmat)$vectors)
+dimnames(WPCs)[[2]] <- paste("PC", 1:39, sep= "")
+dimnames(WPCs)[[1]] <- dimnames(all.main.data$All$matrix$cov)[[1]]
 
-Wmat.extant.Fuckers = CalculateMatrix(manova(as.matrix(extant.main.data$All$ed)  ~ Especie, data = as.data.frame(extant.main.data$All$info) ) )
-Wmat.madagascar.Fuckers = CalculateMatrix(manova(as.matrix(madagascar.main.data$All$ed)  ~ Especie, data = as.data.frame(madagascar.main.data$All$info) ) )
+m.WPCs <- melt(WPCs)
+m.WPCs$Var1<- factor( m.WPCs$Var1, levels = levels( m.WPCs$Var1)[39:1])
+m.WPCs.position =  m.WPCs
+m.WPCs.position$Var1 <- as.numeric( m.WPCs.position$Var1)
+m.WPCs.position$Var2 <- as.numeric( m.WPCs.position$Var2)
+m.WPCs.position$value= round( m.WPCs.position$value, 3)
 
+myPalette <- colorRampPalette(brewer.pal(11, 'Spectral')[-(4:6)], space = 'Lab')(n = 10)
+ggplot ( m.WPCs) +
+  geom_tile(aes(x = Var2, y = Var1, fill = value)) +
+  scale_fill_gradientn(name = '', colours = myPalette) +
+  ylab ('') + xlab ('') + labs(title = "GeralMorphoSpace PCs com fosseis") + 
+  geom_text(data =  m.WPCs.position, size = 3, aes(x = Var2, y = Var1, label = round(value, 2)) ) + 
+  theme(axis.text.x = element_text(angle = 90),
+        #axis.text.y = element_blank(),
+        axis.ticks = element_line(size = 0),
+        legend.title = element_text(size = 10),
+        legend.text = element_text(size = 10),
+        rect = element_blank(), line = element_blank())
+#################################################################################################################
 
-# creating the masks to index the current set of matrices, means and repetabilities
-mask.extant<- unique(All.raw.main.data$All$Especie[All.raw.main.data$All$Status != "Extinct"])
-mask.madagascar<- unique(All.raw.main.data$All$Especie[All.raw.main.data$All$Regiao == "Madagascar"])
-mask.madagascar.extant <- unique(All.raw.main.data$All$Especie[All.raw.main.data$All$Status != "Extinct" &All.raw.main.data$All$Regiao == "Madagascar"])
-
-#selecionando todas as médias, dependendo do grid
-means.All.Fuckers<- current.data %>% llply(function(x) x$ed.means )
-means.extant.Fuckers<- means.All.Fuckers[mask.extant] 
-means.madagascar.Fuckers<- means.All.Fuckers[mask.madagascar]
-means.extant.madagascar.Fuckers<- means.All.Fuckers[mask.madagascar.extant]
-
-current.data$All$info$Familia <- factor (current.data$All$info$Familia, levels = unique(current.data$All$info$Familia) )
-current.data$All$info$Genero <- factor (current.data$All$info$Genero, levels = unique(current.data$All$info$Genero) )
-
-contMap()
+KrzCor(cov.x = as.matrix(eigen(Ancestral.Matrices$"42")$vectors) , cov.y = as.matrix(eigen(GeralMorphoSpace)$vectors) )
