@@ -17,6 +17,8 @@ rownames(current.data) <- rownames(lin_data)
 Wmat.All.Fuckers = CalculateMatrix(manova(as.matrix(all.main.data$All$ed)  ~ Especie, data = as.data.frame(all.main.data$All$info) ) )
 Wmat.extant.madagascar.Fuckers = CalculateMatrix(manova(as.matrix(extant.madagascar.main.data$All$ed)  ~ Especie, data = as.data.frame(extant.madagascar.main.data$All$info) ) )
 Wmat = CalculateMatrix(manova(as.matrix(current.data$All$ed)  ~ Especie, data = as.data.frame(current.data$All$info) ) )
+GeralMorphoSpace = cov(as.matrix(current.data$All$ed))
+
 
 resp <- as.data.frame(as.matrix(na.omit(select(current.data, IS_PM:BA_OPI) ) ) %*% eigen(Wmat.extant.madagascar.Fuckers)$vectors[,c(1:39)])
 resp %<>% mutate(., .id = rownames(resp) )

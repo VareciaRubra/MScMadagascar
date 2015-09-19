@@ -96,19 +96,20 @@ makeMainData <- function (current.data, specie = TRUE, compare.size = FALSE, fin
 ####### OLHANDO PRO PLOT DE PC1 X PC2 #######
 #############################################
 
-extant.main.data<- raw.data %>% filter( Status != "Extinct") %>% filter( Genero != "Tarsius")
+# conjunto de dados só viventes:
+extant.main.data<- raw.data %>% filter( Status != "Extinct") 
 extant.main.data<- dlply(extant.main.data, .(All), tbl_df)
 extant.main.data<- llply(extant.main.data, specie = TRUE, final = FALSE, makeMainData, .progress = 'text')
-
+# conjunto de dados só madagascar, viventes e extintos
 madagascar.main.data<- raw.data %>% filter( Regiao == "Madagascar") 
 madagascar.main.data<- dlply(madagascar.main.data, .(All), tbl_df)
 madagascar.main.data<- llply(madagascar.main.data, specie = TRUE, final = FALSE, makeMainData, .progress = 'text')
-
+# conjunto de dados Madagascar só viventes
 extant.madagascar.main.data<- raw.data %>% filter( Regiao == "Madagascar") %>% filter( Status != "Extinct") 
 extant.madagascar.main.data<- dlply(extant.madagascar.main.data, .(All), tbl_df)
 extant.madagascar.main.data<- llply(extant.madagascar.main.data, specie = TRUE, final = FALSE, makeMainData, .progress = 'text')
 
-#all.main.data <- llply(All.raw.main.data, specie = TRUE, final = TRUE, makeMainData, .progress = 'text')
+#all.main.data <- llply(All.raw.main.data, specie = TRUE, final = FALSE, makeMainData, .progress = 'text')
 #sp.master.main.data <- llply(Sp.raw.main.data, specie = TRUE, final = FALSE, makeMainData, .progress = 'text', .inform = T)
 #gen.master.main.data <- llply(Gen.raw.main.data, specie = FALSE, final = FALSE, makeMainData, .progress = 'text', .inform = T)
 
