@@ -85,11 +85,11 @@
     scale_fill_gradientn(name = '', colours = myPalette) +
     ylab ('') + xlab ('') + labs(title = "Matrix comparisons") + 
     geom_text(data =  m.rs.krz.position, size = 3, aes(x = Var2, y = Var1, label = round(value, 2)) ) + 
-    theme(axis.text.x = element_blank(),
-          #axis.text.y = element_blank(),
+    theme(#axis.text.x = element_text(c(44:1)),
+          axis.text.y = element_text(family = "italic"),
           axis.ticks = element_line(size = 0),
-          legend.title = element_text(size = 7),
-          legend.text = element_text(size = 7),
+          legend.title = element_text(size = 10),
+          legend.text = element_text(size = 10),
           rect = element_blank(), line = element_blank())
   
   log.cov.mx <- current.data %>% llply(function(x) x$matrix$cov.log)
