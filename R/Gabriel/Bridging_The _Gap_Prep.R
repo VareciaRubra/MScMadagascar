@@ -16,9 +16,10 @@ names(cov.mx)[mask.is.na.cov]
 treefile = read.nexus(file = "~/ataches/fbd369agerange_gooddates.tre")
 treefile = read.nexus(file = "attaches/fbd421agerange_edited.tre")
 species <- treefile$tip.label[treefile$tip.label %in% names(sample.no.na)]
-pruned.tree<-drop.tip(treefile,treefile$tip.label[-match(species, treefile$tip.label)])
+drift.pruned.tree<-drop.tip(treefile,treefile$tip.label[-match(species, treefile$tip.label)])
 plot(pruned.tree)
 nodelabels()
+plot(treefile, )
 
 Ancestral.Matrices<- PhyloW(tree = pruned.tree, tip.data = cov.mx[mask.no.na.cov], tip.sample.size = n.size[mask.no.na.cov,2])
 
