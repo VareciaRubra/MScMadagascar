@@ -9,8 +9,9 @@ nodelabels()
 #fazer a chamada pelo numero correspondente do nó na filogenia
 Ancestral.Matrices<- PhyloW(tree = pruned.tree, tip.data = cov.no.na, tip.sample.size = sample.no.na)
 #matriz W selecionada a partir da PhyloW do pacote ATENÇÃO QUE A GRAFIA TEM QUE SER COM ASPAS PARA NUMERO DO NÓ
-Wmat <- Ancestral.Matrices$"42" 
-GeralMorphoSpace = CalculateMatrix(manova(as.matrix(all.main.data$All$ed)  ~ Especie, data = as.data.frame(all.main.data$All$info) ) )
+Wmat <- Ancestral.Matrices$"44" 
+#all.main.data$All$info [aaply (as.matrix (all.main.data$All$ed), 1, function (L) any (is.na(L))), ]
+GeralMorphoSpace = CalculateMatrix(manova(as.matrix(all.main.data$All$ed) ~ Especie, data = as.data.frame(all.main.data$All$info) ))
 Wmat <- GeralMorphoSpace
 #definindo qual o conjunto de dados que quero plotar no espaçõ da matriz determinada:
 current.data <- all.main.data #todo o banco de dados
@@ -27,11 +28,11 @@ lin_data %<>% mutate (., .Cinfo = paste(Status, Regiao, Familia, Genero, Especie
 #Resumed info
 lin_data %<>% mutate (., .Rinfo = paste(Status, Regiao, Familia, Genero, sep = ".")) #criando uma coluna de info que vai ter dados taxonomicos de familia e genero (para depois separar o plot em cores)
 #myformula = paste0('~', paste(names(select(lin_data, IS_PM:BA_OPI)), collapse = '+'))
+lin_data$Tombo <- factor(x = lin_data$Tombo, levels = unique(lin_data$Tombo))
 rownames(lin_data) <- lin_data$Tombo
 
 ######## Biplot dos scores de cada indivíduo no espaço da W desejada##############
 lin_data <- select(lin_data, .Cinfo, .Rinfo, Tombo, Especie, IS_PM:BA_OPI)
-#resp <- as.data.frame(as.matrix(na.omit(select(current.data$All$ed, IS_PM:BA_OPI) ) ) %*% eigen(Wmat)$vectors[,c(1:39)])
 mx.all <- as.matrix(na.omit(select(current.data$All$ed, IS_PM:BA_OPI) ) )
 mx.all<- scale(mx.all, center = TRUE, scale = FALSE)
 resp <- as.data.frame(mx.all %*% eigen(Wmat)$vectors[,c(1:39)])
@@ -39,57 +40,14 @@ resp %<>% mutate(., .id = rownames(resp) )
 names(resp) %<>% gsub("V", "PC", .)
 resp.info <- select(lin_data, c(.Cinfo, .Rinfo, Tombo) )
 resp.info <- resp.info[resp.info$Tombo %in% resp$.id, ]
+table(as.character(resp.info$Tombo) == resp$.id)
 plot.W <- cbind(resp.info, resp)
-plot.W$PC1 <- plot.W$PC1 *(-1) + 120
-plot.W$PC2 <- plot.W$PC2 *(-1)
-plot.W$PC4 <- plot.W$PC4 *(-1)
+plot.W$PC1 <- plot.W$PC1 *(-1) + 90
+plot.W$PC2 <- plot.W$PC2 *(-1) 
+plot.W$PC4 <- plot.W$PC4 *(-1) + 30
 
-plot.W.spread <- ddply(plot.W, .(.Rinfo), plyr::summarise, "hPC1"=PC1[chull(PC1,PC4)],
-      "hPC4"=PC4[chull(PC1,PC4)])
-plot.W.spread %<>% separate(.Rinfo, c('Status', 'Regiao', 'Family', 'Genero'), sep = "\\.")
-hulls <- plot.W.spread
-hulls$Family <- factor(hulls$Family, levels = unique(current.data$All$info$Familia))
-
-hulls <- ddply(plot.W, .(.Cinfo), plyr::summarise, "hPC1"=PC1[chull(PC1,PC4)],
-               "hPC4"=PC4[chull(PC1,PC4)])
-hulls %<>% separate(.Cinfo, c('Status', 'Regiao', 'Family', 'Genero', 'Especie'), sep = "\\.")
-hulls$Family <- factor(hulls$Family, levels = unique(current.data$All$info$Familia))
-
-points.info <- ddply(plot.W, .(.Cinfo), numcolwise(mean))
-points.info %<>% separate(.Cinfo, c('Status', 'Regiao', 'Family', 'Genero', 'Especie'), sep = "\\.")
-
-
-pc_plot <- ggplot(plot.W, aes(PC1, PC4)) +
-  geom_polygon(aes(hPC1, hPC4, fill = Family, color = Family, group= Especie, log = "x"), 
-               data = hulls, alpha=0.2) + 
-  geom_point(data = points.info,
-             aes(PC1, PC4, group= Especie, shape = interaction(Status, Regiao), color = Family), 
-             size = 5, alpha = 0.3, log = "x") + 
-  scale_shape(name = "Localization and status", labels = c("Madagascar - Extants", "Madagascar - Extincts", "Out Madagascar -  Extants")) +
-  geom_text(data = ddply(points.info, .(Genero), numcolwise(mean)),
-            aes(PC1, PC4, label= Genero, size = log((abs(PC1) + 200)) ),  alpha = 0.4) +
-#   scale_size(name = "Size reference\nAverage PC1 score per genus", breaks = c(5.2, 5.6, 6.0),
-#              labels = c("Small", "Medium", "Large") ) +
-  theme_bw() + 
-#   theme(axis.title.x = element_text(face="bold", size=10) ) + labs(x = "PC1 = Size") +
-#   theme(axis.title.y = element_text(face="bold", size=10) ) + labs(y = "PC2 = Snout Lenght x Vault Volume") +
-  ggtitle("Projection at Ancestral Matrix's Morphospace") +
-  #coord_cartesian(ylim=c(-63, 63), xlim = c(-10, 550)) +
-  theme(plot.title = element_text(lineheight=.8, face="bold")) 
-  pc_plot + coord_trans(x = "log10") 
-  
-  
-  
-  
-  
-  plot.W.spread <- ddply(plot.W, .(.Rinfo), plyr::summarise, "hPC1"=PC1[chull(PC1,PC2)],
-                         "hPC2"=PC2[chull(PC1,PC2)])
-  plot.W.spread %<>% separate(.Rinfo, c('Status', 'Regiao', 'Family', 'Genero'), sep = "\\.")
-  hulls <- plot.W.spread
-  hulls$Family <- factor(hulls$Family, levels = unique(current.data$All$info$Familia))
-  
-  hulls <- ddply(plot.W, .(.Cinfo), plyr::summarise, "hPC1"=PC1[chull(PC1,PC2)],
-                 "hPC2"=PC2[chull(PC1,PC2)])
+  hulls <- ddply(plot.W, .(.Cinfo), plyr::summarise, "hPC1"=PC1[chull(PC1,PC4)],
+                 "hPC4"=PC4[chull(PC1,PC4)])
   hulls %<>% separate(.Cinfo, c('Status', 'Regiao', 'Family', 'Genero', 'Especie'), sep = "\\.")
   hulls$Family <- factor(hulls$Family, levels = unique(current.data$All$info$Familia))
   
@@ -97,28 +55,28 @@ pc_plot <- ggplot(plot.W, aes(PC1, PC4)) +
   points.info %<>% separate(.Cinfo, c('Status', 'Regiao', 'Family', 'Genero', 'Especie'), sep = "\\.")
   
   
-  pc_plot <- ggplot(plot.W, aes(PC1, PC2)) +
-    geom_polygon(aes(hPC1, hPC2, fill = Familia, color = Familia, group= Especie, log = "x"), 
+  pc_plot <- ggplot(plot.W, aes(PC1, PC4)) +
+    geom_polygon(aes(hPC1, hPC4, fill = Family, color = Family, group= Especie, log = "x"), 
                  data = hulls, alpha=0.2) + 
     geom_point(data = points.info,
-               aes(PC1, PC2, group= Especie, shape = interaction(Status, Regiao), color = Familia), 
-               size = 5, alpha = 0.3, log = "x") + 
+               aes (PC1, PC4, group= Genero, shape = interaction(Status, Regiao), color = Family, log = "x"), 
+               alpha = 0.3) + 
     scale_shape(name = "Localization and status", labels = c("Madagascar - Extants", "Madagascar - Extincts", "Out Madagascar -  Extants")) +
     geom_text(data = ddply(points.info, .(Genero), numcolwise(mean)),
-              aes(PC1, PC2, label= Genero, size = log((abs(PC1) + 200)) ),  alpha = 0.4) +
-    #   scale_size(name = "Size reference\nAverage PC1 score per genus", breaks = c(5.2, 5.6, 6.0),
-    #              labels = c("Small", "Medium", "Large") ) +
+              aes(PC1, PC4, label= Genero, size = log(abs(PC1)), log = "x"),  alpha = 0.4) +
+       scale_size(name = "Size reference\nAverage PC1 score per genus", breaks = c(5.2, 5.6, 6.0),
+                  labels = c("Small", "Medium", "Large") ) +
     theme_bw() + 
-    #   theme(axis.title.x = element_text(face="bold", size=10) ) + labs(x = "PC1 = Size") +
-    #   theme(axis.title.y = element_text(face="bold", size=10) ) + labs(y = "PC2 = Snout Lenght x Vault Volume") +
+       theme(axis.title.x = element_text(face="bold", size=10) ) + labs(x = "PC1 = Size") +
+       theme(axis.title.y = element_text(face="bold", size=10) ) + labs(y = "PC4 = Contrast between Snout Lenght vs. Vault Volume") +
     ggtitle("Projection at Ancestral Matrix's Morphospace") +
-    #coord_cartesian(ylim=c(-63, 63), xlim = c(-10, 550)) +
+    #coord_cartesian(ylim=c(-2, 58), xlim = c(-10, 580)) +
     theme(plot.title = element_text(lineheight=.8, face="bold")) 
-  pc_plot + coord_trans(x = "log10") 
-  
-  
+  pc_plot  + coord_trans(x = "log10")
 
 
+
+  
 #################################################################################################################
 # INTERPRETANDO OS PCs DA W
 #################################################################################################################
@@ -152,4 +110,70 @@ ggplot ( m.WPCs) +
         rect = element_blank(), line = element_blank())
 #################################################################################################################
 
-KrzCor(cov.x = as.matrix(eigen(Ancestral.Matrices$"42")$vectors) , cov.y = as.matrix(eigen(GeralMorphoSpace)$vectors) )
+KrzCor(cov.x = Ancestral.Matrices$"42" , cov.y = GeralMorphoSpace )
+
+
+
+## Canonical variates
+ProjetaDados = function(y,var.y){
+  y = as.matrix(y)
+  n = nrow(y)
+  p = ncol(y)
+  eigen.y = eigen(var.y)
+  eVal = eigen.y$values
+  eVec = eigen.y$vectors
+  Scores = array(0., c(n,p))
+  for( i in 1:n){
+    Scores[i,] = t(eVec)%*%(as.numeric(y[i,]))
+  }
+  for(i in 1:p){
+    Scores[,i] <- Scores[,i]/eVal[i]
+  }
+  return(Scores)
+}
+
+data_selected <- lin_data %>% 
+  select(., .Cinfo, Tombo, IS_PM:BA_OPI) %>% 
+  separate(., .Cinfo, c('Status', 'Regiao', 'Family', 'Genero', 'Especie'), sep = "\\." ) %>% 
+  filter ( Family == "Lemuridae") %>%
+  filter ( Genero == "Eulemur") %>%
+  mutate (., .Cinfo = paste(Status, Regiao, Family, Genero, Especie, sep = ".")) 
+data_selected$Tombo <- factor(x =data_selected$Tombo, levels = unique(lin_data$Tombo))
+rownames(data_selected) <- data_selected$Tombo
+
+#Escolha a matriz que voce quer, meu bem:
+plot(pruned.tree)
+nodelabels()
+Wmat <- Ancestral.Matrices$"65" 
+
+lm.within = lm(as.matrix(select(data_selected, IS_PM:BA_OPI)) ~ select(data_selected, Especie)[,1])
+
+current.data_projected_W = cbind(select(data_selected, .Cinfo, Tombo),  
+                                 ProjetaDados(select(data_selected, IS_PM:BA_OPI), Wmat))
+
+Bmat = cov(daply(na.omit(current.data_projected_W), .(.Cinfo), function(x) colMeans(x[,-c(1, 2)])))
+
+resp <- cbind(select(data_selected, .Cinfo, Especie, Tombo),  scale(ProjetaDados(select(data_selected, IS_PM:BA_OPI), Wmat) %*% eigen(Bmat)$vectors[,1:4], scale = TRUE))
+resp <- resp[!is.na(resp[,3]),]
+names(resp) <- c(".Cinfo", ".sp", "Tombo", "CV1", "CV2", "CV3", "CV4")
+table(rownames(resp) == resp$Tombo) 
+resp %<>% mutate(., .Cinfo = paste (.Cinfo, Tombo, sep = ".") )
+
+hulls <-ddply(resp, .(.Cinfo), plyr::summarise, "hpc1"=CV1[chull(CV1,CV2)],
+              "hpc2"=CV2[chull(CV1,CV2)])
+hulls %<>% separate(.Cinfo, c('Status', 'Regiao', 'Family', 'Genero', 'Especie', 'Tombo'), sep = "\\.")
+rownames(hulls) <- hulls$Tombo
+resp %<>% ddply(., .(.Cinfo), numcolwise(mean))
+resp %<>% separate(.Cinfo, c('Status', 'Regiao', 'Family', 'Genero', 'Especie', 'Tombo'), sep = "\\.")
+
+cv_plot_12 <- ggplot(resp, aes(CV1, CV2)) +
+  geom_polygon(aes(hpc1, hpc2, fill = Especie, group= Especie), hulls, alpha=.3) + 
+  geom_point(data = resp,
+             aes(CV1, CV2, group= Especie, color = Especie, shape = Genero, size= Status ), size = 5, alpha = 0.5) +
+  geom_text(data = hulls,
+             aes(hpc1, hpc2, group= Especie, label = Tombo), size = 5, alpha = 0.5) +
+  theme_bw() +
+  ggtitle("Canonical Variates") +
+  theme(plot.title = element_text(lineheight=.8, face="bold")) 
+cv_plot_12
+
