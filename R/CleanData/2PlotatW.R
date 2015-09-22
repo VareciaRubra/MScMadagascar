@@ -60,19 +60,29 @@ plot.W$PC4 <- plot.W$PC4 *(-1) + 30
                  data = hulls, alpha=0.2) + 
     geom_point(data = points.info,
                aes (PC1, PC4, group= Genero, shape = interaction(Status, Regiao), color = Family, log = "x"), 
-               alpha = 0.3) + 
-    scale_shape(name = "Localization and status", labels = c("Madagascar - Extants", "Madagascar - Extincts", "Out Madagascar -  Extants")) +
+               alpha = 0.7, size = 7) + 
+    #theme(legend.text = element_text(angle = 90, size = 10, hjust = 3, vjust = 3, face = 'italics')) +
+    scale_shape(name = "Localização e status", labels = c("Madagascar - viventes", "Madagascar - Extintos", "Fora de Madagascar - Viventes")) +
     geom_text(data = ddply(points.info, .(Genero), numcolwise(mean)),
-              aes(PC1, PC4, label= Genero, size = log(abs(PC1)), log = "x"),  alpha = 0.4) +
-       scale_size(name = "Size reference\nAverage PC1 score per genus", breaks = c(5.2, 5.6, 6.0),
-                  labels = c("Small", "Medium", "Large") ) +
+              aes(PC1, PC4, label= Genero, log = "x"),  alpha = 0.4 ) +
+#        scale_size(name = "Size reference\nAverage PC1 score per genus", breaks = c(5.2, 5.6, 6.0),
+#                   labels = c("Small", "Medium", "Large") ) +
     theme_bw() + 
-       theme(axis.title.x = element_text(face="bold", size=10) ) + labs(x = "PC1 = Size") +
-       theme(axis.title.y = element_text(face="bold", size=10) ) + labs(y = "PC4 = Contrast between Snout Lenght vs. Vault Volume") +
-    ggtitle("Projection at Ancestral Matrix's Morphospace") +
+       theme(axis.title.x = element_text(face="bold", size=15) ) + labs(x = "PC1 = Tamanho") +
+       theme(axis.title.y = element_text(face="bold", size=15) ) + labs(y = "PC4 = Contraste entre comprimento\nda face e volume do neurocrânio ") +
+    ggtitle("Projeção no Morfoespaço da Matriz Ancestral") +
     #coord_cartesian(ylim=c(-2, 58), xlim = c(-10, 580)) +
-    theme(plot.title = element_text(lineheight=.8, face="bold")) 
-  pc_plot  + coord_trans(x = "log10")
+    theme(plot.title = element_text(lineheight=.8, size = 20, face="bold")) + 
+    coord_fixed() +
+    guides(size = FALSE, 
+           colour = FALSE, 
+           fill = guide_legend(title.position = "top", title = "Família", size = 10, override.aes = list(alpha = 1) ),
+           shape = guide_legend(title.position = "top", override.aes = list(alpha = 1, size = 5), nrow = 1) ) +
+    theme(legend.position = 'bottom')
+  
+  
+  pc_plot  + coord_trans(x = "log10", y = "log10")
+  pc_plot + coord_fixed()
 
 
 
