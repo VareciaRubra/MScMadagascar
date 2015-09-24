@@ -76,7 +76,7 @@ plot.W$PC4 <- plot.W$PC4 *(-1) + 30
     coord_fixed() +
     guides(size = FALSE, 
            colour = FALSE, 
-           fill = guide_legend(title.position = "top", title = "Família", size = 10, override.aes = list(alpha = 1) ),
+           fill = guide_legend(title.position = "top", title = "Família", size = 40, override.aes = list(alpha = 1) ),
            shape = guide_legend(title.position = "top", override.aes = list(alpha = 1, size = 5), nrow = 1) ) +
     theme(legend.position = 'bottom')
   
@@ -121,6 +121,7 @@ ggplot ( m.WPCs) +
 #################################################################################################################
 
 KrzCor(cov.x = Ancestral.Matrices$"42" , cov.y = GeralMorphoSpace )
+RandomSkewers(cov.x = Ancestral.Matrices$"42" , cov.y = GeralMorphoSpace )
 
 
 

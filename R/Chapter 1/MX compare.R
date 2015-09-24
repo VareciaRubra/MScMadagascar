@@ -91,6 +91,8 @@
           legend.title = element_text(size = 10),
           legend.text = element_text(size = 10),
           rect = element_blank(), line = element_blank())
+   
+   
   
   log.cov.mx <- current.data %>% llply(function(x) x$matrix$cov.log)
   log.cor.mx <- llply(log.cov.mx[mask], cov2cor)
@@ -164,16 +166,44 @@ names(mean.comp.values)[1] <- "method"
 
 method.mean <- data.frame("method"  = mean.comp.values[,1], "mean"=apply(mean.comp.values[,-1], 1, mean))
 Mean.Mx.Plots <- mean.comp.values %>% 
-  gather(key=.sp, value = value, 2:43) %>%
+  gather(key=.sp, value = value, 2:45) %>%
   ggplot( .,aes(x= method, y = value, shape = method), varwidth = T) +
   geom_violin(aes(label = .sp, color = method, shape = method), alpha = 0.5) +
   geom_text( aes(label = .sp), size =2, vjust = 1, alpha = 0.4)  +
   geom_jitter(aes(shape = method, color = method)) +
-  #geom_line(aes(group = .sp, color =.sp)) +
   scale_shape( guide = "none", name = "Mean value by method") +
   ggtitle("Mean value of comparisson") +
   theme_bw() +
   theme(plot.title = element_text(lineheight=.8, face="bold"))
+
+
+Mean.Mx.Plots <- mean.comp.values %>% 
+  gather(key=.sp, value = value, 2:45) %>% 
+  mutate(sample = rep(sample.size.list, each = 3)) %>%
+  filter(sample < 120) %>%
+  filter(sample > 20) %>%
+  filter(method != "PCA.s") %>%
+  ggplot( .,aes(x = 1, y = value, shape = method), varwidth = T) +
+  geom_violin(aes(label = .sp, size = sample, shape = method)) +
+  geom_text( aes(label = .sp), size =7, vjust = 1, alpha = 0.4)  +
+  geom_jitter(aes(shape = method, size = sample, color = interaction(sample, method)) ) +
+  ggtitle("Comparação de matrizes de espécie por método") +
+  facet_grid(~method) + 
+  theme_bw() +
+  theme(axis.text.x = element_blank(),
+        axis.text.y = element_text(size = 20),
+        axis.ticks = element_line(size = 0),
+        axis.title.x = element_blank(), 
+        axis.title.y = element_text(size = 20),
+        strip.text = element_text(size = 30),
+        plot.title = element_text(lineheight=.8, size = 20, face="bold"),
+        legend.position = c(.06, .15)) +
+  labs (y = "Valor médio de comparação") +
+  guides(colour = FALSE,
+         shape = FALSE,
+         size = guide_legend(title = "Tamanho\nAmostral", override.aes = list(alpha = 0.5) ) )
+
+
 
 Mean.Mx.Plots + geom_point(aes (x=method, y=mean, color = method, shape = method), data = method.mean, size = 6 )
 
