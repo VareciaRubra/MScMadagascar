@@ -9,13 +9,13 @@ nodelabels()
 #fazer a chamada pelo numero correspondente do nó na filogenia
 Ancestral.Matrices<- PhyloW(tree = pruned.tree, tip.data = cov.no.na, tip.sample.size = sample.no.na)
 #matriz W selecionada a partir da PhyloW do pacote ATENÇÃO QUE A GRAFIA TEM QUE SER COM ASPAS PARA NUMERO DO NÓ
-Wmat <- Ancestral.Matrices$"44" 
+Wmat <- Ancestral.Matrices$"42" 
 #all.main.data$All$info [aaply (as.matrix (all.main.data$All$ed), 1, function (L) any (is.na(L))), ]
 GeralMorphoSpace = CalculateMatrix(manova(as.matrix(all.main.data$All$ed) ~ Especie, data = as.data.frame(all.main.data$All$info) ))
 Wmat <- GeralMorphoSpace
 #definindo qual o conjunto de dados que quero plotar no espaçõ da matriz determinada:
 current.data <- all.main.data #todo o banco de dados
-# current.data <- extant.main.data #apenas os viventes
+current.data <- extant.main.data #apenas os viventes
 # current.data<- madagascar.main.data # apenas os de madagascar
 # current.data <- extant.madagascar.main.data # apenas os viventes de madagascar
 
@@ -46,6 +46,9 @@ plot.W$PC1 <- plot.W$PC1 *(-1) + 90
 plot.W$PC2 <- plot.W$PC2 *(-1) 
 plot.W$PC4 <- plot.W$PC4 *(-1) + 30
 
+  hulls <- ddply(plot.W, .(.Cinfo), plyr::summarise, "hPC1"=PC1[chull(PC1,PC4)],
+                 "hPC4"=PC4[chull(PC1,PC4)], "tombo"=Tombo[chull(PC1,PC4)])
+  
   hulls <- ddply(plot.W, .(.Cinfo), plyr::summarise, "hPC1"=PC1[chull(PC1,PC4)],
                  "hPC4"=PC4[chull(PC1,PC4)])
   hulls %<>% separate(.Cinfo, c('Status', 'Regiao', 'Family', 'Genero', 'Especie'), sep = "\\.")
@@ -79,7 +82,7 @@ plot.W$PC4 <- plot.W$PC4 *(-1) + 30
            fill = guide_legend(title.position = "top", title = "Família", size = 40, override.aes = list(alpha = 1) ),
            shape = guide_legend(title.position = "top", override.aes = list(alpha = 1, size = 5), nrow = 1) ) +
     theme(legend.position = 'bottom')
-  
+  pc_plot
   
   pc_plot  + coord_trans(x = "log10", y = "log10")
   pc_plot + coord_fixed()
@@ -188,3 +191,7 @@ cv_plot_12 <- ggplot(resp, aes(CV1, CV2)) +
   theme(plot.title = element_text(lineheight=.8, face="bold")) 
 cv_plot_12
 
+
+
+shape.plot[[1]]
+shape.plot + 

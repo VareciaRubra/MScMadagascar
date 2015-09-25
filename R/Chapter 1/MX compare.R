@@ -67,13 +67,14 @@
   
   
   mat_data <- mx.compare$RS$correlations
+  #mat_data <- mat_data[-c(2,39), -c(2,39)]
   mat_data[lower.tri(mat_data)] <- t(mx.compare$KRZ$correlations)[lower.tri(mx.compare$KRZ$correlations)]
   #diag(mat_data) <- NA
   
   
   
    m.rs.krz = melt(mat_data) 
-   m.rs.krz$Var1<- factor( m.rs.krz$Var1, levels = levels( m.rs.krz$Var1)[44:1])
+   m.rs.krz$Var1<- factor( m.rs.krz$Var1, levels = levels( m.rs.krz$Var1)[42:1])
    m.rs.krz.position =  m.rs.krz
    m.rs.krz.position$Var1 <- as.numeric( m.rs.krz.position$Var1)
    m.rs.krz.position$Var2 <- as.numeric( m.rs.krz.position$Var2)
@@ -159,8 +160,8 @@ mean.sim<-function(x) {
 current.mx.list <- mx.compare
 current.mx.list <- mx.compare.log
 
-mean.comp.values.cov<- current.mx.list[c(1:3)] %>% ldply (function (x) mean.sim(x$correlations) )
-mean.comp.values.cor<- current.mx.list[c(4:5)] %>% ldply (function (x) mean.sim(x$correlations) )
+mean.comp.values.cov<- current.mx.list[c(1:3)] %>% llply (function (x) x$correlations ) %>% llply ( function (x) x[-c(2,39), -c(2,39)]) %>% ldply (function (x) mean.sim(x) )
+mean.comp.values.cor<- current.mx.list[c(4:5)] %>% llply (function (x) x$correlations ) %>% llply ( function (x) x[-c(2,39), -c(2,39)]) %>% ldply (function (x) mean.sim(x) )
 mean.comp.values <- mean.comp.values.cov
 names(mean.comp.values)[1] <- "method"
 
