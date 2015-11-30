@@ -71,8 +71,7 @@
   mat_data[lower.tri(mat_data)] <- t(mx.compare$KRZ$correlations)[lower.tri(mx.compare$KRZ$correlations)]
   #diag(mat_data) <- NA
   
-  
-  
+  diag(m.rs.krz) <- sample.size.list
    m.rs.krz = melt(mat_data) 
    m.rs.krz$Var1<- factor( m.rs.krz$Var1, levels = levels( m.rs.krz$Var1)[42:1])
    m.rs.krz.position =  m.rs.krz
@@ -84,16 +83,16 @@
    matrix_comparisons <- ggplot ( m.rs.krz) +
     geom_tile(aes(x = Var2, y = Var1, fill = value)) +
     scale_fill_gradientn(name = '', colours = myPalette) +
-    ylab ('') + xlab ('') + labs(title = "Matrix comparisons") + 
-    geom_text(data =  m.rs.krz.position, size = 3, aes(x = Var2, y = Var1, label = round(value, 2)) ) + 
-    theme(#axis.text.x = element_text(c(44:1)),
+    ylab ('') + xlab ('') + labs(title = "Matrix comparisons") + theme(plot.title = element_text(face = "bold", size = 20)) +
+    geom_text(data =  m.rs.krz.position, size = 6, aes(x = Var2, y = Var1, label = round(value, 2)) ) + 
+    theme(axis.text.x = element_text(c(44:1)),
           axis.text.y = element_text(family = "italic"),
           axis.ticks = element_line(size = 0),
-          legend.title = element_text(size = 10),
-          legend.text = element_text(size = 10),
+          legend.title = element_text(size = 20),
+          legend.text = element_text(size = 30),
           rect = element_blank(), line = element_blank())
    
-   
+ 
   
   log.cov.mx <- current.data %>% llply(function(x) x$matrix$cov.log)
   log.cor.mx <- llply(log.cov.mx[mask], cov2cor)
@@ -306,12 +305,26 @@ data.frame ('n.size' = n.size [mask, -1], Iso.Compare.cor.iso) %>%
 
 rarefaction.all.rs <- llply(sp.main.data, function (x) x$rarefacation$rs)
 
-rarefaction.1 <-PlotRarefaction(sp.main.data$Euoticus_elegantulus$rarefaction$rs) + labs(title = "Euoticus senegalensis") 
-rarefaction.2 <-PlotRarefaction(sp.main.data$Loris_tardigradus$rarefaction$rs) + labs(title = "Loris tardigradus") 
-rarefaction.3 <-PlotRarefaction(sp.main.data$Daubentonia_madagascariensis$rarefaction$rs) + labs(title = "D. madagascariensis") 
-rarefaction.4 <-PlotRarefaction(sp.main.data$Phaner_furcifer$rarefaction$rs) + labs(title = "Phaner furcifer") 
-rarefaction.5 <-PlotRarefaction(sp.main.data$Microcebus_griseorufus$rarefaction$rs) + labs(title = "Microcebus griseorufus") 
-rarefaction.6 <-PlotRarefaction(sp.main.data$Indri_indri$rarefaction$rs) + labs(title = "Indri indri") 
+rarefaction.1 <- PlotRarefaction(sp.main.data$Euoticus_elegantulus$rarefaction$rs) + labs(title = "Euoticus senegalensis") 
+rarefaction.2 <- PlotRarefaction(sp.main.data$Loris_tardigradus$rarefaction$rs) + labs(title = "Loris tardigradus") 
+rarefaction.3 <- PlotRarefaction(sp.main.data$Daubentonia_madagascariensis$rarefaction$rs) + labs(title = "D. madagascariensis") 
+rarefaction.4 <- PlotRarefaction(sp.main.data$Phaner_furcifer$rarefaction$rs) + labs(title = "Phaner furcifer") 
+
+p1 <- PlotRarefaction(sp.main.data$Microcebus_griseorufus$rarefaction$krz) + 
+      labs(title = "Microcebus griseorufus") + 
+      theme(plot.title = element_text(face = "italic", size = 20), axis.title.x = element_blank(), axis.text.x =element_blank(), axis.ticks.x = element_line(size =0), axis.text= element_text(size = 15)) + 
+      coord_cartesian(ylim=c(0.4, 1)) + scale_y_continuous("KRZ", breaks=seq(0.4, 1, 0.2))
+p2 <- PlotRarefaction(sp.main.data$Indri_indri$rarefaction$krz) + 
+      labs(title = "Indri indri") + 
+      theme(plot.title = element_text(face = "italic", size = 20), axis.title = element_blank(), axis.text =element_blank(), axis.ticks = element_line(size =0)) +
+      coord_cartesian(ylim=c(0.4, 1)) + scale_y_continuous( breaks=seq(0.40, 1, 0.2))
+p3 <- PlotRarefaction(sp.main.data$Microcebus_griseorufus$rarefaction$rs) + 
+      theme(axis.text= element_text(size = 15)) +
+      coord_cartesian(ylim=c(0, 1)) + scale_y_continuous("RS", breaks=seq(0.25, 1, 0.25))
+p4 <- PlotRarefaction(sp.main.data$Indri_indri$rarefaction$rs) + 
+      theme(axis.text= element_text(size = 15), axis.title.y = element_blank(), axis.text.y =element_blank(), axis.ticks.y = element_line(size =0)) +
+      coord_cartesian(ylim=c(0, 1)) + scale_y_continuous(breaks=seq(0.25, 1, 0.25))
+plot_grid(p1, p2, p3, p4)  
 
 
 
