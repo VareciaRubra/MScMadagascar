@@ -75,4 +75,11 @@ getTable <- function (x, ...)
                                                            sep = ""), class = c("anova", "data.frame"))
   tests
 }
- 
+
+################# Student t test pra sexo e GM das variaveis cranianas
+
+t.test.sex.gm <- sp.main.data %>% ldply(function (x) table(x$info$Sexo, useNA = "always") ) %>% llply()
+sp.main.data %>% llply(function(x) t.test(x$gm.ind[!is.na(x$info$Sexo)] ~ x$info$Sexo[!is.na(x$info$Sexo)]) ) 
+
+t.test(sp.main.data$Tarsius_bancanus$ ~ )
+
