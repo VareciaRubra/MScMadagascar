@@ -139,3 +139,9 @@ Strepsirrhini.image.complete <- list (specie.lists = sp.main.data,
                              
 save( Strepsirrhini.image.complete,
      file = "~/ataches/Strepsirrhini_image_complete_III.RData")
+
+
+
+
+
+  

@@ -79,3 +79,18 @@ all.raw.main.data<- dlply(raw.data, .(Genero), tbl_df)
 
 #depois de limpar os zuados, salvar em um arquivo
 #write.csv(raw.data, "Data/Eulemur_Clean.csv", row.names= F)
+
+
+i.machos <- sp.main.data$Microcebus_griseorufus$info$Sexo == "M" | is.na(sp.main.data$Microcebus_griseorufus$info$Sexo)
+i.femeas <- sp.main.data$Microcebus_griseorufus$info$Sexo == "F" | is.na(sp.main.data$Microcebus_griseorufus$info$Sexo)
+machos <- as.matrix(sp.main.data$Microcebus_griseorufus$ed.raw)[i.machos,]
+femeas <- as.matrix(sp.main.data$Microcebus_griseorufus$ed.raw)[i.femeas,]
+
+mx.mac <- cov(machos)
+mx.fm <- cov(femeas)
+
+lista.sex.microcebus <- list("machos" = mx.mac,
+                             "femeas" = mx.fm)
+RandomSkewers(lista.sex.microcebus)
+KrzProjection(lista.sex.microcebus)
+llply(lista.sex.microcebus, CalcR2)

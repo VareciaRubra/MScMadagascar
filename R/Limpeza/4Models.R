@@ -4,10 +4,11 @@
 ##### testando modelos de efeitos fixos #####
 ################ SEXO ######################
 #############################################
-current.data <- sp.main.data$
+current.data <- sp.main.data$Microcebus_griseorufus
 SexSig <- function (current.data) 
 {
   y = vector("list", 12)
+  y[1:12] <- NA
   y [[1]] <-  if (sum(table(current.data$info$Sexo))>= 43) manova(as.matrix(current.data$ed) ~ Sexo, data = as.data.frame(current.data$info) ) else NA
   y [[2]] <- if (sum(table(current.data$info$Sexo))>= 43) Manova(y[[1]], type=3, test.statistic="Wilks",icontrasts=c("contr.sum", "contr.poly")) else NA
   y [[3]]  <- if (table(current.data$info$Sexo)[1] >= 3 & table(current.data$info$Sexo)[2] >= 3) 
@@ -15,7 +16,7 @@ SexSig <- function (current.data)
   y [[4]] <- if (sum(table(current.data$info$Sexo))>=43)  CalculateMatrix(y[[1]]) else current.data$matrix$cov
   y [[5]] <- current.data$matrix$cov
   names(y)[1:5] <- c("fit", "multi", "uni",  "cov.fit", "cov")
-  y[[6]] <- if (!is.na(y$cov.fit[1]) ) RandomSkewers (cov.x = y$cov.fit, cov.y = y$cov , num.vectors = 10000, parallel = TRUE)$correlation else NA
+  y[[6]] <- if (!is.na(y$cov.fit[1]) ) RandomSkewers (cov.x = y$cov.fit, cov.y = y$cov , num.vectors = 10000, parallel = TRUE)[1] else NA
   y[[7]] <- if (!is.na(y$cov.fit[1]) ) KrzProjection(cov.x = y$cov.fit,  cov.y = y$cov)$total.variation else NA
   y[[8]] <- if (!is.na(y$cov.fit[1]) ) PCAsimilarity(cov.x = y$cov.fit, cov.y = y$cov ) else NA
   y[[9]] <- if (!is.na(y$cov.fit[1]) ) KrzProjection(cov.x = cov2cor(y$cov.fit), cov.y = cov2cor(y$cov) ) $total.variation else NA
@@ -33,7 +34,7 @@ SexSig <- function (current.data)
   
 }
 
-sex.sig <- llply(sp.main.data, SexSig, .progress = 'text')
+sex.sig. <- llply(sp.main.data, SexSig, .progress = 'text')
 
 sex.sig %>% ldply(function(x) x$RS[1])
 sex.sig %<>% ldply(function(x) x$sig.sex[,2]) 
