@@ -9,11 +9,11 @@ SexSig <- function (current.data)
 {
   y = vector("list", 12)
   y[1:12] <- NA
-  y [[1]] <-  if (sum(table(current.data$info$Sexo))>= 43) manova(as.matrix(current.data$ed) ~ Sexo, data = as.data.frame(current.data$info) ) else NA
-  y [[2]] <- if (sum(table(current.data$info$Sexo))>= 43) Manova(y[[1]], type=3, test.statistic="Wilks",icontrasts=c("contr.sum", "contr.poly")) else NA
+  y [[1]] <-  if (sum(table(current.data$info$Sexo)) >= 43) manova(as.matrix(current.data$ed) ~ Sexo, data = as.data.frame(current.data$info) ) else NA
+  y [[2]] <- if (sum(table(current.data$info$Sexo)) >= 43) Manova(y[[1]], type= 3, test.statistic="Wilks",icontrasts=c("contr.sum", "contr.poly")) else NA
   y [[3]]  <- if (table(current.data$info$Sexo)[1] >= 3 & table(current.data$info$Sexo)[2] >= 3) 
               apply(as.matrix(current.data$ed ), 2, function (x) return (Anova(lm(x ~ Sexo, data = as.data.frame(current.data$info) ), type= 3, test.statistic="Wilks",icontrasts=c("contr.sum", "contr.poly" ))) ) else NA
-  y [[4]] <- if (sum(table(current.data$info$Sexo))>=43)  CalculateMatrix(y[[1]]) else current.data$matrix$cov
+  y [[4]] <- if (sum(table(current.data$info$Sexo)) >= 43)  CalculateMatrix(y[[1]]) else current.data$matrix$cov
   y [[5]] <- current.data$matrix$cov
   names(y)[1:5] <- c("fit", "multi", "uni",  "cov.fit", "cov")
   y[[6]] <- if (!is.na(y$cov.fit[1]) ) RandomSkewers (cov.x = y$cov.fit, cov.y = y$cov , num.vectors = 10000, parallel = TRUE)[1] else NA
@@ -37,7 +37,7 @@ SexSig <- function (current.data)
 sex.sig <- llply(sp.main.data, SexSig, .progress = 'text')
 
 sex.sig %>% ldply(function(x) x$RS[1])
-sex.sig %<>% ldply(function(x) x$sig.sex[,2]) 
+sex.sig %>% llply(function(x) x$sig.sex.uni[,2][!is.na(x$sig.sex.uni[,2])]) 
 xtable(na.omit(sex.sig), digits = 2)
 multi.sig <- sex.sig %>% llply(function(x) summary(x$multi) ) 
 multi.sig <- sex.sig %>% llply(function(x) x$multi )
