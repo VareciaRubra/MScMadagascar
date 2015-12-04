@@ -1,5 +1,6 @@
 if(!require(plyr)) {install.packages('plyr'); library(plyr)}
 if(!require(dplyr)) {install.packages('dplyr'); library(dplyr)}
+if(!require(dplyr)) {install.packages('car'); library(car)}
 if(!require(magrittr)) {install.packages('magrittr'); library(magrittr)}
 if(!require(lme4)) {install.packages('lme4'); library(lme4)}
 if(!require(ggplot2)) {install.packages('ggplot2'); library(ggplot2)}

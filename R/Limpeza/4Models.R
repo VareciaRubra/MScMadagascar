@@ -34,7 +34,7 @@ SexSig <- function (current.data)
   
 }
 
-sex.sig. <- llply(sp.main.data, SexSig, .progress = 'text')
+sex.sig <- llply(sp.main.data, SexSig, .progress = 'text')
 
 sex.sig %>% ldply(function(x) x$RS[1])
 sex.sig %<>% ldply(function(x) x$sig.sex[,2]) 
