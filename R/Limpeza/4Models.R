@@ -37,15 +37,56 @@ SexSig <- function (current.data)
 sex.sig <- llply(sp.main.data, SexSig, .progress = 'text')
 
 sex.sig %>% ldply(function(x) x$RS[1])
-sex.sig %>% llply(function(x) x$sig.sex.uni[,2][!is.na(x$sig.sex.uni[,2])]) 
+sex.sig %>% llply(function(x) x$sig.sex.uni[,2][!is.na(x$sig.sex.uni[,2])]) %>% 
+
 xtable(na.omit(sex.sig), digits = 2)
 multi.sig <- sex.sig %>% llply(function(x) summary(x$multi) ) 
 multi.sig <- sex.sig %>% llply(function(x) x$multi )
-multi.sig %>% !is.na() %>% ldply(!is.na(multi.sig), getTable)
+multi.sig[!is.na(multi.sig)] %>% ldply(function(x) getTable(x)[[6]][2]) %>% xtable(digits = 4)
 #############################Tabela pra meter no relatório ################################
 rownames(sex.sig) <- sex.sig[,1]
 colnames(sex.sig) <- c("Especie", dimnames(sp.main.data$Tarsius_bancanus$matrix$cov)[[1]]) 
 table.sex.sig <- xtable(na.omit(sex.sig)[,-1], digits = 3)
+
+sex.sig %>% tbl_df() %>% 
+  ggplot()
+
+##################3 Comparação entre matrizes de sexo e raw e residual ####################
+
+SexCompare <- function (current.data, sex.sig.list){
+  
+  quantos<- table(current.data$info$Sexo, useNA = "always") 
+  
+  i.femeas <- if (quantos[1] >3)  current.data$info$Sexo == "F" | is.na(current.data$info$Sexo) else current.data$info$Sexo == "nenhum"
+  femeas <- as.matrix(current.data$ed.raw)[i.femeas,]
+  mx.fm <- cov(femeas)
+  
+  i.machos <- if (quantos[2] >3)  current.data$info$Sexo == "M" | is.na(current.data$info$Sexo) else current.data$info$Sexo == "nenhum"
+  machos <- as.matrix(current.data$ed.raw)[i.machos,]
+  mx.mac <- cov(machos)
+  
+  lista.sex <- list("cov.machos" = mx.mac,
+                    "cov.femeas" = mx.fm,
+                    "cov.sex.fit" = sex.sig.list$cov.fit, 
+                    "cov.raw" =  current.data$matrix$cov)
+  
+  RS <- RandomSkewers(lista.sex)$correlations
+  KRZ<- KrzCor(lista.sex, ret.dim = 16)
+  MMstat<- ldply(lista.sex, MeanMatrixStatistics)
+  
+  results <- list("Quantos" = quantos,
+                  "RS" = RS,
+                  "KRZ" =  KRZ,
+                  "MMstat" = MMstat)
+  return(results)
+  
+}
+
+tabele.quantos.sexo <- sp.main.data %>% ldply(function (x) table(x$info$Sexo, useNA = "always") ) 
+mask.sex.sample.size <- tabele.quantos.sexo[,2] != 0 & tabele.quantos.sexo[,3] != 0
+
+sex.MX.compare <- SexCompare(sp.main.data[[4]], sex.sig[[4]])
+Microcebus.sex.comparison <- SexCompare(sp.main.data$Microcebus_griseorufus, sex.sig$Microcebus_griseorufus)
 
 
 getTable <- function (x, ...) 

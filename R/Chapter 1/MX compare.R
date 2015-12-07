@@ -65,22 +65,21 @@
   for (i in 1:5)  {mx.compare[[i]]$method <- names(mx.compare)[i]}
   for (i in 1:5)  {mx.compare[[i]]$mx.class <- mx.class[i]}
   
-  
   mat_data <- mx.compare$RS$correlations
   #mat_data <- mat_data[-c(2,39), -c(2,39)]
   mat_data[lower.tri(mat_data)] <- t(mx.compare$KRZ$correlations)[lower.tri(mx.compare$KRZ$correlations)]
-  #diag(mat_data) <- NA
+  diag(mat_data) <- NA
   
-  diag(m.rs.krz) <- sample.size.list
    m.rs.krz = melt(mat_data) 
    m.rs.krz$Var1<- factor( m.rs.krz$Var1, levels = levels( m.rs.krz$Var1)[42:1])
    m.rs.krz.position =  m.rs.krz
    m.rs.krz.position$Var1 <- as.numeric( m.rs.krz.position$Var1)
    m.rs.krz.position$Var2 <- as.numeric( m.rs.krz.position$Var2)
+   m.rs.krz.position$value[is.na(m.rs.krz.position$value)] <- as.character(sample.size.list)
    m.rs.krz.position$value= round( m.rs.krz.position$value, 3)
    
-   myPalette <- colorRampPalette(brewer.pal(11, 'Spectral'), space = 'Lab')(n = 100)
-   matrix_comparisons <- ggplot ( m.rs.krz) +
+   myPalette <- colorRampPalette(rev(brewer.pal(11, 'Spectral')), space = 'Lab')(n = 100)
+   matrix_comparisons <- ggplot (m.rs.krz.position) +
     geom_tile(aes(x = Var2, y = Var1, fill = value)) +
     scale_fill_gradientn(name = '', colours = myPalette) +
     ylab ('') + xlab ('') + labs(title = "Matrix comparisons") + theme(plot.title = element_text(face = "bold", size = 20)) +
