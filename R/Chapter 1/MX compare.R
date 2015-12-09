@@ -51,7 +51,6 @@
   str(rep.list)
 
   sample.size.list <- c(n.size[mask,2], 130, 230)
-    
   
   mx.compare = vector("list", 5)
   mx.compare[1:5] <- NA
@@ -60,39 +59,65 @@
   mx.compare[[3]]$correlations <- as.matrix(PCAsimilarity(cov.x= cov.list, num.vectors = 1000, repeat.vector = rep.list[, 4] ) )
   mx.compare[[4]]$correlations <- as.matrix(MatrixCor(cor.x= cor.list, correlation = TRUE, num.vectors = 1000, repeat.vector = rep.list[, 5] ) )
   mx.compare[[5]]$correlations <- as.matrix(KrzCor(cov.x= cor.list, correlation = TRUE, num.vectors = 1000, repeat.vector = rep.list[, 6] ))
-  names(mx.compare)[1:5] <-  c('RS', 'KRZ','PCA.s', 'Mantel', 'KRZ')
+  names(mx.compare)[1:5] <-  c('RS', 'KRZ','PCA.s', 'Mantel.Cor', 'KRZ.Cor')
   mx.class<- c('V/CV', 'V/CV','V/CV', 'COR', 'COR')
   for (i in 1:5)  {mx.compare[[i]]$method <- names(mx.compare)[i]}
   for (i in 1:5)  {mx.compare[[i]]$mx.class <- mx.class[i]}
   
   mat_data <- mx.compare$RS$correlations
-  #mat_data <- mat_data[-c(2,39), -c(2,39)]
   mat_data[lower.tri(mat_data)] <- t(mx.compare$KRZ$correlations)[lower.tri(mx.compare$KRZ$correlations)]
-  diag(mat_data) <- NA
+  range.values<- range(mat_data, na.rm = T)
+  diag(mat_data) <- sample.size.list
   
-   m.rs.krz = melt(mat_data) 
-   m.rs.krz$Var1<- factor( m.rs.krz$Var1, levels = levels( m.rs.krz$Var1)[42:1])
-   m.rs.krz.position =  m.rs.krz
-   m.rs.krz.position$Var1 <- as.numeric( m.rs.krz.position$Var1)
-   m.rs.krz.position$Var2 <- as.numeric( m.rs.krz.position$Var2)
-   m.rs.krz.position$value[is.na(m.rs.krz.position$value)] <- as.character(sample.size.list)
-   m.rs.krz.position$value= round( m.rs.krz.position$value, 3)
+  Combine.Mx.Plot <- function(Mx1, Mx2, diag.info = NA, titulo = "blé"){
+    
+    mat_data <- Mx1
+    mat_data[lower.tri(mat_data)] <- t(Mx2)[lower.tri(Mx2)]
+    range.values<- range(mat_data, na.rm = T)
+    diag(mat_data) <- diag.info
+    
+    mixed.mx = melt(mat_data) 
+    mixed.mx.position =  mixed.mx
+    mixed.mx.position$value= round( mixed.mx.position$value, 2)
+    
+    myPalette <- colorRampPalette(rev(brewer.pal(7, 'Spectral')), space = 'Lab')(n = 10)
+    mixed.mx.cute.plot <- 
+      ggplot (mixed.mx.position) +
+      geom_tile(aes(x = Var2, y = Var1, fill = value)) +
+      scale_fill_gradientn(name = '', colours = myPalette, limits = range.values, na.value = "white") +
+      ylab ('') + xlab ('') + labs(title = titulo) + theme(plot.title = element_text(face = "bold", size = 30)) +
+      geom_text(aes(x = Var2, y = Var1, label = value), size = 2) +
+      scale_y_discrete(limits = rev(levels(mixed.mx.position$Var1))) +
+      # scale_x_discrete() +
+      theme_minimal() +  
+      theme(axis.text.x = element_text(angle = 270, hjust = 0, face = 'italic', size =7),
+            axis.text.y = element_text(face = "italic", size =5),
+            axis.ticks = element_line(size = 0),
+            #legend.title = element_text(size = 20),
+            legend.text = element_text(size = 10),
+            rect = element_blank(), line = element_blank())
+    
+    return(mixed.mx.cute.plot)
+    
+  }
+  
+  plot.a<- Combine.Mx.Plot(Mx1 = mx.compare$RS$correlations, Mx2 = mx.compare$KRZ$correlations, diag.info = sample.size.list, titulo = "A. Covariance matrices comparison values via KRZ and RS ")
+  plot.b<- Combine.Mx.Plot(Mx1 = mx.compare$PCA.s$correlations, Mx2 = mx.compare$KRZ$correlations, diag.info = sample.size.list, titulo = "Covariance matrices comparison values via KRZ and PCA Similarity ")
+  plot.c<- Combine.Mx.Plot(Mx1 = mx.compare$Mantel.Cor$correlations, Mx2 = mx.compare$KRZ.Cor$correlations, diag.info = sample.size.list, titulo = "B. Correlation matrices comparison values via KRZ and Mantel ")
+  
+  plot_grid(plot.a, plot.c, nrow = 2, vjust = 0.1)
    
-   myPalette <- colorRampPalette(rev(brewer.pal(11, 'Spectral')), space = 'Lab')(n = 100)
-   matrix_comparisons <- ggplot (m.rs.krz.position) +
-    geom_tile(aes(x = Var2, y = Var1, fill = value)) +
-    scale_fill_gradientn(name = '', colours = myPalette) +
-    ylab ('') + xlab ('') + labs(title = "Matrix comparisons") + theme(plot.title = element_text(face = "bold", size = 20)) +
-    geom_text(data =  m.rs.krz.position, size = 6, aes(x = Var2, y = Var1, label = round(value, 2)) ) + 
-    theme(axis.text.x = element_text(c(44:1)),
-          axis.text.y = element_text(family = "italic"),
-          axis.ticks = element_line(size = 0),
-          legend.title = element_text(size = 20),
-          legend.text = element_text(size = 30),
-          rect = element_blank(), line = element_blank())
-   
+ mat_data2 <- array (0, dim (mat_data))
+ mat_data2 [lower.tri (mat_data2)] <- mat_data [lower.tri (mat_data)]
+ mat_data2 <- mat_data2 + t(mat_data2)
+ diag(mat_data2) <- 1
+ dimnames (mat_data2) <- dimnames (mat_data)
+  
+ eigen1matdata <- Re(eigen (mat_data2) $ vectors [,1])
  
-  
+ mat_data2 <- mat_data2 [order(eigen1matdata, decreasing = T), order(eigen1matdata, decreasing = T)]
+ diag(mat_data2) <- sample.size.list
+
   log.cov.mx <- current.data %>% llply(function(x) x$matrix$cov.log)
   log.cor.mx <- llply(log.cov.mx[mask], cov2cor)
   mx.compare.log = vector("list", 5)
