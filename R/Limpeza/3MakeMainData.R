@@ -108,6 +108,10 @@ madagascar.main.data<- llply(madagascar.main.data, specie = TRUE, final = FALSE,
 extant.madagascar.main.data<- raw.data %>% filter( Regiao == "Madagascar") %>% filter( Status != "Extinct") 
 extant.madagascar.main.data<- dlply(extant.madagascar.main.data, .(All), tbl_df)
 extant.madagascar.main.data<- llply(extant.madagascar.main.data, specie = TRUE, final = FALSE, makeMainData, .progress = 'text')
+# conjunto de dados Madagascar só viventes
+extinct.madagascar.main.data<- raw.data %>% filter( Regiao == "Madagascar") %>% filter( Status == "Extinct") 
+extinct.madagascar.main.data<- dlply(extinct.madagascar.main.data, .(All), tbl_df)
+extinct.madagascar.main.data<- llply(extinct.madagascar.main.data, specie = TRUE, final = FALSE, makeMainData, .progress = 'text')
 
 #all.main.data <- llply(All.raw.main.data, specie = TRUE, final = FALSE, makeMainData, .progress = 'text')
 #sp.master.main.data <- llply(Sp.raw.main.data, specie = TRUE, final = FALSE, makeMainData, .progress = 'text', .inform = T)

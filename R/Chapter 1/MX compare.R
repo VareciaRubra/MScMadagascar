@@ -73,14 +73,16 @@
     
     mat_data <- Mx1
     mat_data[lower.tri(mat_data)] <- t(Mx2)[lower.tri(Mx2)]
+    diag(mat_data)<- NA
     range.values<- range(mat_data, na.rm = T)
+    range.values<- range.values- c(0.1, -0.1)
     diag(mat_data) <- diag.info
     
     mixed.mx = melt(mat_data) 
     mixed.mx.position =  mixed.mx
     mixed.mx.position$value= round( mixed.mx.position$value, 2)
     
-    myPalette <- colorRampPalette(rev(brewer.pal(7, 'Spectral')), space = 'Lab')(n = 10)
+    myPalette <- colorRampPalette(rev(brewer.pal(5, 'Spectral')), space = 'Lab')(n = 3)
     mixed.mx.cute.plot <- 
       ggplot (mixed.mx.position) +
       geom_tile(aes(x = Var2, y = Var1, fill = value)) +
@@ -93,7 +95,7 @@
       theme(axis.text.x = element_text(angle = 270, hjust = 0, face = 'italic', size =7),
             axis.text.y = element_text(face = "italic", size =5),
             axis.ticks = element_line(size = 0),
-            #legend.title = element_text(size = 20),
+            legend.title = element_text(size = 20),
             legend.text = element_text(size = 10),
             rect = element_blank(), line = element_blank())
     

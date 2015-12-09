@@ -9,6 +9,8 @@ table(restricted.info$Especie)
 
 
 lfunction<-lda(restricted.ed, restricted.info$Especie)
+# com o resultado disso pegar o objeto $rotation (ou algo do tipo) que tem o peso de cada caractere 
+#Isso vai tar no espaço das canonicas. pra voltar pro espaço das variaveis originais tem que pegar essa mx de rotação pela inversa da mx v/cv
 predicted.scores  <- predict(lfunction, restricted.ed)
 
 write.csv2(coef(lfunction), file="coef_lda.csv")
