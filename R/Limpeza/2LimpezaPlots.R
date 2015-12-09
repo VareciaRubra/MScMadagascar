@@ -78,7 +78,7 @@ raw.data %>%
 
 raw.data %>% 
   dplyr::group_by(., Especie, Sexo ) %>%
-  summarise_each(funs(mean),IS_PM:BA_OPI) %>% 
+  summarise_each(funs(mean),IS_PM:BA_OPI) %>% RColorBrewer
   gather(key=ed, value=value, 3:41 )  %>%
   ggplot(., aes( x= ed, y=value, color=Especie)) +
   geom_line(aes(group = Especie)) +

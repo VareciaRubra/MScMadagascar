@@ -9,7 +9,7 @@
   n.size <- current.data %>% ldply(function(x) x$sample.size) 
   
   boot.R2 <- current.data %>% llply(function(x) x$BootsR2)
-  # criando mascaras para selecionar só parte do dataset.
+  #criando mascaras para selecionar só parte do dataset.
   #Todas que tem matriz, mesmo as mal estimadas
   mask <- ldply(cov.mx, function(x) !is.na(x[1]))[,2]
   #Só mtrizes com mais de 40 indivíduos
@@ -75,7 +75,7 @@
     mat_data[lower.tri(mat_data)] <- t(Mx2)[lower.tri(Mx2)]
     diag(mat_data)<- NA
     range.values<- range(mat_data, na.rm = T)
-    range.values<- range.values- c(0.1, -0.1)
+    range.values<- range.values- c(0.01, -0.01)
     diag(mat_data) <- diag.info
     
     mixed.mx = melt(mat_data) 
@@ -88,12 +88,12 @@
       geom_tile(aes(x = Var2, y = Var1, fill = value)) +
       scale_fill_gradientn(name = '', colours = myPalette, limits = range.values, na.value = "white") +
       ylab ('') + xlab ('') + labs(title = titulo) + theme(plot.title = element_text(face = "bold", size = 30)) +
-      geom_text(aes(x = Var2, y = Var1, label = value), size = 2) +
+      geom_text(aes(x = Var2, y = Var1, label = value), size = 8) +
       scale_y_discrete(limits = rev(levels(mixed.mx.position$Var1))) +
       # scale_x_discrete() +
       theme_minimal() +  
-      theme(axis.text.x = element_text(angle = 270, hjust = 0, face = 'italic', size =7),
-            axis.text.y = element_text(face = "italic", size =5),
+      theme(axis.text.x = element_text(angle = 270, hjust = 0, face = 'italic', size =10),
+            axis.text.y = element_text(face = "italic", size =10),
             axis.ticks = element_line(size = 0),
             legend.title = element_text(size = 20),
             legend.text = element_text(size = 10),
@@ -133,6 +133,7 @@
   mx.class<- c('V/CV', 'V/CV','V/CV', 'COR', 'COR')
   for (i in 1:5)  {mx.compare.log[[i]]$method <- names(mx.compare.log)[i]}
   for (i in 1:5)  {mx.compare.log[[i]]$mx.class <- mx.class[i]}
+
   
   
 ##################################
