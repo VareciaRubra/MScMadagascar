@@ -13,7 +13,7 @@ current.data<- sp.main.data
 cov.mx <- current.data %>% llply(function(x) x$matrix$cov)
 mx.rep <- current.data %>% ldply(function(x) x$Mx.Rep$BootsRep[1]) 
 n.size <- current.data %>% ldply(function(x) x$sample.size) 
-ed.means <- current.data %>% llply(function(x) x$ed.means) 
+ed.means <- current.data %>% ldply(function(x) x$ed.means) 
 gm.mean <- current.data %>% ldply(function(x) x$gm.mean) 
 
 # creating the masks to index the current set of matrices, means and repetabilities

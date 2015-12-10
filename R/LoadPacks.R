@@ -12,4 +12,8 @@ if(!require(evolqg)) {install.packages('evolqg'); library(evolqg)}
 #if(!require(evolqg)) {devtools::install_github('lem-usp/evolqg'); library(evolqg)}
 if(!require(readr)) {devtools::install_github('hadley/readr'); library(readr)}
 if(!require(doParallel)) {install.packages('doParallel'); library(doParallel)}
-if(!require(phylobase)) {install.packages('doParallel'); library(phylobase)}
+if(!require(phylobase)) {install.packages('phylobase'); library(phylobase)}
+if(!require(RColorBrewer)) {install.packages('RColorBrewer'); library(RColorBrewer)}
+if(!require(cowplot)) {install.packages('cowplot'); library(cowplot)}
+if(!require()) {install.packages(''); library()}
+
