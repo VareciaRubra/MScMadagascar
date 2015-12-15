@@ -43,13 +43,14 @@ indroidea.data <- sp.main.data[indroidea]
 #Mascara para aqueles que nao tem medidas de algumas distancias at all.
 na.na.na<- rowSums(is.na(indroidea.data %>% ldply(function (x) Matrix::colMeans(x$ed, na.rm = T) ))) !=0
 #selecionando e montando as listas em que vou trabalhar
-cov.mx.all <- indroidea.data[!na.na.na] %>% llply(function (x) cov(x$ed, use =))
+cov.mx.all <- indroidea.data[!na.na.na] %>% llply(function (x) cov(x$ed))
 ed.means.all <- indroidea.data[!na.na.na] %>% llply(function (x) Matrix::colMeans(x$ed, na.rm = T) ) 
 sample.size.all <- indroidea.data[!na.na.na] %>% ldply(function(x) x$sample.size) %>% .[,2]
 names.all <- names(cov.mx.all)
 pruned.tree.all<- drop.tip(treefile,treefile$tip.label[-match(names.all, treefile$tip.label)])
 plot(pruned.tree.all, cex = 1, adj =0.1, font =3)
 
+cov.mx.all.backup <- cov.mx.all
 # verificando se tem algum aqui que ta como NA nas matrizes: provavelmente sao os caras que tem sample.size == 1
 names(cov.mx.all)[sample.size.all == 1]
 ############################################# Começando a meter-lhes matrizes bem estimadas
@@ -77,28 +78,95 @@ drift.test.indroidea.with.mx <- TreeDriftTest(tree = tree.with.mx,
                                      sample.sizes = sample.size.with.mx)
 
 PlotTreeDriftTest(test.list = drift.test.indroidea.with.mx, tree = tree.with.mx, cex = 1, adj =0.1, font =3)
-nodelabels(bg = NULL, frame = "none", adj = -0.4 )
+nodelabels(bg = NULL, frame = "none", adj = -1 )
 
-########## comparando os resultados apenas com matrizes bem estimadas
-cov.indridae <- cov.mx.sp[indridae]
-mask.cov.na.indridae <- ldply(cov.indridae, function(x) !is.na(x[1]))[,2]
-names(cov.indridae)[mask.cov.na.indridae == F]
-n.size.indridae <- n.size.sp[indridae,2]
+#################################### vendo a quem atribuir quais matrizes ancestrais ########################
+names(cov.mx.all)[no.mx]
+sample.size.all
+#cov.mx.all <- indroidea.data[!na.na.na] %>% llply(function (x) cov(x$ed))
+#ed.means.all <- indroidea.data[!na.na.na] %>% llply(function (x) Matrix::colMeans(x$ed, na.rm = T) ) 
+#sample.size.all <- indroidea.data[!na.na.na] %>% ldply(function(x) x$sample.size) %>% .[,2]
+#names.all <- names(cov.mx.all)
+par(mfrow=c(2,1))
+PlotTreeDriftTest(test.list = drift.test.indroidea.with.mx, tree = tree.with.mx, cex = 1, adj =0.1, font =3)
+nodelabels(bg = NULL, frame = "none", adj = -1 )
+pruned.tree.all<- drop.tip(treefile,treefile$tip.label[-match(names.all, treefile$tip.label)])
+plot(pruned.tree.all, cex = 1, adj =0.1, font =3)
+par(mfrow=c(1,1))
+##### substituindo nos extintos
+cov.mx.all$Hadropithecus_stenognathus <- Ancestral.indroidea.with.mx$`14`
+cov.mx.all$Archaeolemur_majori <- Ancestral.indroidea.with.mx$`14`
+cov.mx.all$Archaeolemur_edwardsi <- Ancestral.indroidea.with.mx$`14`
+cov.mx.all$Mesopropithecus_pithecoides <- Ancestral.indroidea.with.mx$`15`
+cov.mx.all$Mesopropithecus_dolichobrachion <- Ancestral.indroidea.with.mx$`15`
+cov.mx.all$Palaeopropithecus_ingens <- Ancestral.indroidea.with.mx$`15`
+cov.mx.all$Babakotia_radafolia <- Ancestral.indroidea.with.mx$`15`
+###### substituindo nos viventes que só tem média
+cov.mx.all$Avahi_meridionalis <- Ancestral.indroidea.with.mx$"18"
+cov.mx.all$Avahi_occidentalis <- Ancestral.indroidea.with.mx$"17"
 
-RandomSkewers(cov.x = list("Propithecus Genus" = cov.mx.genus$Propithecus,
-                           "P.edwardsi" = cov.mx.all$Propithecus_edwardsi,
-                           "P.diadema" = cov.mx.all$Propithecus_diadema,
-                           "P.tattersalli" = cov.mx.all$Propithecus_tattersalli,
-                           "P.coquereli" = cov.mx.all$Propithecus_coquereli,
-                           "P.verreauxi" = cov.mx.all$Propithecus_verreauxi,
-                           "P.candidus" = cov.mx.all$Propithecus_candidus,
-                           "Ancestral P.19" = Ancestral.indroidea.with.mx$"19",
-                           "Ancestral P.20" = Ancestral.indroidea.with.mx$"20",
-                           "Ancestral P.21" = Ancestral.indroidea.with.mx$"21",
-                           "Ancestral P.22" = Ancestral.indroidea.with.mx$"22",
-                           "Ancestral P.23" = Ancestral.indroidea.with.mx$"23",
-                           "Ancestral P.24" = Ancestral.indroidea.with.mx$"24"),
-              num.vectors = 1000)$correlations
+
+
+######### verificando os novos resultados dos testes dadas as substituiçoes
+
+Ancestral.indroidea.subistitute.mx <- PhyloW(tree = pruned.tree.all, 
+                                      tip.data = cov.mx.all, 
+                                      tip.sample.size = sample.size.all )
+
+drift.test.indroidea.subistitute.mx <- TreeDriftTest(tree = pruned.tree.all, 
+                                              mean.list = ed.means.all, 
+                                              cov.matrix.list = cov.mx.all, 
+                                              sample.sizes = sample.size.all)
+
+PlotTreeDriftTest(test.list = drift.test.indroidea.subistitute.mx, tree = pruned.tree.all, cex = 1, adj =0.1, font =3)
+nodelabels(bg = NULL, frame = "none", adj = -1 )
+
+###################### Porque diabos o nó do genero Propithecus estaria mudando?
+RandomSkewers(cov.x = Ancestral.Matrices.indridae$"15",cov.y = Ancestral.Matrices.indridroidea$"27", num.vectors = 1000 )
+par(mfrow=c(2,1))
+
+plot_grid(labels = c("node 19: drift rejected IC 95%= 1.02  1.36 ", "node 31: drift accepted IC 95%= 0.82 1.26"), drift.test.indroidea.with.mx$`19`$plot, drift.test.indroidea.subistitute.mx$`31`$plot)
+
+
+
+Propithecus.list<- list("Propithecus Genus" = cov.mx.genus$Propithecus,
+                        "P.edwardsi" = cov.mx.all$Propithecus_edwardsi,
+                        "P.diadema" = cov.mx.all$Propithecus_diadema,
+                        "P.tattersalli" = cov.mx.all$Propithecus_tattersalli,
+                        "P.coquereli" = cov.mx.all$Propithecus_coquereli,
+                        "P.verreauxi" = cov.mx.all$Propithecus_verreauxi,
+                        "P.deckenii" = cov.mx.all$Propithecus_deckenii,
+                        "P.coronatus" = cov.mx.all$Propithecus_coronatus,
+                        "P.candidus" = cov.mx.all$Propithecus_candidus,
+                        "node 19" = Ancestral.indroidea.with.mx$"19",
+                        "node 20" = Ancestral.indroidea.with.mx$"20",
+                        "node 21" = Ancestral.indroidea.with.mx$"21",
+                        "node 22" = Ancestral.indroidea.with.mx$"22",
+                        "node 23" = Ancestral.indroidea.with.mx$"23",
+                        "node 24" = Ancestral.indroidea.with.mx$"24",
+                        "node 31" = Ancestral.indroidea.subistitute.mx$"31")
+Propithecus <- grepl("Propithecus", names(sp.main.data)) 
+Sample.Propithecus <- c(201, 28, 43, 7, 14, 58, 21, 17, 13, 201, 130, 180, 167, 109, 27 )
+
+RS.Propithecus <- RandomSkewers(cov.x = Propithecus.list, num.vectors = 1000)$correlations
+RS.Propithecus <- t(RS.Propithecus)
+KRZ.Propithecus <- KrzCor(cov.x = Propithecus.list, ret.dim = 16)
+KRZ.Propithecus <- t(KRZ.Propithecus)
+
+plot.propithecus.compare.all.mx<- Combine.Mx.Plot(Mx1 = RS.Propithecus, Mx2 = KRZ.Propithecus, diag.info = Sample.Propithecus, titulo = "Propithecus genus comparison")
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 cov.indridae$Propithecus_candidus <- Ancestral.indroidea.with.mx$"21"
 cov.indridae$Propithecus_coquereli <- Ancestral.indroidea.with.mx$"24"
@@ -161,8 +229,7 @@ Ancestral.Matrices.indridroidea<- PhyloW(tree = pruned.tree.indroidea,
                                      tip.data = cov.indroidea, 
                                      tip.sample.size = n.size.indroidea )
 
-RandomSkewers(cov.x = Ancestral.Matrices.indridae$"15",cov.y = Ancestral.Matrices.indridroidea$"27", num.vectors = 1000 )
-par(mfrow=c(2,1))
+
 
 
 

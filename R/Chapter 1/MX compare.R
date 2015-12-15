@@ -106,7 +106,7 @@
       # scale_x_discrete() +
       theme_minimal() +  
       theme(axis.text.x = element_text(angle = 270, hjust = 0, face = 'italic', size =10),
-            axis.text.y = element_text(face = "italic", size =10),
+            axis.text.y = element_text(face = "italic", size =30),
             axis.ticks = element_line(size = 0),
             legend.title = element_text(size = 20),
             legend.text = element_text(size = 10),
