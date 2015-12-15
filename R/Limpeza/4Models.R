@@ -65,10 +65,10 @@ SexCompare <- function (current.data, sex.sig.list){
   machos <- as.matrix(current.data$ed.raw)[i.machos,]
   mx.mac <- cov(machos)
   
-  lista.sex <- list("cov.machos" = mx.mac,
-                    "cov.femeas" = mx.fm,
-                    "cov.sex.fit" = sex.sig.list$cov.fit, 
-                    "cov.raw" =  current.data$matrix$cov)
+  lista.sex <- list("Males" = mx.mac,
+                    "Females" = mx.fm,
+                    "Sex Fit" = sex.sig.list$cov.fit, 
+                    "Raw Data" =  current.data$matrix$cov)
   
   RS <- RandomSkewers(lista.sex)$correlations
   KRZ<- KrzCor(lista.sex, ret.dim = 16)
@@ -87,12 +87,13 @@ mask.sex.sample.size <- tabele.quantos.sexo[,2] != 0 & tabele.quantos.sexo[,3] !
 
 sex.MX.compare <- SexCompare(sp.main.data[[34]], sex.sig[[34]])
 Microcebus.sex.comparison <- SexCompare(sp.main.data$Microcebus_griseorufus, sex.sig$Microcebus_griseorufus)
-Combine.Mx.Plot(Mx1 = t(Microcebus.sex.comparison$RS), Mx2 = t(Microcebus.sex.comparison$KRZ), diag.info = c(32,34, 68, 68), titulo = "Microcebus Sex comparison")
+Combine.Mx.Plot(Mx1 = t(Microcebus.sex.comparison$RS), Mx2 = t(Microcebus.sex.comparison$KRZ), diag.info = c(32,34, 68, 68), titulo = "Covariance matrices comparisons via KRZ and RS")
 
 mat_data <- t(Microcebus.sex.comparison$RS)
 mat_data[lower.tri(mat_data)] <- t(t(Microcebus.sex.comparison$KRZ))[lower.tri(t(Microcebus.sex.comparison$KRZ))]
 diag(mat_data)<- NA
 range.values<- range(mat_data, na.rm = T) - c(0.01, -0.01)
+diag.info = c(32,34, 68, 68)
 diag(mat_data) <- diag.info
 
 mixed.mx = melt(mat_data) 
@@ -104,16 +105,16 @@ mixed.mx.cute.plot <-
   ggplot (mixed.mx.position) +
   geom_tile(aes(x = Var2, y = Var1, fill = value)) +
   scale_fill_gradientn(name = '', colours = myPalette, limits = range.values, na.value = "white") +
-  ylab ('') + xlab ('') + labs(title = "Microcebus Sex comparison") + theme(plot.title = element_text(face = "bold", size = 30)) +
+  ylab ('') + xlab ('') + labs(title = "Covariance matrices comparisons via KRZ and RS") + theme(plot.title = element_text(face = "bold", size = 50)) +
   geom_text(aes(x = Var2, y = Var1, label = value), size = 10) +
-  scale_y_discrete(limits = rev(levels(mixed.mx.position$Var1))) +
+  scale_y_discrete(limits = rev(levels(mixed.mx.position$Var1)) ) +
   # scale_x_discrete() +
   theme_minimal() +  
-  theme(axis.text.x = element_text(angle =0, hjust = 0, face = 'italic', size =15),
-        axis.text.y = element_text(face = "italic", size =15),
+  theme(axis.text.x = element_text(angle =0, hjust = 0.5, face = 'italic', size =15),
+        axis.text.y = element_text(face = "italic", size =20),
         axis.ticks = element_line(size = 0),
         #legend.title = element_text(size = 20),
-        legend.text = element_text(size = 10),
+        legend.text = element_text(size = 20),
         rect = element_blank(), line = element_blank())
 
 
