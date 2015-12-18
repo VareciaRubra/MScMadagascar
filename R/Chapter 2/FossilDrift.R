@@ -117,18 +117,25 @@ drift.test.indroidea.subistitute.mx <- TreeDriftTest(tree = pruned.tree.all,
                                               mean.list = ed.means.all, 
                                               cov.matrix.list = cov.mx.all, 
                                               sample.sizes = sample.size.all)
+length(pruned.tree.all$tip.label)
+length(ed.means.all)
+length(cov.mx.all)
+length(sample.size.all)
 
 PlotTreeDriftTest(test.list = drift.test.indroidea.subistitute.mx, tree = pruned.tree.all, cex = 1, adj =0.1, font =3)
 nodelabels(bg = NULL, frame = "none", adj = -1 )
 
+pruned.tree.all$edge[which(pruned.tree.all$edge[, 1] == "31"), 2]
+
+library(phytools)
+all.equal(ed.means.all[na.omit(pruned.tree.all$tip.label[getDescendants(pruned.tree.all, 31)])],
+ed.means.with.mx[na.omit(tree.with.mx$tip.label[getDescendants(tree.with.mx, 19)])])
+
+
 ###################### Porque diabos o nó do genero Propithecus estaria mudando?
 RandomSkewers(cov.x = Ancestral.Matrices.indridae$"15",cov.y = Ancestral.Matrices.indridroidea$"27", num.vectors = 1000 )
 par(mfrow=c(2,1))
-
 plot_grid(labels = c("node 19: drift rejected IC 95%= 1.02  1.36 ", "node 31: drift accepted IC 95%= 0.82 1.26"), drift.test.indroidea.with.mx$`19`$plot, drift.test.indroidea.subistitute.mx$`31`$plot)
-
-
-
 Propithecus.list<- list("Propithecus Genus" = cov.mx.genus$Propithecus,
                         "P.edwardsi" = cov.mx.all$Propithecus_edwardsi,
                         "P.diadema" = cov.mx.all$Propithecus_diadema,
@@ -146,7 +153,7 @@ Propithecus.list<- list("Propithecus Genus" = cov.mx.genus$Propithecus,
                         "node 24" = Ancestral.indroidea.with.mx$"24",
                         "node 31" = Ancestral.indroidea.subistitute.mx$"31")
 Propithecus <- grepl("Propithecus", names(sp.main.data)) 
-Sample.Propithecus <- c(201, 28, 43, 7, 14, 58, 21, 17, 13, 201, 130, 180, 167, 109, 27 )
+Sample.Propithecus <- c(201, 28, 43, 7, 14, 58, 21, 17, 13, 201, 130, 180, 167, 109, 27, 201)
 
 RS.Propithecus <- RandomSkewers(cov.x = Propithecus.list, num.vectors = 1000)$correlations
 RS.Propithecus <- t(RS.Propithecus)
@@ -155,18 +162,11 @@ KRZ.Propithecus <- t(KRZ.Propithecus)
 
 plot.propithecus.compare.all.mx<- Combine.Mx.Plot(Mx1 = RS.Propithecus, Mx2 = KRZ.Propithecus, diag.info = Sample.Propithecus, titulo = "Propithecus genus comparison")
 
+#conferindo o nome dos terminais filhos dos respectivos nós de Propithecus.
+names(evolqg:::getMeans(ed.means.all, pruned.tree.all, "31"))
+names(evolqg:::getMeans(ed.means.with.mx, tree.with.mx, "19"))
 
-
-
-
-
-
-
-
-
-
-
-
+# tava errada a evolqg:::getMeans mas agora o Ograo ajeitou, ta ok.
 
 cov.indridae$Propithecus_candidus <- Ancestral.indroidea.with.mx$"21"
 cov.indridae$Propithecus_coquereli <- Ancestral.indroidea.with.mx$"24"
@@ -186,7 +186,7 @@ Ancestral.Matrices.indridae$"14"
 # bem parecido com o considerando o unico fossil que da pra ter matriz 9mas tbm, essa porra tem só 2 bichos)
 RandomSkewers(Ancestral.indroidea.with.mx$"14", Ancestral.Matrices.indridae$"14", num.vectors = 1000) # = 0.998861314 
 
-drift.test.indridae <- TreeDriftTest(tree = tree.indridae, mean.list = ed.means.indridae , cov.matrix.list = cov.indridae, sample.sizes = n.size.indridae)
+drift.test.indridae <- TreeDriftTest(tree = tree.indridae, mean.list = ed.means.indridae , cov.matrix.list = cov.indridae, sample.sizes = n.size.indridae[,2])
 PlotTreeDriftTest(test.list = drift.test.indridae, tree = tree.indridae, cex = 1, adj =0.1, font =3)
 nodelabels(bg = NULL, frame = "none", adj = -0.4 )
 
