@@ -9,7 +9,7 @@ if(!require(tidyr)) {install.packages('tidyr'); library(tidyr)}
 #if(!require(MCMCglmm)) {install.packages('MCMCglmm'); library(MCMCglmm)}
 if(!require(reshape2)) {install.packages('reshape2'); library(reshape2)}
 if(!require(evolqg)) {install.packages('evolqg'); library(evolqg)}
-#if(!require(evolqg)) {devtools::install_github('lem-usp/evolqg'); library(evolqg)}
+#devtools::install_github('lem-usp/evolqg'); library(evolqg)
 if(!require(readr)) {devtools::install_github('hadley/readr'); library(readr)}
 if(!require(doParallel)) {install.packages('doParallel'); library(doParallel)}
 if(!require(phylobase)) {install.packages('phylobase'); library(phylobase)}
