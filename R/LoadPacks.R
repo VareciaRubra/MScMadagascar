@@ -22,3 +22,5 @@ source("https://bioconductor.org/biocLite.R")
 biocLite()
 biocLite(pkgs = "Biostrings")
 install.packages("phangorn")
+
+teste clonando no lenovo
