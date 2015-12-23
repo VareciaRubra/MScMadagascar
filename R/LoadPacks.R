@@ -17,3 +17,8 @@ if(!require(RColorBrewer)) {install.packages('RColorBrewer'); library(RColorBrew
 if(!require(cowplot)) {install.packages('cowplot'); library(cowplot)}
 #if(!require()) {install.packages(''); library()}
 
+################### Update do R e mais um monte de zica de pacotes e dependencias
+source("https://bioconductor.org/biocLite.R")
+biocLite()
+biocLite(pkgs = "Biostrings")
+install.packages("phangorn")
