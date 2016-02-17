@@ -1,4 +1,20 @@
 
+AddMCReps <- function(x){
+  x[[16]][[2]] <- matrix(NA, nrow = 1, ncol= 5)
+  x[[16]][[2]][1] <- MonteCarloRep( x[[11]][[1]], sample.size = x[[9]], ComparisonFunc = RandomSkewers, iterations = 1000, parallel = T) 
+  x[[16]][[2]][2] <- MonteCarloRep( x[[11]][[1]], sample.size = x[[9]], ComparisonFunc = KrzCor, iterations = 1000, parallel = T) 
+  x[[16]][[2]][3] <- MonteCarloRep( x[[11]][[1]], sample.size = x[[9]], ComparisonFunc = PCAsimilarity, iterations = 1000, parallel = T) 
+  x[[16]][[2]][4] <- MonteCarloRep( x[[11]][[1]], sample.size = x[[9]], ComparisonFunc = MantelCor, iterations = 1000, correlation = TRUE, parallel = T) 
+  x[[16]][[2]][5] <- MonteCarloRep( x[[11]][[1]], sample.size = x[[9]], ComparisonFunc = KrzCor, iterations = 1000, correlation = TRUE, parallel = T)
+  colnames(x[[16]][[2]])[1:5] <- c('rs', 'krz','pcas', 'cor.mantel', 'cor.krz')
+  return(x)
+  
+}
+
+sp.main.data.t <- current.data %>% llply(AddMCReps)
+
+sp.main.data$Tarsius_bancanus$Mx.Rep
+
 
   current.data <- sp.main.data
   current.data <- gen.main.data
@@ -9,6 +25,8 @@
   n.size <- current.data %>% ldply(function(x) x$sample.size) 
   
   boot.R2 <- current.data %>% llply(function(x) x$BootsR2)
+  
+  sp.main.data$Tarsius_bancanus[9]
   #criando mascaras para selecionar só parte do dataset.
   #Todas que tem matriz, mesmo as mal estimadas
   mask <- ldply(cov.mx, function(x) !is.na(x[1]))[,2]
@@ -123,7 +141,7 @@
   plot_grid(plot.a, plot.c, nrow = 2, vjust = 0.1)
   
   plot.a.log <- Combine.Mx.Plot(Mx1 = mx.compare.log$RS$correlations, Mx2 = mx.compare.log$KRZ$correlations, diag.info = n.size[mask,2], titulo = "A. Covariance matrices comparison values via KRZ and RS ")
-  plot.b,log <- Combine.Mx.Plot(Mx1 = mx.compare$PCA.s$correlations, Mx2 = mx.compare$KRZ$correlations, diag.info = sample.size.list, titulo = "Covariance matrices comparison values via KRZ and PCA Similarity ")
+  plot.b.log <- Combine.Mx.Plot(Mx1 = mx.compare$PCA.s$correlations, Mx2 = mx.compare$KRZ$correlations, diag.info = sample.size.list, titulo = "Covariance matrices comparison values via KRZ and PCA Similarity ")
   plot.c.log <- Combine.Mx.Plot(Mx1 = mx.compare$Mantel.Cor$correlations, Mx2 = mx.compare$KRZ.Cor$correlations, diag.info = sample.size.list, titulo = "B. Correlation matrices comparison values via KRZ and Mantel ")
   
   plot_grid(plot.a, plot.c, nrow = 2, vjust = 0.1)
