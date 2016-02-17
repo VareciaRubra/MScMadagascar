@@ -1,38 +1,20 @@
-
-AddMCReps <- function(x){
-  x[[16]][[2]] <- matrix(NA, nrow = 1, ncol= 5)
-  x[[16]][[2]][1] <- MonteCarloRep( x[[11]][[1]], sample.size = x[[9]], ComparisonFunc = RandomSkewers, iterations = 1000, parallel = T) 
-  x[[16]][[2]][2] <- MonteCarloRep( x[[11]][[1]], sample.size = x[[9]], ComparisonFunc = KrzCor, iterations = 1000, parallel = T) 
-  x[[16]][[2]][3] <- MonteCarloRep( x[[11]][[1]], sample.size = x[[9]], ComparisonFunc = PCAsimilarity, iterations = 1000, parallel = T) 
-  x[[16]][[2]][4] <- MonteCarloRep( x[[11]][[1]], sample.size = x[[9]], ComparisonFunc = MantelCor, iterations = 1000, correlation = TRUE, parallel = T) 
-  x[[16]][[2]][5] <- MonteCarloRep( x[[11]][[1]], sample.size = x[[9]], ComparisonFunc = KrzCor, iterations = 1000, correlation = TRUE, parallel = T)
-  colnames(x[[16]][[2]])[1:5] <- c('rs', 'krz','pcas', 'cor.mantel', 'cor.krz')
-  return(x)
-  
-}
-
-sp.main.data.t <- current.data %>% llply(AddMCReps)
-
-sp.main.data$Tarsius_bancanus$Mx.Rep
-
-
   current.data <- sp.main.data
   current.data <- gen.main.data
   
   cov.mx <- current.data %>% llply(function(x) x$matrix$cov)
   cor.mx <- current.data %>% llply(function(x) x$matrix$cor)
   mx.rep <- current.data %>% ldply(function(x) x$Mx.Rep$BootsRep) 
+  mx.rep.mc <- sp.main.data.t%>% ldply(function(x) x$Mx.Rep$MCRep) 
+  mx.rep.all <- cbind(mx.rep, mx.rep.mc[,-1])
   n.size <- current.data %>% ldply(function(x) x$sample.size) 
   
-  boot.R2 <- current.data %>% llply(function(x) x$BootsR2)
-  
-  sp.main.data$Tarsius_bancanus[9]
   #criando mascaras para selecionar só parte do dataset.
   #Todas que tem matriz, mesmo as mal estimadas
   mask <- ldply(cov.mx, function(x) !is.na(x[1]))[,2]
   #Só mtrizes com mais de 40 indivíduos
   mask.n.size <- n.size[,2]>40
   
+  # Add as matrizes P e G de Saguinus e suas respectivas informações 
   Saguinus_G.cov <- read.csv(file = "Data/Saguinus_G.csv", header = F)
   Saguinus_G.cov <- as.matrix(Saguinus_G.cov)
   dimnames(Saguinus_G.cov) <- dimnames(cov.list[[1]])
@@ -54,53 +36,59 @@ sp.main.data$Tarsius_bancanus$Mx.Rep
   cor.list$Saguinus_P.cor <- Saguinus_P.cor
   cor.list$Saguinus_G.cor <- Saguinus_G.cor
   
-  rep.list <- mx.rep[mask, ]
+  safe.copy.rep.list <- rep.list
+  mx.rep.all <- cbind(mx.rep, mx.rep.mc[,-1])
+  rep.list <- mx.rep.all[mask, ]
   row.names(rep.list) <- rep.list$Especie
   rep.list$Especie <- as.character(rep.list$Especie)
-  rep.list[dim(rep.list)[1] +1, ] <- c("Saguinus_P", rep(0.97, 5) )
-  rep.list[dim(rep.list)[1] +1, ] <- c("Saguinus_G", rep(0.75, 5) )
+  rep.list[dim(rep.list)[1] +1, ] <- c("Saguinus_P", rep(0.97, 7) )
+  rep.list[dim(rep.list)[1] +1, ] <- c("Saguinus_G", rep(0.75, 7) )
   row.names(rep.list) <- rep.list$Especie
   rep.list$Especie <- factor(rep.list$Especie, levels = unique(rep.list$Especie) )
-  rep.list$rs <- as.numeric(rep.list$rs)
-  rep.list$krz <- as.numeric(rep.list$krz)
+  rep.list$BS.rs <- as.numeric(rep.list$BS.rs)
+  rep.list$BS.krz <- as.numeric(rep.list$BS.krz)
   rep.list$pcas <- as.numeric(rep.list$pcas)
   rep.list$cor.mantel <- as.numeric(rep.list$cor.mantel)
   rep.list$cor.krz <- as.numeric(rep.list$cor.krz)
+  rep.list$MC.rs <- as.numeric(rep.list$MC.rs)
+  rep.list$MC.krz <- as.numeric(rep.list$MC.krz)
+  
   str(rep.list)
 
   sample.size.list <- c(n.size[mask,2], 130, 230)
   
-  mx.compare = vector("list", 5)
-  mx.compare[1:5] <- NA
+  safe.copy.mx.compare <- mx.compare
+  mx.compare = vector("list", 7)
+  mx.compare[1:7] <- NA
   mx.compare[[1]] <- RandomSkewers(cov.x= cov.list, num.vectors = 1000, repeat.vector = rep.list[, 2] )
   mx.compare[[2]]$correlations <- as.matrix(KrzCor(cov.x= cov.list, num.vectors = 1000, repeat.vector = rep.list[, 3] ))
   mx.compare[[3]]$correlations <- as.matrix(PCAsimilarity(cov.x= cov.list, num.vectors = 1000, repeat.vector = rep.list[, 4] ) )
   mx.compare[[4]]$correlations <- as.matrix(MatrixCor(cor.x= cor.list, correlation = TRUE, num.vectors = 1000, repeat.vector = rep.list[, 5] ) )
   mx.compare[[5]]$correlations <- as.matrix(KrzCor(cov.x= cor.list, correlation = TRUE, num.vectors = 1000, repeat.vector = rep.list[, 6] ))
-  names(mx.compare)[1:5] <-  c('RS', 'KRZ','PCA.s', 'Mantel.Cor', 'KRZ.Cor')
-  mx.class<- c('V/CV', 'V/CV','V/CV', 'COR', 'COR')
-  for (i in 1:5)  {mx.compare[[i]]$method <- names(mx.compare)[i]}
-  for (i in 1:5)  {mx.compare[[i]]$mx.class <- mx.class[i]}
+  mx.compare[[6]] <- RandomSkewers(cov.x= cov.list, num.vectors = 1000, repeat.vector = rep.list[, 7] )
+  mx.compare[[7]]$correlations <- as.matrix(KrzCor(cov.x= cor.list, correlation = TRUE, num.vectors = 1000, repeat.vector = rep.list[, 8] ))
+  names(mx.compare)[1:7] <-  c('BS.RS', 'BS.KRZ','PCA.s', 'Mantel.Cor', 'KRZ.Cor', 'MC.RS', 'MC.KRZ')
+  mx.class<- c('V/CV', 'V/CV','V/CV', 'COR', 'COR','V/CV','V/CV')
+  for (i in 1:7)  {mx.compare[[i]]$method <- names(mx.compare)[i]}
+  for (i in 1:7)  {mx.compare[[i]]$mx.class <- mx.class[i]}
+  
+  mx.compare %>% function(x) dimnames(x$correlations) %>% gsub("_", ' ', .)
   
   mat_data <- mx.compare$RS$correlations
+  mat_data_raw <-t(mat_data)
+  mat_data_raw[lower.tri(mat_data)] <- mx.compare$KRZ$correlations[lower.tri(mx.compare$KRZ$correlations)]
+  
   mat_data[lower.tri(mat_data)] <- t(mx.compare$KRZ$correlations)[lower.tri(mx.compare$KRZ$correlations)]
   range.values<- range(mat_data, na.rm = T)
   diag(mat_data) <- sample.size.list
   
-  ############################# Vendo efeito de filogenia ##########################################
-  notat.tree<- is.na(match(dimnames(mx.compare$RS$correlations)[[1]], treefile$tip.label)) 
-  names.at.tree <- dimnames(mx.compare$RS$correlations)[[1]][!notat.tree] 
-  mx.all.at.tree<- mx.compare$RS$correlations[!notat.tree,!notat.tree]
-  pruned.tree.all<- drop.tip(treefile,treefile$tip.label[-match( names.at.tree, treefile$tip.label)])
-  phylo.dist.all.at.tree<- cophenetic.phylo(pruned.tree.all)
-  phylo.dist.all.at.tree<- phylo.dist.all.at.tree[rownames( mx.all.at.tree), rownames( mx.all.at.tree)]
-  MatrixCor(phylo.dist.all.at.tree, mx.all.at.tree)
-  ##################################################################################################
-  
-  ################## Ponderar os valores de comparação pelo tamanho amostral : média armonica
-  
   ##################################################################################################
   Combine.Mx.Plot <- function(Mx1, Mx2, diag.info = NA, titulo = "blé"){
+    ## Mx1 = Matriz que vai pegar os valores da diagonal de cima e manter na diagonal de cima
+    ## Mx2 = Matriz que vai pegar os valores da diagonal de cima e passar pra diagonal de baixo
+    
+    dimnames(Mx1)[[1]] %<>% gsub("_", ' ',.)
+    dimnames(Mx1)[[2]] %<>% gsub("_", ' ',.)
     
     mat_data <- Mx1
     mat_data[lower.tri(mat_data)] <- t(Mx2)[lower.tri(Mx2)]
@@ -111,7 +99,8 @@ sp.main.data$Tarsius_bancanus$Mx.Rep
     
     mixed.mx = melt(mat_data) 
     mixed.mx.position =  mixed.mx
-    mixed.mx.position$value= round( mixed.mx.position$value, 2)
+    mixed.mx.position$value = round( mixed.mx.position$value, 2)
+    
     
     myPalette <- colorRampPalette(rev(brewer.pal(5, 'Spectral')), space = 'Lab')(n = 3)
     mixed.mx.cute.plot <- 
@@ -119,22 +108,24 @@ sp.main.data$Tarsius_bancanus$Mx.Rep
       geom_tile(aes(x = Var2, y = Var1, fill = value)) +
       scale_fill_gradientn(name = '', colours = myPalette, limits = range.values, na.value = "white") +
       ylab ('') + xlab ('') + labs(title = titulo) + theme(plot.title = element_text(face = "bold", size = 30)) +
-      geom_text(aes(x = Var2, y = Var1, label = value), size = 8) +
+      geom_text(aes(x = Var2, y = Var1, label = value), size = 3) +
       scale_y_discrete(limits = rev(levels(mixed.mx.position$Var1))) +
       # scale_x_discrete() +
       theme_minimal() +  
-      theme(axis.text.x = element_text(angle = 270, hjust = 0, face = 'italic', size =10),
-            axis.text.y = element_text(face = "italic", size =30),
+      theme(axis.text.x = element_text(angle = 270, hjust = 0, face = 'italic', size =7),
+            axis.text.y = element_text(face = "italic", size =10),
             axis.ticks = element_line(size = 0),
             legend.title = element_text(size = 20),
-            legend.text = element_text(size = 10),
+            legend.text = element_text(size = 20),
             rect = element_blank(), line = element_blank())
     
     return(mixed.mx.cute.plot)
     
   }
   
-  plot.a<- Combine.Mx.Plot(Mx1 = mx.compare$RS$correlations, Mx2 = mx.compare$KRZ$correlations, diag.info = sample.size.list, titulo = "A. Covariance matrices comparison values via KRZ and RS ")
+  ########################## Montando os plots de combinação valores de comparação corrigidos, nao corrigidos e por método
+  
+  Combine.Mx.Plot(Mx1 = mx.compare$BS.RS$correlations, Mx2 = mx.compare$BS.KRZ$correlations, diag.info = sample.size.list, titulo = "Matrices comparissons")
   plot.b<- Combine.Mx.Plot(Mx1 = mx.compare$PCA.s$correlations, Mx2 = mx.compare$KRZ$correlations, diag.info = sample.size.list, titulo = "Covariance matrices comparison values via KRZ and PCA Similarity ")
   plot.c<- Combine.Mx.Plot(Mx1 = mx.compare$Mantel.Cor$correlations, Mx2 = mx.compare$KRZ.Cor$correlations, diag.info = sample.size.list, titulo = "B. Correlation matrices comparison values via KRZ and Mantel ")
   
