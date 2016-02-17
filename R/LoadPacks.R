@@ -6,7 +6,7 @@ if(!require(lme4)) {install.packages('lme4'); library(lme4)}
 if(!require(ggplot2)) {install.packages('ggplot2'); library(ggplot2)}
 if(!require(phylobase)) {install.packages('cowplot'); library(phylobase)}
 if(!require(tidyr)) {install.packages('tidyr'); library(tidyr)}
-#if(!require(MCMCglmm)) {install.packages('MCMCglmm'); library(MCMCglmm)}
+if(!require(MCMCglmm)) {install.packages('MCMCglmm'); library(MCMCglmm)}
 if(!require(reshape2)) {install.packages('reshape2'); library(reshape2)}
 if(!require(evolqg)) {install.packages('evolqg'); library(evolqg)}
 #devtools::install_github('lem-usp/evolqg'); library(evolqg)
@@ -17,3 +17,8 @@ if(!require(RColorBrewer)) {install.packages('RColorBrewer'); library(RColorBrew
 if(!require(cowplot)) {install.packages('cowplot'); library(cowplot)}
 #if(!require()) {install.packages(''); library()}
 
+################### Update do R e mais um monte de zica de pacotes e dependencias
+# source("https://bioconductor.org/biocLite.R")
+# biocLite()
+# biocLite(pkgs = "Biostrings")
+# install.packages("phangorn")
