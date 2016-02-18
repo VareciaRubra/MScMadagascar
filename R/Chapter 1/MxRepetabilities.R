@@ -63,3 +63,6 @@ mean.compare.cov<- t(mean.compare.cov[,-1])
 tab.rep.mx.mix<- cbind(tab.rep.mx[mask,-1] , mean.compare.cov[-c(43:44),] )
 
 xtable(tab.rep.mx.mix, digits = 3, caption = "Matrix repetabilities calculated via Bootstrap and Monte Carlo using RS and KRZ methods of comparisson.")
+
+
+
