@@ -125,7 +125,7 @@
   
   ########################## Montando os plots de combinação valores de comparação corrigidos, nao corrigidos e por método
   
-  Combine.Mx.Plot(Mx1 = mx.compare$BS.RS$correlations, Mx2 = mx.compare$BS.KRZ$correlations, diag.info = sample.size.list, titulo = "Matrices comparissons")
+  Combine.Mx.Plot(Mx1 = t(mx.compare$BS.RS$correlations), Mx2 = t(mx.compare$BS.KRZ$correlations), diag.info = sample.size.list, titulo = "Matrices comparissons")
   plot.b<- Combine.Mx.Plot(Mx1 = mx.compare$PCA.s$correlations, Mx2 = mx.compare$KRZ$correlations, diag.info = sample.size.list, titulo = "Covariance matrices comparison values via KRZ and PCA Similarity ")
   plot.c<- Combine.Mx.Plot(Mx1 = mx.compare$Mantel.Cor$correlations, Mx2 = mx.compare$KRZ.Cor$correlations, diag.info = sample.size.list, titulo = "B. Correlation matrices comparison values via KRZ and Mantel ")
   
