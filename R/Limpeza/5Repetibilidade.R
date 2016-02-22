@@ -59,9 +59,8 @@ DoubleRep <- function (current.data, detailed = FALSE) {
    
 } 
 
-mask.rep = ldply(Sp.raw.main.data, count, Especie)[,2] > 14
+mask.rep = ldply(Sp.raw.main.data, count, Especie)[,2] > 10
 
-DoubleRep(raw.main.data[[2]], detailed = F)
 rep.sp <- ldply(Sp.raw.main.data, DoubleRep, detailed = TRUE)
 rep.gen <- ldply(Gen.raw.main.data, DoubleRep, detailed = FALSE) 
 rep.sp <- rep.sp[,-2]
@@ -70,6 +69,9 @@ REP <- rep.sp
 names(REP)[1]<- "Specie"
 names(REP)[2]<- "Trait"
 names(REP)[3]<- "Repetability"
+REP$Diff <- abs(REP$Repetability - REP$all.rep)
+
+names(REP)
 
 REP[,2] <- c( names(raw.main.data[[1]][12:50]) )
 REP[,2] <- factor (REP[,2], levels = unique(REP[,2]) )
@@ -79,13 +81,13 @@ REP[,2] <- factor (REP[,2], levels = unique(REP[,2]) )
 REP<- tbl_df(REP)
 REP %>% na.omit(.) %>%
   ggplot(., aes_string( x= "Trait", y="Repetability", color="Specie")) +
-  geom_line(aes(group = Specie, size=2)) +
+  geom_line(aes(group = Specie), size=2) +
   theme_bw() +
   theme(axis.text.x = element_text(angle = 90))
 
 REP %>% na.omit(.) %>%
-  ggplot(., aes_string( x= "Trait", y="Repetability", color = "Specie")) +
-  geom_line(aes(group = Specie)) +
+  ggplot(., aes_string( x= "Trait", y="all.rep" )) +
+  #geom_line(aes(group = Specie)) +
   geom_point(aes(group = Specie),  size=1 ) +
   facet_wrap(~Specie, scale="free_y", nrow = 5, ncol = 7) +
   theme_bw() +
@@ -97,3 +99,31 @@ REP %>% na.omit(.) %>%
   ggtitle("Traits Repetabilities by Specie") + 
   theme(plot.title = element_text(lineheight=.8, face="bold", size = 8)) 
 
+REP %>% na.omit(.) %>%
+  ggplot(., aes_string( x= "Trait", y="Repetability" )) +
+  #geom_line(aes(group = Specie)) +
+  geom_point(aes(group = Specie),  size=1 ) +
+  facet_wrap(~Specie, scale="free_y", nrow = 5, ncol = 7) +
+  theme_bw() +
+  theme(legend.position="none") +
+  theme(axis.text.x = element_text(angle = 90, size = 4), 
+        axis.text.y = element_text(size = 7),
+        axis.title.x = element_blank(),
+        strip.text= element_text(size=7)) +
+  ggtitle("Traits Repetabilities by Specie") + 
+  theme(plot.title = element_text(lineheight=.8, face="bold", size = 8)) 
+
+
+REP %>% na.omit(.) %>%
+  ggplot(., aes_string( x= "Trait", y="Diff" )) +
+  #geom_line(aes(group = Specie)) +
+  geom_point(aes(group = Specie),  size=1 ) +
+  facet_wrap(~Specie, scale="free_y", nrow = 5, ncol = 7) +
+  theme_bw() +
+  theme(legend.position="none") +
+  theme(axis.text.x = element_text(angle = 90, size = 4), 
+        axis.text.y = element_text(size = 7),
+        axis.title.x = element_blank(),
+        strip.text= element_text(size=7)) +
+  ggtitle("Traits Repetabilities by Specie") + 
+  theme(plot.title = element_text(lineheight=.8, face="bold", size = 8)) 
