@@ -4,6 +4,7 @@ if(!require(car)) {install.packages('car'); library(car)}
 if(!require(magrittr)) {install.packages('magrittr'); library(magrittr)}
 if(!require(lme4)) {install.packages('lme4'); library(lme4)}
 if(!require(ggplot2)) {install.packages('ggplot2'); library(ggplot2)}
+if(!require(GGally)) {install.packages('GGally'); library(GGally)}
 if(!require(tidyr)) {install.packages('tidyr'); library(tidyr)}
 if(!require(MCMCglmm)) {install.packages('MCMCglmm'); library(MCMCglmm)}
 if(!require(reshape2)) {install.packages('reshape2'); library(reshape2)}
