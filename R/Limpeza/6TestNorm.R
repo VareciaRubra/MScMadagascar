@@ -32,5 +32,16 @@ apply(sig.p.uni.norm,2, FUN = function(x) table(x == TRUE))
 quantos.normais <- apply(sig.p.uni.norm,1, FUN = function(x) table(x == TRUE))
 names(quantos.normais) <- p.uni.norm$Species
 
-apply(sp.main.data$Microcebus_griseorufus$ed, 2, FUN = function (x) lillie.test(x)$p.value )
 
+
+RawData<- raw.data %>% tbl_df()
+RawData[, 1:54] <- filter(., Genero == "Microcebus") as.data.frame() %>% ggscatmat(., columns = 16:54, color = "Especie" )
+RawData[, 1:54] %>% filter(., Familia == "Cheirogaleidae") %>% as.data.frame() %>% ggscatmat(., columns = 16:54, color = "Especie" )
+
+RawData[, 1:54] %>% filter(., Especie == "Euoticus_elegantulus") %>% as.data.frame() %>% ggscatmat(., columns = 16:54 )
+########  graficos de densidade 
+RawData[, 1:54] %>% filter(., Especie == "Euoticus_elegantulus") %>% gather(key=ed, value=value, (16:54) ) %>% 
+  ggplot(., aes(x=value) ) +
+  geom_density(aes(group = ed, color = ed)) +
+  facet_wrap(~ed,  scales="free")
+  
