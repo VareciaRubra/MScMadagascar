@@ -38,10 +38,41 @@ RawData<- raw.data %>% tbl_df()
 RawData[, 1:54] <- filter(., Genero == "Microcebus") as.data.frame() %>% ggscatmat(., columns = 16:54, color = "Especie" )
 RawData[, 1:54] %>% filter(., Familia == "Cheirogaleidae") %>% as.data.frame() %>% ggscatmat(., columns = 16:54, color = "Especie" )
 
-RawData[, 1:54] %>% filter(., Especie == "Euoticus_elegantulus") %>% as.data.frame() %>% ggscatmat(., columns = 16:54 )
 ########  graficos de densidade 
 RawData[, 1:54] %>% filter(., Especie == "Euoticus_elegantulus") %>% gather(key=ed, value=value, (16:54) ) %>% 
   ggplot(., aes(x=value) ) +
   geom_density(aes(group = ed, color = ed)) +
   facet_wrap(~ed,  scales="free")
+
+euoticus.uni.normal<- eds.sp$Euoticus_elegantulus %>% apply(. , 2, FUN = function (x) round(lillie.test(x)$p.value, 4 ))
+euoticus.uni.normal<- euoticus.uni.normal<=0.05
+euoticus.uni.normal[euoticus.uni.normal == TRUE] <- "grey" 
+euoticus.uni.normal[euoticus.uni.normal == FALSE] <- "red"
+euoticus.uni.normal <- as.character(as.data.frame(euoticus.uni.normal)[,1])
+
+RawData$Planilha <- as.factor(RawData$Planilha)
+DensityEuoticus <- RawData[, 1:54] %>% filter(., Especie == "Euoticus_elegantulus") %>% melt() 
+names(DensityEuoticus)[16] <- "Trait" 
+
+dim(RawData[, 1:54] %>% filter(., Especie == "Euoticus_elegantulus"))
+
+col.uni.normal <- rep(euoticus.uni.normal, each =  30) 
+
+DensityEuoticus %>% 
+  ggplot(.,aes(value)) +
+  geom_density(aes(group = Trait, fill = col.uni.normal, color = col.uni.normal) ,alpha= 0.1) +
+  scale_fill_manual(values = c("red", "grey")) +
+  scale_color_manual(values = c("red", "grey")) +
+  #geom_text(aes(group = "Trait", label = Specie)) +
+  facet_wrap(~Trait, scale="free", ncol =5, nrow = 8) +
+  theme_bw() +
+  theme(legend.position="none") +
+  theme(axis.text.x = element_text(size =8), 
+        axis.text.y = element_text(size = 7),
+        #axis.title.x = element_blank(),
+        #axis.title.y = element_text(size=17),
+        strip.text= element_text(size=10)) +
+  ggtitle("Euoticus elegantulus Univariate distribuition") + 
+  theme(plot.title = element_text(lineheight=.8, face="bold", size = 8)) 
+
   
