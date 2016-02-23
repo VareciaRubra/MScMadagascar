@@ -83,9 +83,10 @@
   diag(mat_data) <- sample.size.list
   
   ##################################################################################################
-  Combine.Mx.Plot <- function(Mx1, Mx2, diag.info = NA, titulo = "blé"){
-    ## Mx1 = Matriz que vai pegar os valores da diagonal de cima e manter na diagonal de cima
-    ## Mx2 = Matriz que vai pegar os valores da diagonal de cima e passar pra diagonal de baixo
+  Combine.Mx.Plot <- function(Mx1, Mx2, diag.info = NA, prob = NULL, titulo = "blé"){
+    ## Mx1 = Matriz que vai pegar os valores da diagonal de cima e manter na diagonal de cima (geralmente os results de RS)
+    ## Mx2 = Matriz que vai pegar os valores da diagonal de cima e passar pra diagonal de baixo (geralmente os results de KRZ)
+    ## prob = Matriz com as probabilidades do result comparação de RS
     
     dimnames(Mx1)[[1]] %<>% gsub("_", ' ',.)
     dimnames(Mx1)[[2]] %<>% gsub("_", ' ',.)
@@ -97,6 +98,15 @@
     range.values<- range.values- c(0.01, -0.01)
     diag(mat_data) <- diag.info
     
+    sig.mx <- prob >= 0.04
+    sig.mx[upper.tri(sig.mx, diag = T)] <- FALSE
+    sig.mx [sig.mx == TRUE] <- "white"
+    sig.mx [sig.mx == FALSE] <- "black"
+    sig.mx <- t(sig.mx)
+    melted.sig <- melt(sig.mx)
+    names(melted.sig) <- c("Sp1", "Sp2", "prob")
+    Prob <- melted.sig$prob
+
     mixed.mx = melt(mat_data) 
     mixed.mx.position =  mixed.mx
     mixed.mx.position$value = round( mixed.mx.position$value, 2)
@@ -108,7 +118,7 @@
       geom_tile(aes(x = Var2, y = Var1, fill = value)) +
       scale_fill_gradientn(name = '', colours = myPalette, limits = range.values, na.value = "white") +
       ylab ('') + xlab ('') + labs(title = titulo) + theme(plot.title = element_text(face = "bold", size = 30)) +
-      geom_text(aes(x = Var2, y = Var1, label = value), size = 3) +
+      geom_text(aes(x = Var2, y = Var1, label = value), size = 3, color = as.character(Prob) ) +
       scale_y_discrete(limits = rev(levels(mixed.mx.position$Var1))) +
       # scale_x_discrete() +
       theme_minimal() +  
@@ -125,7 +135,7 @@
   
   ########################## Montando os plots de combinação valores de comparação corrigidos, nao corrigidos e por método
   
-  plot.mix.raw<- Combine.Mx.Plot(Mx1 = t(mx.compare$BS.RS$correlations), Mx2 = t(mx.compare$BS.KRZ$correlations), diag.info = sample.size.list, titulo = "Species matrices comparisons")
+  plot.mix.raw<- Combine.Mx.Plot(Mx1 = t(mx.compare$BS.RS$correlations), Mx2 = t(mx.compare$BS.KRZ$correlations), prob = mx.compare$BS.RS$probabilities, diag.info = sample.size.list, titulo = "Species matrices comparisons")
   plot.mix.correct.rep.mx<- Combine.Mx.Plot(Mx1 = mx.compare$BS.RS$correlations, Mx2 = mx.compare$BS.KRZ$correlations, diag.info = sample.size.list, titulo = "Matrices comparisons")
   
   plot.b<- Combine.Mx.Plot(Mx1 = mx.compare$PCA.s$correlations, Mx2 = mx.compare$KRZ$correlations, diag.info = sample.size.list, titulo = "Covariance matrices comparison values via KRZ and PCA Similarity ")
