@@ -17,6 +17,7 @@ if(!require(RColorBrewer)) {install.packages('RColorBrewer'); library(RColorBrew
 if(!require(cowplot)) {install.packages('cowplot'); library(cowplot)}
 if(!require(mvoutlier)) {install.packages('mvoutlier'); library(mvoutlier)}
 if(!require(MVN)) {install.packages('MVN'); library(MVN)}
+if(!require(mvtnorm)) {install.packages('mvtnorm'); library(mvtnorm)}
 
 #if(!require()) {install.packages(''); library()}
 
