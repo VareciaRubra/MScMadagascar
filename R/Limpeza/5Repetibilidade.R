@@ -127,3 +127,36 @@ REP %>% na.omit(.) %>%
         strip.text= element_text(size=7)) +
   ggtitle("Traits Repetabilities by Specie") + 
   theme(plot.title = element_text(lineheight=.8, face="bold", size = 8)) 
+####### wraped por caractere e com o nome das especies
+REP %>% na.omit(.) %>%
+  ggplot(., aes_string(x=1, y="Repetability" )) +
+  #geom_line(aes(group = Specie)) +
+  geom_point(aes(group = "Trait"),  size=1 ) +
+  geom_text(aes(group = "Trait", label = Specie)) +
+  facet_wrap(~Trait, scale="free_y", ncol =5, nrow = 8) +
+  theme_bw() +
+  theme(legend.position="none") +
+  theme(axis.text.x = element_blank(), 
+        axis.text.y = element_text(size = 11),
+        axis.title.x = element_blank(),
+        axis.title.y = element_text(size=17),
+        strip.text= element_text(size=15)) +
+  #ggtitle("Traits Repetabilities") + 
+  theme(plot.title = element_text(lineheight=.8, face="bold", size = 8)) 
+############# de densidade
+REP %>% na.omit(.) %>%
+  ggplot(., aes_string(x = "Repetability" )) +
+  geom_density(aes(group = Trait, color = Trait) )+
+  #geom_text(aes(group = "Trait", label = Specie)) +
+  #facet_wrap(~Trait, scale="free_y", ncol =5, nrow = 8) +
+  theme_bw() +
+  #theme(legend.position="none") +
+  theme(axis.text.x = element_text(size =18), 
+        axis.text.y = element_text(size = 7)
+        #axis.title.x = element_blank(),
+        #axis.title.y = element_text(size=17),
+        ) +
+  #ggtitle("Traits Repetabilities") + 
+  theme(plot.title = element_text(lineheight=.8, face="bold", size = 8)) 
+
+
