@@ -67,6 +67,7 @@ Uni.Normal.Density.Test <- function (RawSpList){
 
 Uni.Normal.Density.Test(RawSpList = Sp.raw.main.data$Varecia_rubra)
 
+Uni.Tests <- llply(Sp.raw.main.data[mask], .fun = Uni.Normal.Density.Test)
 
 euoticus.uni.normal<- eds.sp$Euoticus_elegantulus %>% apply(. , 2, FUN = function (x) round(lillie.test(x)$p.value, 4 ))
 euoticus.uni.normal<- euoticus.uni.normal<=0.05
