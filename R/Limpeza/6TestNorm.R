@@ -98,3 +98,28 @@ DensityEuoticus %>%
         legend.text= element_text(size=10)) +
   ggtitle("Euoticus elegantulus Univariate distribuition") + 
   theme(plot.title = element_text(lineheight=.8, face="bold", size = 8)) 
+
+
+DensityGM <- sp.main.data %>% llply(function(x) x$gm.ind ) 
+
+DensityGmPlot <- function (x)
+  { x <- x %>% melt()
+    p.normal.test<- round(lillie.test(x$value)$p.value, 4 )
+ Plot <- x %>%
+    ggplot(.,aes(value)) +
+    geom_density() +
+    theme_bw() +
+    theme(axis.text.x = element_text(size =15), 
+          axis.text.y = element_text(size = 15),
+          #axis.title.x = element_blank(),
+          #axis.title.y = element_text(size=17),
+          legend.text= element_text(size=10)) +
+    theme(plot.title = element_text(lineheight=.8, face="bold", size = 8)) 
+ 
+ return (list("Plot" = Plot,
+              "GM.sd" = sd(x$value),
+              "GM.mean" = mean(x$value),
+              "p.lillie.test" = p.normal.test) )
+}
+
+GMDensityPlots <- llply(DensityGM[mask], .fun = DensityGmPlot)
