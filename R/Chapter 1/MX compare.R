@@ -281,6 +281,7 @@ Mean.Mx.Plots + geom_point(aes (x=method, y=mean, color = method, shape = method
 ########################################################################################################################################
 ########################################################################################################################################
 ########################################################################################################################################
+current.data <- sp.main.data
 PCs1to4<- current.data[mask] %>% llply(function(x) as.data.frame(eigen(x$matrix$cov)$vectors[,1:4]) ) %>% llply(function(x) as.list(x) )
 PC1 <- current.data[mask] %>% ldply(function(x) eigen(x$matrix$cov)$vectors[,1])
 names.sp <-  PC1[,1]
@@ -361,84 +362,35 @@ PCs1to4 %>% gather(key=".pcScore", value=value, 2:5 ) %>%
   theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5),
         axis.ticks = element_line(size = 0))
 
-data.frame ('n.size' = n.size [mask, -1], Iso.Compare.cor.iso) %>%
-  gather(key = '.pc', value=value, c(3:6)) %>%
+
+################## Grafico que nao serve pra nada, nao sai nenum padrao
+####################### nao faz sentido olhar só pros valores das gm, tenho que pensar no quanto de variação que tem em tamanho.
+
+gm.mean <- sp.main.data[mask] %>% ldply(function(x) x$gm.mean)
+sd.gm <- sp.main.data[mask] %>% ldply(function(x) sd(x$gm.ind, na.rm = T) )
+PcPercent.1to4<- cov.mx[mask] %>% ldply(function(x) eigen(x)$values[1:4]/sum(eigen(x)$values) )
+names(PcPercent.1to4) <- paste ("percent", names(PcPercent.1to4), sep = "")
+
+names(sd.gm)[2] <- "sd.gm"
+
+data.frame ('sd.gm' = sd.gm[2],  'gm' = gm.mean[,2], 'Sample' = n.size [mask, -1], Iso.Compare.cor.iso, PcPercent.1to4[2:5]) %>%
+  gather(key = '.pc', value=value, c(5:8)) %>%
   ggplot (.) +
-  #geom_text(aes (x = n.size, y = abs(value), label = .sp)) +
-  geom_point(aes (x = n.size, y = abs(value), size = n.size, color = abs(value) ) ) +
-  geom_text(aes (x = n.size, y = abs(value), label = .sp), alpha = 0.4, size =2) +
+  geom_point(aes (x = sd.gm^2, y = percentPC1, color = Sample ), size = 3) +
+  scale_colour_gradientn(colours = terrain.colors(7) ) +
+  geom_text(aes (x =  sd.gm^2, y = percentPC1, label = .sp), alpha = 0.4, size =4) +
   #scale_color_brewer(name = 'PC.Score' , type = "div"  , palette =  myPalette(1000)) +
-  ylab ('Absolute value of correlation') + xlab ('Sample size') + labs(title = "First 4 PC's correlation with Isometric vector sample size") +
-  facet_wrap(~ .pc) +
+  ylab ('Absolute value of correlation') + xlab ('sd of traits geometric mean (Skull size)') + labs(title = "First 4 PC's correlation with Isometric vector") +
+  facet_wrap(~ .pc, scales = "fixed") +
   theme_bw() +
-  theme(plot.title = element_text(lineheight=.8, face="bold"))
+    theme(plot.title = element_text(lineheight=.8, face="bold"),
+        axis.text.y = element_text(size = 12),
+        axis.text.y = element_text(size = 12),
+        axis.title.y = element_text(size=17),
+        axis.title.x = element_text(size=17),
+        strip.text= element_text(size=15) )
 
-rarefaction.all.rs <- llply(sp.main.data, function (x) x$rarefacation$rs)
-
-rarefaction.1 <- PlotRarefaction(sp.main.data$Euoticus_elegantulus$rarefaction$rs) + labs(title = "Euoticus senegalensis") 
-rarefaction.2 <- PlotRarefaction(sp.main.data$Loris_tardigradus$rarefaction$rs) + labs(title = "Loris tardigradus") 
-rarefaction.3 <- PlotRarefaction(sp.main.data$Daubentonia_madagascariensis$rarefaction$rs) + labs(title = "D. madagascariensis") 
-rarefaction.4 <- PlotRarefaction(sp.main.data$Phaner_furcifer$rarefaction$rs) + labs(title = "Phaner furcifer") 
-
-p1 <- PlotRarefaction(sp.main.data$Microcebus_griseorufus$rarefaction$krz) + 
-      labs(title = "Microcebus griseorufus") + 
-      theme(plot.title = element_text(face = "italic", size = 20), axis.title.x = element_blank(), axis.text.x =element_blank(), axis.ticks.x = element_line(size =0), axis.text= element_text(size = 15)) + 
-      coord_cartesian(ylim=c(0.4, 1)) + scale_y_continuous("KRZ", breaks=seq(0.4, 1, 0.2))
-p2 <- PlotRarefaction(sp.main.data$Indri_indri$rarefaction$krz) + 
-      labs(title = "Indri indri") + 
-      theme(plot.title = element_text(face = "italic", size = 20), axis.title = element_blank(), axis.text =element_blank(), axis.ticks = element_line(size =0)) +
-      coord_cartesian(ylim=c(0.4, 1)) + scale_y_continuous( breaks=seq(0.40, 1, 0.2))
-p3 <- PlotRarefaction(sp.main.data$Microcebus_griseorufus$rarefaction$rs) + 
-      theme(axis.text= element_text(size = 15)) +
-      coord_cartesian(ylim=c(0, 1)) + scale_y_continuous("RS", breaks=seq(0.25, 1, 0.25))
-p4 <- PlotRarefaction(sp.main.data$Indri_indri$rarefaction$rs) + 
-      theme(axis.text= element_text(size = 15), axis.title.y = element_blank(), axis.text.y =element_blank(), axis.ticks.y = element_line(size =0)) +
-      coord_cartesian(ylim=c(0, 1)) + scale_y_continuous(breaks=seq(0.25, 1, 0.25))
-plot_grid(p1, p2, p3, p4)  
-
-
-
-multiplot <- function(..., plotlist=NULL, file, cols=1, layout=NULL) {
-  library(grid)
-  
-  # Make a list from the ... arguments and plotlist
-  plots <- c(list(...), plotlist)
-  
-  numPlots = length(plots)
-  
-  # If layout is NULL, then use 'cols' to determine layout
-  if (is.null(layout)) {
-    # Make the panel
-    # ncol: Number of columns of plots
-    # nrow: Number of rows needed, calculated from # of cols
-    layout <- matrix(seq(1, cols * ceiling(numPlots/cols)),
-                     ncol = cols, nrow = ceiling(numPlots/cols))
-  }
-  
-  if (numPlots==1) {
-    print(plots[[1]])
-    
-  } else {
-    # Set up the page
-    grid.newpage()
-    pushViewport(viewport(layout = grid.layout(nrow(layout), ncol(layout))))
-    
-    # Make each plot, in the correct location
-    for (i in 1:numPlots) {
-      # Get the i,j matrix positions of the regions that contain this subplot
-      matchidx <- as.data.frame(which(layout == i, arr.ind = TRUE))
-      
-      print(plots[[i]], vp = viewport(layout.pos.row = matchidx$row,
-                                      layout.pos.col = matchidx$col))
-    }
-  }
-}
-
-
-multiplot(rarefaction.5, rarefaction.6, cols = 2)
-
-
-########################################################################################################################################
+#######################################################################################################################################
 ########################################################################################################################################
 ########################################################################################################################################
 
@@ -459,22 +411,6 @@ multiplot(rarefaction.5, rarefaction.6, cols = 2)
     ggtitle("% of variance on first 4 PC by specie") +
     theme(plot.title = element_text(lineheight=.8, face="bold"), axis.title.x = element_blank()) +
     theme(legend.position="none")
-
-PcPercent.1to4<- cov.mx[mask] %>% ldply(function(x) eigen(x)$values[1:4]/sum(eigen(x)$values) )
-names(PcPercent.1to4) <- c(".sp", "PC1", "PC2", "PC3", "PC4")
-PcPercent.1to4$.sp <- factor(PcPercent.1to4$.sp, levels = unique(PcPercent.1to4$.sp)) 
-library(scales)
-PcPercent.1to4 %>%
-  gather(key="Percent_var_PC", value=value, 2:5 ) %>%
-  ggplot( ., aes(x= Percent_var_PC, y = value, color = .sp), varwidth = T) +
-  geom_line(aes(group = .sp), size = 1) +
-  scale_y_continuous(labels=percent) +
-  theme_bw() +
-  facet_wrap(~.sp)+
-  ggtitle("% of variance on first 4 PC by specie") +
-  theme(plot.title = element_text(lineheight=.8, face="bold")) +
-  theme(axis.title.x = element_blank()) +
-  theme(legend.position="none")
 
 MMxStats<- cov.mx[mask] %>% ldply(function(x) MeanMatrixStatistics(x))
 names(MMxStats)[1] <- ".sp"
@@ -515,8 +451,6 @@ MMxStats %>% .[, c(1:3,9)] %>%
   #scale_fill_brewer(palette="Spectral") +
   scale_colour_brewer(name = "Mean Matrix Statistics") + 
   theme(legend.position="none")
-
-
 
 
 MMxStats<- cov.mx[mask] %>% ldply(function(x) MeanMatrixStatistics(x))
@@ -565,7 +499,7 @@ MMxStats %>%
 
 summary(lm(flexibility ~ PC1.percent , data = MMxStats))
 
-gm.mean <- current.data[mask] %>% ldply(function(x) x$gm.mean)
+gm.mean <- sp.main.data[mask] %>% ldply(function(x) x$gm.mean)
 
 MMxStats.gm<- cbind(MMxStats, gm.mean[,2])
 names(MMxStats.gm)[11] <- "gm.mean"
