@@ -19,6 +19,7 @@ if(!require(mvoutlier)) {install.packages('mvoutlier'); library(mvoutlier)}
 if(!require(MVN)) {install.packages('MVN'); library(MVN)}
 if(!require(mvtnorm)) {install.packages('mvtnorm'); library(mvtnorm)}
 
+
 #if(!require()) {install.packages(''); library()}
 
 ################### Update do R e mais um monte de zica de pacotes e dependencias
