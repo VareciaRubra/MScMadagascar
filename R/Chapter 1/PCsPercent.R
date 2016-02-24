@@ -1,5 +1,5 @@
 ########################################################################################################################################
-#############OLHANDO PARA OS PCs DAS MATRIZES: INTERPRETANDO OS PCs E VENDO A DISTRIBUIÇÃO DE VARIAÇÃO##################################
+############ OLHANDO PARA OS PCs DAS MATRIZES: INTERPRETANDO OS PCs E VENDO A DISTRIBUIÇÃO DE VARIAÇÃO #################################
 ########################################################################################################################################
 current.data <- sp.main.data
 current.data <- gen.main.data
@@ -54,17 +54,31 @@ MonteCarloPCPercent <- function (otu, iterations = 1000, parallel = FALSE)
                  })
 }
  
-tmp <- MonteCarloPCPercent(sp.main.data$Tarsius_bancanus, iterations = 100, parallel = TRUE)
 
-l
+MonteCarloVarSize <- function (otu, iterations = 1000, parallel = FALSE) 
+{
+  with (otu, 
+        {
+          return (aaply (1:iterations, 1, 
+                         function (i)
+                         {
+                           eds <- (rmvnorm (sample.size, mean= ed.means, sigma = matrix$cov, method = 'chol'))
+                           gms <- aaply (eds, 1, function (x) exp (mean (log (x) )))
+                           var (gms)
+                         }, .parallel = parallel))
+        })
+}
+tmp <- MonteCarloVarSize (sp.main.data$Indri_indri, iterations = 100, parallel = TRUE)
+
+gm.var.dist <- llply(sp.main.data[mask], .fun = MonteCarloVarSize, .progress = "text")
 
 tab.rep.mx.mix
 
+exp (mean (log (sp.main.data$Indri_indri$ed.means))) / sqrt
 
 
-evolqg:::MonteCarloStat
 
-
+tmp * 39
 
 
 
