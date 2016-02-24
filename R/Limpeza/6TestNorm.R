@@ -16,7 +16,6 @@ RandomSkewers(cov.list, cov(sp.main.data$Microcebus_griseorufus$ed[!(as.logical(
 roystonTest(data = sp.main.data$Microcebus_griseorufus$ed[!(result.outlier$outliers),], qqplot = T)
 mar.test <- mardiaTest(data = sp.main.data$Microcebus_griseorufus$ed[!(result.outlier$outliers),], qqplot = T, cov = T)
 
-
 lillie.test(x = sp.main.data$Microcebus_griseorufus$ed)
 
 cov.mx <- current.data %>% llply(function(x) x$matrix$cov)
@@ -32,17 +31,27 @@ sig.p.uni.norm <- p.uni.norm[,-1] >= 0.05
 Uni.Normal.Density.Test <- function (RawSpList){
   ## RawSpList =  Lista com o rawdata frame por especie
   eds <- dplyr::select(RawSpList, c(IS_PM:BA_OPI)) # pegando as ed de cada replica
+  eds.log <- log(eds)
   uni.normal.c <- eds %>% apply(. , 2, FUN = function (x) round(lillie.test(x)$p.value, 4 ))
+  uni.normal.l <- eds.log %>% apply(. , 2, FUN = function (x) round(lillie.test(x)$p.value, 4 ))
   uni.normal<- uni.normal.c<=0.05
+  uni.normal.log <- uni.normal.l<=0.05
   uni.normal[uni.normal == TRUE] <- "p < 0.05" 
   uni.normal[uni.normal == FALSE] <- "p > 0.05" 
   uni.normal <- as.character(as.data.frame(uni.normal)[,1])
   
+  uni.normal.log[uni.normal.log == TRUE] <- "p < 0.05" 
+  uni.normal.log[uni.normal.log == FALSE] <- "p > 0.05" 
+  uni.normal.log <- as.character(as.data.frame(uni.normal.log)[,1])
+  
   RawSpList$Planilha <- as.factor(RawSpList$Planilha)
   Density <- RawSpList[,1:54]  %>% melt() 
   names(Density)[16] <- "Trait" 
-  
+  Density.log <- Density
+  Density.log$Trait <- log(Density.log$value)
+
   Univariate_Normality <- rep(uni.normal, each =  dim(RawSpList)[1]) 
+  Univariate_Normality.log<- rep(uni.normal.log, each =  dim(RawSpList)[1]) 
   
   specie <- as.character(unique(RawSpList$Especie))
   
@@ -54,6 +63,23 @@ Uni.Normal.Density.Test <- function (RawSpList){
     #geom_text(aes(group = "Trait", label = Specie)) +
     facet_wrap(~Trait, scale="free", ncol =5, nrow = 8) +
     theme_bw() +
+    ggtitle(specie) +
+    theme(axis.text.x = element_text(size =8), 
+          axis.text.y = element_text(size = 7),
+          #axis.title.x = element_blank(),
+          #axis.title.y = element_text(size=17),
+          legend.text= element_text(size=10)) +
+    theme(plot.title = element_text(lineheight=.8, face="bold", size = 8)) 
+  
+  Plot.log <- Density.log%>% 
+    ggplot(.,aes(value)) +
+    geom_density(aes(group = Trait, fill = Univariate_Normality.log, color = Univariate_Normality.log) ,alpha= 0.1) +
+    scale_fill_manual(values = c("red", "grey")) +
+    scale_color_manual(values = c("red", "grey"))  +
+    #geom_text(aes(group = "Trait", label = Specie)) +
+    facet_wrap(~Trait, scale="free", ncol =5, nrow = 8) +
+    theme_bw() +
+    ggtitle(paste(c(specie, "loged values")) ) +
     theme(axis.text.x = element_text(size =8), 
           axis.text.y = element_text(size = 7),
           #axis.title.x = element_blank(),
@@ -62,7 +88,8 @@ Uni.Normal.Density.Test <- function (RawSpList){
     theme(plot.title = element_text(lineheight=.8, face="bold", size = 8)) 
   
   return(list("Plot" = Plot,
-              "UniTestLillie" = uni.normal.c ))
+              "UniTestLillie" = uni.normal.c,
+              "Plot.log" = Plot.log ))
 }
 
 Uni.Normal.Density.Test(RawSpList = Sp.raw.main.data$Varecia_rubra)
