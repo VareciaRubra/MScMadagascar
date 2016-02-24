@@ -76,13 +76,14 @@ raw.data %>%
 #plot das medias de cada variável por especie e ligando com um alinha 
 #(pra ter uma noçao se tem algum a especie que é sempre maior/menor que as demais...)
 
-raw.data %>% 
+raw.data
+raw.data %>% filter(., Especie == "Euoticus_elegantulus") %>% 
   dplyr::group_by(., Especie, Sexo ) %>%
-  summarise_each(funs(mean),IS_PM:BA_OPI) %>% RColorBrewer
+  summarise_each(funs(mean),IS_PM:BA_OPI) %>% 
   gather(key=ed, value=value, 3:41 )  %>%
-  ggplot(., aes( x= ed, y=value, color=Especie)) +
+  ggplot(., aes( x= ed, y=value, color=Sexo)) +
   geom_line(aes(group = Especie)) +
-  facet_wrap(~Sexo)+
+  #facet_wrap(~Sexo)+
   theme(axis.text.x = element_text(angle = 90))
 
 #plot em linhas por media entre replica de indivíduos por museu e por especie
@@ -114,20 +115,30 @@ raw.data %>%
   ggplot(., aes( x= ed, y= value, color= Museu )) +
   geom_line(aes(group = Tombo)) +
   theme(axis.text.x = element_text(angle = 90))
-
+##############################################################################################################################
+##############################################################################################################################
+##############################################################################################################################
+##############################################################################################################################
 ######## Biplot PC1 x PC2 ##############
-current.data <-extant.main.data$All
+# current.data <- extant.main.data$All
 #PRCOMP <- princomp(current.data$ed %>% na.omit) # extraindo os componentes principais a partir dos dados (medias ed)
-PRCOMP <- princomp(data.frame(na.omit(current.data$ed ) ) )
-resp <- current.data$info[current.data$info$Tombo %in% dimnames(PRCOMP$scores)[[1]], ] #respectivos dados aos participantes da PCA
-resp %<>% mutate(., PC1 = PRCOMP$scores[,1], PC2=PRCOMP$scores[,2]) 
-hulls <-ddply(resp, .(Familia), plyr::summarise, "hpc1"=PC1[chull(PC1,PC2)],
+PRCOMP <- prcomp(data.frame(na.omit(sp.main.data$Loris_tardigradus$ed ) ) )
+current.data <- sp.main.data$Loris_tardigradus
+
+resp <- current.data$info[current.data$info$Tombo %in% dimnames(PRCOMP$x)[[1]], ] #respectivos dados aos participantes da PCA
+resp %<>% mutate(., PC1 = PRCOMP$x[,1], PC2=PRCOMP$x[,2]) 
+hulls <-ddply(resp, .(Sexo), plyr::summarise, "hpc1"=PC1[chull(PC1,PC2)],
               "hpc2"=PC2[chull(PC1,PC2)])
-fig <- ggplot(resp, aes(PC1, PC2, color = Familia)) +
-  geom_text(aes(PC1, PC2, color = Familia, label = Especie) ) +
-  geom_polygon(aes(hpc1, hpc2, fill = Familia, group = Familia),
+fig <- ggplot(resp, aes(PC1, PC2, color = Sexo)) +
+  geom_text(aes(PC1, PC2, color = Sexo, label = Museu) ) +
+  geom_polygon(aes(hpc1, hpc2, fill = Sexo, group = Sexo),
                hulls,alpha=.2)
-fig
+fig+coord_fixed()
+
+##############################################################################################################################
+##############################################################################################################################
+##############################################################################################################################
+##############################################################################################################################
 
 
 lin_data = ldply(extant.main.data, function(x) tbl_df(cbind(x$info, x$ed))) 
