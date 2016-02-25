@@ -118,7 +118,7 @@ rarefaction.plot.krz <-
       ggtitle("Rarefaction and Observed range of similarity") +
       theme(plot.title = element_text(lineheight=.8, face="bold"),
             axis.text.x = element_text(size = 15), 
-            #labs(x = x.axis),
+           labs(x = x.axis),
             axis.title.x = element_text(size = 15)) +
       scale_y_continuous(y.axis, limits = c(0,1), breaks = c(0.00, 0.25, 0.5, 0.75, 0.82, 1.00)) +
       scale_x_continuous(x.axis, limits = c(0, 68)) +
