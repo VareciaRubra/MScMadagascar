@@ -35,6 +35,6 @@ mx.class<- c('V/CV', 'V/CV')
 for (i in 1:2)  {gen.mx.compare[[i]]$method <- names(gen.mx.compare)[i]}
 for (i in 1:2)  {gen.mx.compare[[i]]$mx.class <- mx.class[i]}
 
-Combine.Mx.Plot(Mx1 = t(gen.mx.compare$BS.RS$correlations), Mx2 = t(gen.mx.compare$BS.KRZ$correlations), diag.info = gen.sample.size.list, titulo = "Genus matrices comparisons")
+Combine.Mx.Plot(Mx1 = t(gen.mx.compare$BS.RS$correlations), Mx2 = t(gen.mx.compare$BS.KRZ$correlations), prob = gen.mx.compare$BS.RS$probabilities, diag.info = gen.sample.size.list, titulo = "Genus matrices comparisons")
 
 
