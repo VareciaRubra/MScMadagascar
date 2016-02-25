@@ -80,32 +80,51 @@ range.compare$.id <- rownames(range.compare)
 
 PlotRaRangefaction<- function (comparison.list, y.axis = "Random Skewers", x.axis = "Number of sampled specimens") 
  ## comparison.list ==> output da evolqg::RarefactionStat()
-  comparison.list <- sp.main.data$Indri_indri$rarefaction$rs
+  y.axis = "Random Skewers"
+  comparison.list <- sp.main.data$Microcebus_griseorufus$rarefaction$rs
   plot.df <- melt(comparison.list, value.name = "Mean.BS.RS")
   names(plot.df) <- c("Mean.BS.RS", "n") 
   plot.df <- as.data.frame(lapply(plot.df, as.numeric))
-  #rarefaction.plot <- 
+  rarefaction.plot.rs <- 
     ggplot(data = plot.df, aes(x= n, y = Mean.BS.RS)) + 
     geom_boxplot(aes( group = n), color="grey") + 
     scale_x_continuous(x.axis) + 
     geom_point(data = range.compare, aes(x = n, y = Mean.BS.RS), shape=17, size = 2.2, color = "red") +
     geom_text(data = range.compare, aes(x = n, y = Mean.BS.RS, label = .id), color = "red", size = 3, alpha = 0.3, angle = 70, hjust =  0.6) +
-    geom_errorbar(data = range.compare, aes(x= n, ymin = Min.BS.RS, ymax = Max.BS.RS), alpha = 0.5, size = 1.2, color = "red") +
-    scale_y_continuous(y.axis, limits = c(0,1)) +
-    scale_x_continuous(y.axis, limits = c(0, 68)) +
+    geom_errorbar(data = range.compare, aes(x= n, ymin = Min.BS.RS, ymax = Max.BS.RS), alpha = 0.3, size = 1.2, color = "red") +
+    geom_hline(data = range.compare, aes(yintercept = mean (Mean.BS.RS), y = mean (Mean.BS.RS)), alpha = 0.1, size = 2) +
     ggtitle("Rarefaction and Observed range of similarity") +
-    theme(plot.title = element_text(lineheight=.8, face="bold")
-          ) +
+    theme(plot.title = element_text(lineheight=.8, face="bold"),
+            axis.text.x = element_text(size = 15), 
+            axis.title.x = element_text(size = 15)) +
+    scale_y_continuous(y.axis, limits = c(0,1), breaks = c(0.00, 0.25, 0.5, 0.66, 0.75, 1.00)) +
+    scale_x_continuous(x.axis, limits = c(0, 68)) +
     theme_bw()
     
-    
-    ggplot(data = range.compare) +
-      geom_point(data = range.compare, aes(x = n, y = Mean.BS.KRZ)) +
-      geom_errorbar(data = range.compare, aes(x= n, ymin = Min.BS.KRZ, ymax = Max.BS.KRZ)) +
-      scale_y_continuous(y.axis, limits = c(0,1)) +
+    y.axis = "Krzanowski "
+    comparison.list <- sp.main.data$Microcebus_griseorufus$rarefaction$krz
+    plot.df <- melt(comparison.list, value.name = "Mean.BS.KRZ")
+    names(plot.df) <- c("Mean.BS.KRZ", "n") 
+    plot.df <- as.data.frame(lapply(plot.df, as.numeric))
+    rarefaction.plot.krz <- 
+    ggplot(data = plot.df, aes(x= n, y = Mean.BS.KRZ)) + 
+      geom_boxplot(aes( group = n), color="grey") + 
+      scale_x_continuous(x.axis) + 
+      geom_point(data = range.compare, aes(x = n, y = Mean.BS.KRZ), shape=17, size = 2.2, color = "red") +
+      geom_text(data = range.compare, aes(x = n, y = Mean.BS.KRZ, label = .id), color = "red", size = 3, alpha = 0.3, angle = 70, hjust =  0.6) +
+      geom_errorbar(data = range.compare, aes(x= n, ymin = Min.BS.KRZ, ymax = Max.BS.KRZ), alpha = 0.3, size = 1.2, color = "red") +
+      geom_hline(data = range.compare, aes(yintercept = mean (Mean.BS.KRZ), y = mean (Mean.BS.KRZ)), alpha = 0.1, size = 2) +
+      ggtitle("Rarefaction and Observed range of similarity") +
+      theme(plot.title = element_text(lineheight=.8, face="bold"),
+            axis.text.x = element_text(size = 15), 
+            #labs(x = x.axis),
+            axis.title.x = element_text(size = 15)) +
+      scale_y_continuous(y.axis, limits = c(0,1), breaks = c(0.00, 0.25, 0.5, 0.75, 0.81, 1.00)) +
+      scale_x_continuous(y.axis, limits = c(0, 68)) +
       theme_bw()
-    
-    
+
+
+plot_grid(rarefaction.plot.rs, rarefaction.plot.krz)
 
 
 
