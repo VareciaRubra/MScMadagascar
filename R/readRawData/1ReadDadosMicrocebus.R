@@ -79,6 +79,9 @@ all.raw.main.data<- dlply(raw.data, .(Genero), tbl_df)
 
 #depois de limpar os zuados, salvar em um arquivo
 #write.csv(raw.data, "Data/Eulemur_Clean.csv", row.names= F)
+# depois de ver possiveis outliers nos plots de PC1 x PC2
+write.csv(raw.data, "Data/Microcebus_Clean_outliers.csv", row.names= F)
+
 
 
 i.machos <- sp.main.data$Microcebus_griseorufus$info$Sexo == "M" | is.na(sp.main.data$Microcebus_griseorufus$info$Sexo)
