@@ -52,7 +52,7 @@ raw.data %>%
 raw.data %>%
   #filter(., is.na(Sexo) ) %>% 
   gather(key=ed, value=value, IS_NSL ) %>% 
-  ggplot(., aes( x= Especie, y=value, color=Especie, label = Tombo), varwidth = T) + 
+  ggplot(., aes( x= Especie, y=value, label = Tombo), color=Especie, varwidth = T) + 
   geom_text(aes(size = 0.4, vjust = 1) )  +
   geom_violin(aes(alpha = 0)) + 
   geom_jitter() +
@@ -77,7 +77,8 @@ raw.data %>%
 #(pra ter uma noçao se tem algum a especie que é sempre maior/menor que as demais...)
 
 raw.data
-raw.data %>% filter(., Especie == "Euoticus_elegantulus") %>% 
+raw.data #%>% filter(., Especie == "Euoticus_elegantulus") 
+%>% 
   dplyr::group_by(., Especie, Sexo ) %>%
   summarise_each(funs(mean),IS_PM:BA_OPI) %>% 
   gather(key=ed, value=value, 3:41 )  %>%
@@ -108,7 +109,7 @@ raw.data %>%
   theme(axis.text.x = element_text(angle = 90))
 
 raw.data %>% 
-  filter(Especie == "Propithecus_verreauxi") %>%
+  #filter(Especie == "Propithecus_verreauxi") %>%
   dplyr::group_by(., Museu, Tombo ) %>%
   summarise_each(funs(mean),IS_PM:BA_OPI) %>% 
   gather(key=ed, value=value, 3:41 )  %>%
@@ -122,15 +123,28 @@ raw.data %>%
 ######## Biplot PC1 x PC2 ##############
 # current.data <- extant.main.data$All
 #PRCOMP <- princomp(current.data$ed %>% na.omit) # extraindo os componentes principais a partir dos dados (medias ed)
-PRCOMP <- prcomp(data.frame(na.omit(sp.main.data$Loris_tardigradus$ed ) ) )
-current.data <- sp.main.data$Loris_tardigradus
+PRCOMP <- prcomp(data.frame(na.omit(sp.main.data$Microcebus_griseorufus$ed ) ) )
+current.data <- sp.main.data$Microcebus_griseorufus
 
-resp <- current.data$info[current.data$info$Tombo %in% dimnames(PRCOMP$x)[[1]], ] #respectivos dados aos participantes da PCA
+MX.PLOT<- Sp.raw.main.data$Microcebus_griseorufus 
+MX.PLOT%<>% filter (Take != "T2") 
+dimnames(MX.PLOT) [[1]] <- unique(MX.PLOT$Tombo)
+MX.PLOT%<>% 
+  filter (Tombo != "174522") %>%
+  filter (Tombo != "174496") %>%
+  filter (Tombo != "174515") %>%
+  filter (Tombo != "174434") 
+
+PRCOMP <- prcomp(data.frame(na.omit(MX.PLOT[,16:54]) ) )
+dimnames(PRCOMP$x)[[1]] <- unique(MX.PLOT$Tombo)
+current.data <- sp.main.data$Microcebus_griseorufus
+
+resp <- MX.PLOT[unique(Sp.raw.main.data$Microcebus_griseorufus$Tombo) %in% unique(MX.PLOT$Tombo), ] #respectivos dados aos participantes da PCA
 resp %<>% mutate(., PC1 = PRCOMP$x[,1], PC2=PRCOMP$x[,2]) 
 hulls <-ddply(resp, .(Sexo), plyr::summarise, "hpc1"=PC1[chull(PC1,PC2)],
               "hpc2"=PC2[chull(PC1,PC2)])
 fig <- ggplot(resp, aes(PC1, PC2, color = Sexo)) +
-  geom_text(aes(PC1, PC2, color = Sexo, label = Museu) ) +
+  geom_text(aes(PC1, PC2, color = Sexo, label = Tombo) ) +
   geom_polygon(aes(hpc1, hpc2, fill = Sexo, group = Sexo),
                hulls,alpha=.2)
 fig+coord_fixed()
