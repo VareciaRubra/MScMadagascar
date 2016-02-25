@@ -99,7 +99,7 @@ Plotao <- plot_grid( Plot.PC, Plot.gm)
  
 temp <- MonteCarloPCPercent (sp.main.data$Microcebus_griseorufus, iterations = 100, parallel = TRUE)
 
-
+############################ usando essa with o bagulho ta reciclando o objeto anterior! 
 Vairiae <- llply(sp.main.data[mask], .fun =  MonteCarloPCPercent, .progress = "text")
 
 
