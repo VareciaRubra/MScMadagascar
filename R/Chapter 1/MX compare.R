@@ -15,18 +15,18 @@
   mask.n.size <- n.size[,2]>40
   
   # Add as matrizes P e G de Saguinus e suas respectivas informações 
-  Saguinus_G.cov <- read.csv(file = "Data/Saguinus_G.csv", header = F)
-  Saguinus_G.cov <- as.matrix(Saguinus_G.cov)
-  dimnames(Saguinus_G.cov) <- dimnames(cov.list[[1]])
-  Saguinus_G.cor <- cov2cor(Saguinus_G.cov)
+  #Saguinus_G.cov <- read.csv(file = "Data/Saguinus_G.csv", header = F)
+  #Saguinus_G.cov <- as.matrix(Saguinus_G.cov)
+  #dimnames(Saguinus_G.cov) <- dimnames(cov.list[[1]])
+  #Saguinus_G.cor <- cov2cor(Saguinus_G.cov)
   
-  Saguinus_P.cov <- read.csv(file = "Data/Saguinus_P.csv", header = F)
-  Saguinus_P.cov <- as.matrix(Saguinus_P.cov)
-  Saguinus_P.cov.t <- t(Saguinus_P.cov)
-  Saguinus_P.cov[upper.tri(diag(39))] <- Saguinus_P.cov.t[upper.tri(diag(39))]
+  #Saguinus_P.cov <- read.csv(file = "Data/Saguinus_P.csv", header = F)
+  #Saguinus_P.cov <- as.matrix(Saguinus_P.cov)
+  #Saguinus_P.cov.t <- t(Saguinus_P.cov)
+  #Saguinus_P.cov[upper.tri(diag(39))] <- Saguinus_P.cov.t[upper.tri(diag(39))]
   
-  dimnames(Saguinus_P.cov) <- dimnames(cov.list[[1]])
-  Saguinus_P.cor <- cov2cor(Saguinus_P.cov)
+  #dimnames(Saguinus_P.cov) <- dimnames(cov.list[[1]])
+  #Saguinus_P.cor <- cov2cor(Saguinus_P.cov)
   
   cov.list <- cov.mx[mask]
   cov.list$Saguinus_P.cov <- Saguinus_P.cov
@@ -36,7 +36,7 @@
   cor.list$Saguinus_P.cor <- Saguinus_P.cor
   cor.list$Saguinus_G.cor <- Saguinus_G.cor
   
-  safe.copy.rep.list <- rep.list
+  #safe.copy.rep.list <- rep.list
   mx.rep.all <- cbind(mx.rep, mx.rep.mc[,-1])
   rep.list <- mx.rep.all[mask, ]
   row.names(rep.list) <- rep.list$Especie
@@ -71,8 +71,6 @@
   mx.class<- c('V/CV', 'V/CV','V/CV', 'COR', 'COR','V/CV','V/CV')
   for (i in 1:7)  {mx.compare[[i]]$method <- names(mx.compare)[i]}
   for (i in 1:7)  {mx.compare[[i]]$mx.class <- mx.class[i]}
-  
-  mx.compare %>% function(x) dimnames(x$correlations) %>% gsub("_", ' ', .)
   
   mat_data <- mx.compare$RS$correlations
   mat_data_raw <-t(mat_data)
@@ -412,111 +410,5 @@ data.frame ('sd.gm' = sd.gm[2],  'gm' = gm.mean[,2], 'Sample' = n.size [mask, -1
     theme(plot.title = element_text(lineheight=.8, face="bold"), axis.title.x = element_blank()) +
     theme(legend.position="none")
 
-MMxStats<- cov.mx[mask] %>% ldply(function(x) MeanMatrixStatistics(x))
-names(MMxStats)[1] <- ".sp"
-names(MMxStats)[3] <- "PC1.percent"
-MMxStats %>% 
-gather(key= .MMxStats, value=value, 2:10 ) %>%
-ggplot( ., aes(x= .MMxStats, y = value, color = .MMxStats, label = .sp), varwidth = T) +
-  geom_text(size =2, vjust = 1)  +
-  theme_bw() +
-  geom_boxplot(alpha = 0) +
-  facet_wrap(~.MMxStats, scales="free") +
-  ggtitle("Mean matrix evolutionary statistics by specie") +
-  theme(axis.ticks = element_blank(), axis.text.x = element_blank(), axis.title.x = element_blank()) +
-  theme(plot.title = element_text(lineheight=.8, face="bold")) + 
-  theme(legend.position="none")
 
-
-MMxStats<- cov.list %>% ldply(function(x) MeanMatrixStatistics(x))
-names(MMxStats)[1] <- ".sp"
-MMxStats[,1] <- factor(unique(MMxStats[,1]), levels = unique(MMxStats[,1]))
-names(MMxStats)[2] <- "R^2"
-names(MMxStats)[3] <- "PC1.percent"
-
-MMxStats %>% .[, c(1:3,9)] %>%
-  gather(key= .MMxStats, value=value, 2:4 ) %>% 
-  ggplot(aes(y=  value, x = .sp, fill = .MMxStats ), varwidth = T) +
-  geom_bar(aes(y=  value, x = .sp, fill = .MMxStats ), stat = "identity", position="dodge")+
-  #scale_y_continuous(breaks = seq(0,0.6, by = 0.1) )+
-  theme_bw() +
-  facet_grid(~.MMxStats) +
-  coord_flip() +
-  ggtitle("Mean matrix evolutionary statistics by specie") +
-    theme(axis.text.y = element_text(face = "italic")) +
-  theme(axis.title.x = element_blank()) +
-  theme(axis.title.y = element_blank()) +
-  theme(plot.title = element_text(lineheight=.8, face="bold")) +
-  scale_fill_grey() +
-  #scale_fill_brewer(palette="Spectral") +
-  scale_colour_brewer(name = "Mean Matrix Statistics") + 
-  theme(legend.position="none")
-
-
-MMxStats<- cov.mx[mask] %>% ldply(function(x) MeanMatrixStatistics(x))
-names(MMxStats)[1] <- ".sp"
-MMxStats %>% 
-  ggplot( ., aes(x = MeanSquaredCorrelation, y = ICV, color = .sp, label = .sp), varwidth = T) +
-  geom_text(size =4, vjust = 1 )  +
-  stat_smooth(method="lm", aes(group=1)) +
-  scale_x_continuous(limits = c(0.03, 0.4)) +
-  scale_y_continuous(limits = c(1.5, 4.5)) +
-  theme_bw() +
-  geom_point() +
-  #geom_text(x = 0.5, y = 3, label = "r.squared = 0.899 \n 38 DF,  p-value: < 2.2e-16") + 
-  ggtitle("R2 x ICV") +
-  theme(legend.position  ="none") +
-  theme(plot.title = element_text(lineheight=.8, face="bold"))
-summary(lm(ICV ~ MeanSquaredCorrelation, data = MMxStats))
-
-MMxStats %>% 
-  ggplot( ., aes(x = flexibility, y = evolvability, color = .sp, label = .sp), varwidth = T) +
-  geom_text(size =5, vjust = 1) +
-  stat_smooth(method="lm", aes(group=1)) +
-  #scale_x_continuous(limits = c(0.23, 0.5)) +
-  #scale_y_continuous(limits = c(1, 7)) +
-  theme_bw() +
-  geom_point() +
-  #geom_text(x = 0.35, y = 3.5, label = "r.squared = 0.149 \n 38 DF,  p-value: 0.00803") + 
-  ggtitle("flexibility x evolvability") +
-  theme(plot.title = element_text(lineheight=.8, face="bold")) +
-  theme(legend.position  ="none") 
-summary(lm(flexibility ~ evolvability , data = MMxStats))
-
-names (MMxStats)[3] <- "PC1.percent"
-MMxStats %>% 
-  ggplot( ., aes(x = flexibility, y = PC1.percent, color = .sp, label = .sp), varwidth = T) +
-  geom_text(size =4, vjust = 1)  +
-  stat_smooth(method="lm", aes(group=1)) +
-  #scale_x_continuous(limits = c(0.1, 0.7)) +
-  #scale_y_continuous(limits = c(1, 7)) +
-  theme_bw() +
-  geom_point() +
-  #geom_text(x = 0.4,  y = 0.74, label = "r.squared = 0.8992 \n 38 DF,  p-value: < 2.2e-16") + 
-  ggtitle("flexibility x PC1.percent") +
-  theme(legend.position  ="none") +
-  theme(plot.title = element_text(lineheight=.8, face="bold"))
-
-summary(lm(flexibility ~ PC1.percent , data = MMxStats))
-
-gm.mean <- sp.main.data[mask] %>% ldply(function(x) x$gm.mean)
-
-MMxStats.gm<- cbind(MMxStats, gm.mean[,2])
-names(MMxStats.gm)[11] <- "gm.mean"
-
-names (MMxStats.gm)[3] <- "PC1.percent"
-MMxStats.gm %>%
-  ggplot( ., aes(x = gm.mean, y = PC1.percent, color = .sp, label = .sp), varwidth = T) +
-  geom_text(size =5, vjust = 1)  +
-  stat_smooth(method="lm", aes(group=1)) +
-  #scale_x_continuous(limits = c(0.1, 0.7)) +
-  #scale_y_continuous(limits = c(1, 7)) +
-  theme_bw() +
-  geom_point() +
-  #geom_text(x = 0.4,  y = 0.74, label = "r.squared = 0.8992 \n 38 DF,  p-value: < 2.2e-16") + 
-  ggtitle("gm.mean x PC1.percent") +
-  theme(legend.position  ="none") +
-  theme(plot.title = element_text(lineheight=.8, face="bold"))
-
-summary(lm(gm.mean ~ PC1.percent , data = MMxStats.gm))
 
