@@ -14,7 +14,7 @@ AddMCReps <- function(x){
   return(x)
   
 }
-registerDoParallel(cores = 5)
+registerDoParallel(cores = 2)
 current.data <- sp.main.data
 sp.main.data.t <- current.data %>% llply(AddMCReps, .progress = "text")
 
