@@ -141,12 +141,15 @@ names(COr.PHyHM) <- c("Matrix.Similarity.RS", "Harmonic.Mean", "Phylogenetic.Dis
   #scale_x_continuous(limits = c(0.1, 0.7)) +
   #scale_y_continuous(limits = c(1, 7)) +
   theme_bw() +
-  geom_text(x = 26,  y = 0.4, label = "r.squared = 0.35 \n 818 DF,  p-value: < 2.2e-16 \n MatrixCor = -0.5770781 ", color = "red", size = 2) + 
+  geom_text(x = 26,  y = 0.4, label = "r.squared = 0.35 \n 818 DF,  p-value: < 2.2e-16 \n MatrixCor = -0.577 ", color = "red", size = 2) + 
   #ggtitle("Geometric mean x PC1.percent") +
   theme(legend.position  ="none") +
-  theme(plot.title = element_text(lineheight=.8, face="bold"))
+  theme(plot.title = element_text(lineheight=.8, face="bold")) +
+        xlab( "Phylogenetic distance") + 
+        ylab("Matrix similarity by RS")
 
 summary(lm(Matrix.Similarity.RS ~ Phylogenetic.Distance , data = COr.PHyHM))
+MatrixCor(phylo.dist.all.at.tree[rownames( mx.all.at.tree), rownames( mx.all.at.tree)], mx.compare$BS.RS$correlations[-c(41,43:44), -c(41,43:44)])
 
 
 Plot.HM.SIM<- 
@@ -160,9 +163,29 @@ Plot.HM.SIM<-
   geom_text(x = 3.8,  y = 0.4, label = "r.squared = 0.328 \n 818 DF,  p-value: < 2.2e-16 \n MatrixCor = 0.602", color = "red", size = 2) + 
   #ggtitle("Geometric mean x PC1.percent") +
   #theme(legend.position  ="none") +
-  theme(plot.title = element_text(lineheight=.8, face="bold"))
+  theme(plot.title = element_text(lineheight=.8, face="bold") ) +
+        xlab( "Harmonic mean") +
+        ylab("Matrix similarity by RS")
 
 summary(lm(Matrix.Similarity.RS ~ log(Harmonic.Mean) , data = COr.PHyHM))
-
+MatrixCor(as.matrix(harm_matrix)[-c(41, 43:44), -c(41, 43:44)], mx.compare$BS.RS$correlations[-c(41,43:44), -c(41,43:44)])
 
 plot_grid(Plot.GM.PC1, Plot.R2.PC1, Plot.HM.SIM, Plot.Phy.SIM, labels = LETTERS[1:4], ncol = 2)
+
+Plot.HM.PHy<- 
+  COr.PHyHM %>% 
+  ggplot( ., aes(x = log(Harmonic.Mean), y = Phylogenetic.Distance), varwidth = T) +
+  geom_point(color = "grey") +
+  stat_smooth(method="lm", aes(group=1), color = "red") +
+  #scale_x_continuous(limits = c(0.1, 0.7)) +
+  #scale_y_continuous(limits = c(1, 7)) +
+  theme_bw() +
+  geom_text(x = 3.8,  y = 0.4, label = "r.squared = 0.05665 \n 818 DF,  p-value: 5.02e-12 \n MatrixCor = -0.228", color = "red", size = 2) + 
+  #ggtitle("Geometric mean x PC1.percent") +
+  #theme(legend.position  ="none") +
+  theme(plot.title = element_text(lineheight=.8, face="bold") ) +
+  xlab( "Harmonic mean") +
+  ylab("Phylogenetic distance")
+
+summary(lm(Phylogenetic.Distance ~ log(Harmonic.Mean) , data = COr.PHyHM))
+MatrixCor(as.matrix(harm_matrix)[-c(41, 43:44), -c(41, 43:44)], phylo.dist.all.at.tree[rownames( mx.all.at.tree), rownames( mx.all.at.tree)])
