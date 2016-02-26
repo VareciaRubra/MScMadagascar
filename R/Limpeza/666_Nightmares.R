@@ -25,5 +25,6 @@ temp.microcebus <- cov(sp.main.data$Microcebus_griseorufus$ed[removed,])
 as.matrix(eigen (temp.microcebus) $ values/sum (eigen (temp.microcebus) $ values) )
 as.matrix(eigen (sp.main.data$Microcebus_griseorufus$matrix$cov) $ values/sum (eigen (sp.main.data$Microcebus_griseorufus$matrix$cov) $ values) )
 
-mean(RandomSkewers(cov.x = cov.list, cov.y =  temp.microcebus, num.vectors = 100)$correlation)
+mean(RandomSkewers(cov.x = cov.list[names(cov.list) != "Microcebus_griseorufus"], cov.y =  temp.microcebus, num.vectors = 100)$correlation)
+
 
