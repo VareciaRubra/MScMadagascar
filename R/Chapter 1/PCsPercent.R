@@ -40,20 +40,18 @@ require (mvtnorm)
 
 registerDoParallel(cores = 2)
 
-MonteCarloPCPercent <- function (otu, iterations = 1000, parallel = FALSE) 
+MonteCarloPCPercent <- function (x, iterations = 1000, parallel = FALSE) 
 {## B_A = t(E) B E
   ## B é a sua matriz a ser rotacionada
   ## A é a sua matriz original referencia
   ## E sao os autovalores de A
-  with (otu, 
-        {
-          Aevec <- eigen (matrix$cov) $ vectors
-          Aeval <- eigen (matrix$cov) $ values
+          Aevec <- eigen (x$matrix$cov) $ vectors
+          Aeval <- eigen (x$matrix$cov) $ values
           PCpercent <- as.matrix(Aeval/sum (Aeval) )
           
           projec.B.A <- aaply (1:iterations, 1, .fun = 
                  function (i)
-                   {  B <- var (rmvnorm (sample.size, sigma = matrix$cov, method = 'svd') ) ## gerando valores a partir de uma distribuiçao que tem a cara da sua matriz
+                   {  B <- var (rmvnorm (x$sample.size, sigma = x$matrix$cov, method = 'svd') ) ## gerando valores a partir de uma distribuiçao que tem a cara da sua matriz
                       B.rot <- t(Aevec) %*% B %*% Aevec ## calculando a projeçao de B na A
                       diag(B.rot) / sum(Aeval) ## normalizando pelos autovalores da matriz original
                       
@@ -62,7 +60,7 @@ MonteCarloPCPercent <- function (otu, iterations = 1000, parallel = FALSE)
           gms <- aaply (1:iterations, 1, 
                  function (i)
                  {
-                   eds <- rmvnorm (sample.size, mean= ed.means, sigma = matrix$cov, method = 'svd') ## gerando valores a partir duma distribuiçao com o jeitao da sua matriz e com média igual a da sp
+                   eds <- rmvnorm (x$sample.size, mean= x$ed.means, sigma = x$matrix$cov, method = 'svd') ## gerando valores a partir duma distribuiçao com o jeitao da sua matriz e com média igual a da sp
                    mean(aaply (eds, 1, function (x) exp (mean (log (x) ))) )
                    # calculando a média geométrica média naquela populaçao amostrada nessa iteraçao
                    }, .parallel = parallel)
@@ -71,142 +69,60 @@ MonteCarloPCPercent <- function (otu, iterations = 1000, parallel = FALSE)
           names(intervalo.mc.pc) <- c("PC", "min", "max")
           intervalo.mc.pc$observed <- PCpercent   
         
-        
          intervalo.mc.gm <- data.frame("min" = sort(gms)[3], "max" = sort(gms)[97])
-         intervalo.mc.gm$observed <- gm.mean  
-         temp$intervalo.mc.gm <- as.data.frame(temp$intervalo.mc.gm)
+         intervalo.mc.gm$observed <- x$gm.mean  
+         intervalo.mc.gm <- as.data.frame(intervalo.mc.gm)
          
-Plot.PC <- temp$intervalo.mc.pc %>%
+  especie <-  unique (x$info$Especie) %>% gsub("_", ' ',.)
+  quantos <- x$sample.size
+quantos = 19
+  
+Plot.PC <- Variae$Tarsius_bancanus$intervalo.mc.pc %>% 
            ggplot(.) +
            geom_errorbar( aes(x= PC, ymin = min, ymax = max )) +
-           geom_point(aes(x= PC, y = observed), color = "red") +
+           geom_point(aes(x= PC, y = observed), color = "red" ) +
+          #geom_text(x = 38,  y = 0.75, label = c("sample size =\n",quantos) ) + 
+      scale_y_continuous(limits = c(0, 0.77), breaks = c(0.25, 0.5, 0.75) ) +
+      ggtitle(label = especie ) + 
+          theme(axis.text.x = element_text(angle = 90, size =5), 
+                  axis.text.y = element_text(size = 7),
+                  axis.title.x = element_text(size=7),
+                  plot.title = element_text(face = "bold.italic" )) +  
+  xlab("Principal component") +
+  ylab("% of variance") +
            theme_bw()
          
-Plot.gm <- temp$intervalo.mc.gm %>%
+Plot.gm <- intervalo.mc.gm %>%
            ggplot(.) +
-           geom_errorbar( aes(x= 1, ymin = min, ymax = max )) +
-           geom_point(aes(x= 1, y = observed), color = "red") +
+           geom_errorbar( aes(x= 2, ymin = min, ymax = max )) +
+           geom_point(aes(x= 2, y = observed), color = "red") +
+          scale_x_discrete(breaks=4, labels = especie)  +
+          ggtitle("Parametric samples from cov matrix ") +
+          theme(axis.text.x = element_blank(), 
+                axis.text.y = element_text(size = 7),
+                axis.title.y = element_text(angle = 90, size=17),
+                plot.title = element_text(lineheight=.8, face="bold")  ) + 
+          ylab("Geometric mean") + xlab("distribuition") + 
            theme_bw()
 
-Plotao <- plot_grid( Plot.PC, Plot.gm)
+Plotao <- plot_grid( Plot.PC, Plot.gm, labels = LETTERS[1:2])
+
           return(list("intervalo.mc.pc" = intervalo.mc.pc,
+                      "ProjectedPC" = projec.B.A, 
                       "intervalo.mc.gm" = intervalo.mc.gm,
                       "gms" = gms,
-                      "Plot" = Plotao))
-         
-                 })
+                      "Plotao" = Plotao,
+                      "Plot.PC" = Plot.PC,
+                      "Plot.GM" = Plot.gm))
+
 }
  
-temp <- MonteCarloPCPercent (sp.main.data$Microcebus_griseorufus, iterations = 100, parallel = TRUE)
-
+temp.chol <- MonteCarloPCPercent (x = sp.main.data$Varecia_variegata, iterations = 100, parallel = TRUE)
+temp$Plotao
 ############################ usando essa with o bagulho ta reciclando o objeto anterior! 
-Vairiae <- llply(sp.main.data[mask], .fun =  MonteCarloPCPercent, .progress = "text")
-
-
-MonteCarloPCPercent.nowith <- function (main.data, iterations = 1000, parallel = FALSE) 
-{## B_A = t(E) B E
-  ## B é a sua matriz a ser rotacionada
-  ## A é a sua matriz original referencia
-  ## E sao os autovalores de A
-  main.data <- sp.main.data$Microcebus_griseorufus
-  
-  Aevec <- eigen (main.data$matrix$cov) $ vectors
-  Aeval <- eigen (main.data$matrix$cov) $ values
-  PCpercent <- as.matrix(Aeval/sum (Aeval) )
-  
-  projec.B.A <- aaply (1:iterations, 1, .fun = 
-                         function (i)
-                         {  B <- var (rmvnorm (main.data$sample.size, sigma = main.data$matrix$cov, method = 'svd') ) ## gerando valores a partir de uma distribuiçao que tem a cara da sua matriz
-                         B.rot <- t(Aevec) %*% B %*% Aevec ## calculando a projeçao de B na A
-                         diag(B.rot) / sum(Aeval) ## normalizando pelos autovalores da matriz original
-                         
-                         }, .parallel = parallel) 
-  
-  gms <- aaply (1:iterations, 1, 
-                function (i)
-                {
-                  eds <- rmvnorm (main.data$sample.size, mean= main.data$ed.means, sigma = main.data$matrix$cov, method = 'svd') ## gerando valores a partir duma distribuiçao com o jeitao da sua matriz e com média igual a da sp
-                  mean(aaply (eds, 1, function (x) exp (mean (log (x) ))) )
-                  # calculando a média geométrica média naquela populaçao amostrada nessa iteraçao
-                }, .parallel = parallel)
-  
-  intervalo.mc.pc <- projec.B.A %>% adply(., 2, function (x) sort(x) [ c(3,97) ] )
-  names(intervalo.mc.pc) <- c("PC", "min", "max")
-  intervalo.mc.pc$observed <- PCpercent   
-  
-  
-  intervalo.mc.gm <- data.frame("min" = sort(gms)[3], "max" = sort(gms)[97])
-  intervalo.mc.gm$observed <- gm.mean  
-  temp$intervalo.mc.gm <- as.data.frame(temp$intervalo.mc.gm)
-  
-  Plot.PC <- temp$intervalo.mc.pc %>%
-    ggplot(.) +
-    geom_errorbar( aes(x= PC, ymin = min, ymax = max )) +
-    geom_point(aes(x= PC, y = observed), color = "red") +
-    theme_bw()
-  
-  Plot.gm <- temp$intervalo.mc.gm %>%
-    ggplot(.) +
-    geom_errorbar( aes(x= 1, ymin = min, ymax = max )) +
-    geom_point(aes(x= 1, y = observed), color = "red") +
-    theme_bw()
-  
-  Plotao <- plot_grid( Plot.PC, Plot.gm)
-  return(list("intervalo.mc.pc" = intervalo.mc.pc,
-              "intervalo.mc.gm" = intervalo.mc.gm,
-              "gms" = gms,
-              "Plot" = Plotao))
-  
-  
-}
-
-temp <- MonteCarloPCPercent (sp.main.data$Indri_indri, iterations = 100, parallel = TRUE)
-  
+Variae <- llply(sp.main.data[mask], .fun =  MonteCarloPCPercent, .progress = "text")
+Variae$Loris_tardigradus$Plot
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-MonteCarloVarSize <- function (otu, iterations = 1000, parallel = FALSE) 
-{
-  with (otu, 
-        {
-          return (aaply (1:iterations, 1, 
-                         function (i)
-                         {
-                           eds <- (rmvnorm (sample.size, mean= ed.means, sigma = matrix$cov, method = 'chol'))
-                           gms <- aaply (eds, 1, function (x) exp (mean (log (x) )))
-                           var (gms)
-                         }, .parallel = parallel))
-          
-          
-        })
-}
-tmp <- MonteCarloVarSize (sp.main.data$Indri_indri, iterations = 100, parallel = TRUE)
-
-gm.var.dist <- llply(sp.main.data[mask], .fun = MonteCarloVarSize, .progress = "text")
-
-tab.rep.mx.mix
-
-exp (mean (log (sp.main.data$Indri_indri$ed.means))) / sqrt
-
-
-
-tmp * 39
-
-
-
-
-
+gm.mean[mask,] %>% tbl_df %>% ggplot(., aes(x = Especie, y = V1)) 
