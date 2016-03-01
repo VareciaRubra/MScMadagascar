@@ -2,8 +2,10 @@
   current.data <- gen.main.data
   
   cov.mx <- current.data %>% llply(function(x) x$matrix$cov)
+  #cov.sizeless <- current.data %>% llply(function(x) x$matrix$cov.sizeless ) #### só pra sizeless
   cor.mx <- current.data %>% llply(function(x) x$matrix$cor)
   mx.rep <- current.data %>% ldply(function(x) x$Mx.Rep$BootsRep) 
+  #mx.rep.sizeless <- current.data %>% ldply(function(x) x$size.mx.rep.rs$cov.sizeless) #### só pra sizeless
   mx.rep.mc <- sp.main.data.t%>% ldply(function(x) x$Mx.Rep$MCRep) 
   mx.rep.all <- cbind(mx.rep, mx.rep.mc[,-1])
   n.size <- current.data %>% ldply(function(x) x$sample.size) 
@@ -29,6 +31,7 @@
   #Saguinus_P.cor <- cov2cor(Saguinus_P.cov)
   
   cov.list <- cov.mx[mask]
+  cov.list <- cov.sizeless[mask]
   cov.list$Saguinus_P.cov <- Saguinus_P.cov
   cov.list$Saguinus_G.cov <- Saguinus_G.cov
   
@@ -36,14 +39,16 @@
   cor.list$Saguinus_P.cor <- Saguinus_P.cor
   cor.list$Saguinus_G.cor <- Saguinus_G.cor
   
-  #safe.copy.rep.list <- rep.list
+  #safe.copy.rep.list <- rep.list 
   mx.rep.all <- cbind(mx.rep, mx.rep.mc[,-1])
   rep.list <- mx.rep.all[mask, ]
+  #rep.list <-  mx.rep.sizeless[mask,] #### só pra sizeless
   row.names(rep.list) <- rep.list$Especie
   rep.list$Especie <- as.character(rep.list$Especie)
   rep.list[dim(rep.list)[1] +1, ] <- c("Saguinus_P", rep(0.97, 7) )
   rep.list[dim(rep.list)[1] +1, ] <- c("Saguinus_G", rep(0.75, 7) )
   row.names(rep.list) <- rep.list$Especie
+  #colnames(rep.list) <- c("Especie", "BS.rs")  #### só pra sizeless
   rep.list$Especie <- factor(rep.list$Especie, levels = unique(rep.list$Especie) )
   rep.list$BS.rs <- as.numeric(rep.list$BS.rs)
   rep.list$BS.krz <- as.numeric(rep.list$BS.krz)
@@ -56,7 +61,7 @@
   str(rep.list)
 
   sample.size.list <- c(n.size[mask,2], 130, 230)
-  
+
   safe.copy.mx.compare <- mx.compare
   mx.compare = vector("list", 7)
   mx.compare[1:7] <- NA
@@ -132,6 +137,8 @@
   }
   
   ########################## Montando os plots de combinação valores de comparação corrigidos, nao corrigidos e por método
+
+  Combine.Mx.Plot(Mx1 =   mx.compare.sizeless$RS$correlations, Mx2 = t(mx.compare.log$RS$correlations), prob =   mx.compare.sizeless$RS$probabilities, diag.info = sample.size.list, titulo = "Species matrices comparisons")
   
   plot.mix.raw<- Combine.Mx.Plot(Mx1 = t(mx.compare$BS.RS$correlations), Mx2 = t(mx.compare$BS.KRZ$correlations), prob = mx.compare$BS.RS$probabilities, diag.info = sample.size.list, titulo = "Species matrices comparisons")
   plot.mix.correct.rep.mx<- Combine.Mx.Plot(Mx1 = mx.compare$BS.RS$correlations, Mx2 = mx.compare$BS.KRZ$correlations, diag.info = sample.size.list, titulo = "Matrices comparisons")
@@ -411,4 +418,6 @@ data.frame ('sd.gm' = sd.gm[2],  'gm' = gm.mean[,2], 'Sample' = n.size [mask, -1
     theme(legend.position="none")
 
 
-
+  PhyloW(tree = tree.indridae, 
+         tip.data = cov.indridae, 
+         tip.sample.size = n.size.indridae )
