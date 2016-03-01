@@ -199,7 +199,11 @@ r2.plot <- VarR2%>% ggplot() +
   #  scale_y_continuous(limits = c(0, 0.77), breaks = c(0.25, 0.5, 0.75) ) +
   xlab("") + 
   ylab("Mean squared correlation") +
-  theme(axis.text.x = element_text(family =  "italic", size =19)) + 
   coord_flip() +
+  
   theme_bw()
+
+pc.plot <- pc.plot + theme(axis.text.y = element_blank())  
+
+plot_grid(r2.plot, pc.plot, labels = LETTERS[1:2])
 
