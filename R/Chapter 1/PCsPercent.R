@@ -38,7 +38,7 @@ PcPercent.1to4 %>%
 
 require (mvtnorm)
 
-registerDoParallel(cores = 2)
+registerDoParallel(cores = 5)
 
 MonteCarloPCPercent <- function (x, iterations = 1000, parallel = FALSE) 
 {## B_A = t(E) B E
@@ -53,7 +53,7 @@ MonteCarloPCPercent <- function (x, iterations = 1000, parallel = FALSE)
                  function (i)
                    {  B <- var (rmvnorm (x$sample.size, sigma = x$matrix$cov, method = 'svd') ) ## gerando valores a partir de uma distribuiçao que tem a cara da sua matriz
                       B.rot <- t(Aevec) %*% B %*% Aevec ## calculando a projeçao de B na A
-                      diag(B.rot) / sum(Aeval) ## normalizando pelos autovalores da matriz original
+                      diag(B.rot) / sum( diag(B.rot) ) ## normalizando pelos autovalores da matriz original
                       
                    }, .parallel = parallel) 
           
@@ -65,19 +65,32 @@ MonteCarloPCPercent <- function (x, iterations = 1000, parallel = FALSE)
                    # calculando a média geométrica média naquela populaçao amostrada nessa iteraçao
                    }, .parallel = parallel)
 
-          intervalo.mc.pc <- projec.B.A %>% adply(., 2, function (x) sort(x) [ c(3,97) ] )
+         r2.dists<- aaply (1:iterations, 1, 
+                            function (i)
+                            {
+                              mc.mx <- cov(rmvnorm (x$sample.size, mean= x$ed.means, sigma = x$matrix$cov, method = 'svd') )## gerando valores a partir duma distribuiçao com o jeitao da sua matriz e com média igual a da sp
+                              CalcR2(mc.mx) 
+                              
+                            }, .parallel = parallel)
+        
+          intervalo.mc.pc <- projec.B.A %>% adply(., 2, function (x) sort(x)[ c(3,97) ] )
           names(intervalo.mc.pc) <- c("PC", "min", "max")
           intervalo.mc.pc$observed <- PCpercent   
         
-         intervalo.mc.gm <- data.frame("min" = sort(gms)[3], "max" = sort(gms)[97])
-         intervalo.mc.gm$observed <- x$gm.mean  
-         intervalo.mc.gm <- as.data.frame(intervalo.mc.gm)
+          intervalo.mc.gm <- data.frame("min" = sort(gms)[3], "max" = sort(gms)[97])
+          intervalo.mc.gm$observed <- x$gm.mean  
+          intervalo.mc.gm <- as.data.frame(intervalo.mc.gm)
          
+          intervalo.mc.r2<- sort(r2.dists)[ c(3,97) ] 
+          intervalo.mc.r2$observed <- mean(r2.dists) 
+          intervalo.mc.r2 <- as.data.frame(intervalo.mc.r2)
+          names(intervalo.mc.r2) <- c("min", "max", "observed")  
+          
   especie <-  unique (x$info$Especie) %>% gsub("_", ' ',.)
   quantos <- x$sample.size
-quantos = 19
+
   
-Plot.PC <- Variae$Tarsius_bancanus$intervalo.mc.pc %>% 
+Plot.PC <- intervalo.mc.pc %>% 
            ggplot(.) +
            geom_errorbar( aes(x= PC, ymin = min, ymax = max )) +
            geom_point(aes(x= PC, y = observed), color = "red" ) +
@@ -97,36 +110,96 @@ Plot.gm <- intervalo.mc.gm %>%
            geom_errorbar( aes(x= 2, ymin = min, ymax = max )) +
            geom_point(aes(x= 2, y = observed), color = "red") +
           scale_x_discrete(breaks=4, labels = especie)  +
-          ggtitle("Parametric samples from cov matrix ") +
+          ggtitle("") +
           theme(axis.text.x = element_blank(), 
                 axis.text.y = element_text(size = 7),
                 axis.title.y = element_text(angle = 90, size=17),
                 plot.title = element_text(lineheight=.8, face="bold")  ) + 
-          ylab("Geometric mean") + xlab("distribuition") + 
+          ylab("Geometric mean") + xlab("") + 
            theme_bw()
 
-Plotao <- plot_grid( Plot.PC, Plot.gm, labels = LETTERS[1:2])
+Plot.r2 <- intervalo.mc.r2 %>% 
+  ggplot(.) +
+  geom_errorbar(aes(x= 2, ymin = min, ymax = max )) +
+  geom_point(aes(x= 2, y = observed), color = "red") +
+  scale_x_discrete(breaks=4, labels = especie)  +
+  theme(axis.text.x = element_blank(), 
+        axis.text.y = element_text(size = 7),
+        axis.title.y = element_text(angle = 90, size=17),
+        plot.title = element_text(lineheight=.8, face="bold")  ) + 
+  ylab("Mean squared correlation (r2)") + xlab("") + 
+  theme_bw()
+
+Plotao <- plot_grid( Plot.PC, Plot.gm, Plot.r2, labels = LETTERS[1:3], ncol = 3)
 
           return(list("intervalo.mc.pc" = intervalo.mc.pc,
                       "ProjectedPC" = projec.B.A, 
                       "intervalo.mc.gm" = intervalo.mc.gm,
                       "gms" = gms,
+                      "intervalo.mc.r2" = intervalo.mc.r2,
                       "Plotao" = Plotao,
+                      "Plot.RS" = Plot.r2,
                       "Plot.PC" = Plot.PC,
-                      "Plot.GM" = Plot.gm))
+                      "Plot.GM" = Plot.gm ) )
 
 }
  
-mc.pc.percent <- MonteCarloPCPercent (x = sp.main.data, iterations = 100, parallel = TRUE)
+temp <- MonteCarloPCPercent (x = sp.main.data$Microcebus_griseorufus, iterations = 100, parallel = TRUE)
 temp$Plotao
 ############################ usando essa with o bagulho ta reciclando o objeto anterior! 
-Variae <- llply(sp.main.data[mask], .fun =  MonteCarloPCPercent, .progress = "text")
+Variae <- llply(.data = sp.main.data[mask], .fun =  MonteCarloPCPercent, .progress = "text", iterations = 100, parallel = TRUE )
 
-Variae$Tarsius_bancanus$ProjectedPC[,1:4]
+Variae$Lemur_catta$intervalo.mc.pc[1:4]
 
 
-Var1to4<- Variae %>% ldply(function (x) x$ProjectedPC[,1])
+Var1to4<- Variae %>% ldply(function (x) x$intervalo.mc.pc[1:4,])
+Var1to4$.id %<>% gsub("_", ' ',.)
+Var1to4$.id <- factor(Var1to4$.id, levels = unique(Var1to4$.id)[42:1])
+Var1to4$PC <- factor(Var1to4$PC, levels = unique(Var1to4$PC)[4:1])
+
 str(Var1to4)
-rownames(Var1to4) <- names(Variae)
+#Var1to4$.id <- as.character(Var1to4$.id)
 
-Var1to4 <- ggplot() + geom_bar()
+
+Var1to4[Var1to4$.id == "Indri_indri" ,]
+Var1to4[Var1to4$.id == "Loris_tardigradus" ,]
+Var1to4[Var1to4$.id == "Lemur_catta" ,]
+Var1to4$.id %<>% gsub("_", ' ',.)
+
+pc.plot <- Var1to4 %>% ggplot() + 
+            geom_linerange(aes(x = .id, ymin = min, ymax = max, color = PC, size = PC), alpha = 0.1)+
+            geom_point(aes(x = .id, y = observed, color = PC )) +
+            #facet_wrap(~ PC, scales = 'free') +
+            scale_colour_brewer(palette = "Spectral", direction = -1) +
+            xlab("") + ylab("% of variance") +
+  theme(axis.text.x = element_text(family =  "italic", size =19)) + 
+  #theme(legend.position="none") +
+#scale_x_continuous(limits = c(0, 0.9), breaks = c(0.2, 0.4, 0.6, 0.8)) 
+            coord_flip() +
+            theme_bw()
+
+VarGM<- Variae %>% ldply(function (x) x$intervalo.mc.gm)
+VarGM$.id %<>% gsub("_", ' ',.)
+VarGM$.id <- factor(VarGM$.id, levels = unique(VarGM$.id)[42:1])
+
+VarGM%>% ggplot() + 
+  geom_errorbar(aes(x = .id, ymin = min, ymax = max)) +
+  geom_point(aes(x = .id, y = observed)) +
+  scale_x_discrete()  +
+  #  scale_y_continuous(limits = c(0, 0.77), breaks = c(0.25, 0.5, 0.75) ) +
+  coord_flip()
+
+VarR2<- Variae %>% ldply(function (x) x$intervalo.mc.r2)
+VarR2$.id %<>% gsub("_", ' ',.)
+VarR2$.id <- factor(VarR2$.id, levels = unique(VarR2$.id)[42:1])
+r2.plot <- VarR2%>% ggplot() + 
+  geom_linerange(aes(x = .id, ymin = min, ymax = max), size =4, alpha = 0.1) +
+  geom_point(aes(x = .id, y = observed)) +
+  scale_x_discrete()  +
+  #  scale_y_continuous(limits = c(0, 0.77), breaks = c(0.25, 0.5, 0.75) ) +
+  xlab("") + 
+  ylab("Mean squared correlation") +
+  theme(axis.text.x = element_text(family =  "italic", size =19)) + 
+  coord_flip() +
+  theme_bw()
+

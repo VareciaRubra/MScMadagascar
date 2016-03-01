@@ -65,24 +65,15 @@ abline(coef = model.harmonic.mean$coefficients, col = 'red')
 title(main = 'Comparison value corrected by MC Repetability')
 
 
-Harm.Mean <- harm_matrix[-c(43:44), -c(43:44)]
+Harm.Mean <- harm_matrix[-c(41, 43:44), -c(41, 43:44)]
 Harm.Mean <- Harm.Mean[upper.tri(Harm.Mean, diag = F)]
 par(mfrow= c(1,2))
-Similaridade.Mx  <- mx.compare$MC.RS$correlations[-c(43:44), -c(43:44)]
+Similaridade.Mx  <- mx.compare$MC.RS$correlations[-c(41, 43:44), -c(41, 43:44)]
 Similaridade.Mx <- Similaridade.Mx [lower.tri(Similaridade.Mx, diag = F)]
 model.harmonic.mean <- lm(Similaridade.Mx ~  log(Harm.Mean))
 plot(y = Similaridade.Mx, x = log(Harm.Mean), pch = 20, col = 'grey', xlab = "log sample sizes' harmonic mean", ylab = 'Matrices similarity via RS', xlim=c(2.5,4.8), ylim = c(0.2, 0.9)) 
 abline(coef = model.harmonic.mean$coefficients, col = 'red')
 title(main = 'Raw value of comparisson')
-
-Similaridade.Mx  <- mx.compare$MC.RS$correlations[-c(43:44), -c(43:44)]
-Similaridade.Mx <- Similaridade.Mx [upper.tri(Similaridade.Mx, diag = F)]
-model.harmonic.mean <- lm(Similaridade.Mx ~  log(Harm.Mean))
-plot(y = Similaridade.Mx, x = log(Harm.Mean), pch = 20, col = 'grey', xlab = "log sample sizes' harmonic mean", ylab = 'Matrices similarity via RS', xlim=c(2.5,4.8), ylim = c(0.2, 0.9)) 
-abline(coef = model.harmonic.mean$coefficients, col = 'red')
-title(main = 'Comparisson value corrected by MC Repetability')
-
-
 
 plot(y = Similaridade.Mx, x = log(Harm.Mean), pch = 20, col = 'grey', xlab = "log sample sizes' harmonic mean", ylab = 'Matrices similarity via RS' ) 
 
@@ -154,21 +145,23 @@ MatrixCor(phylo.dist.all.at.tree[rownames( mx.all.at.tree), rownames( mx.all.at.
 
 Plot.HM.SIM<- 
   COr.PHyHM %>% 
-  ggplot( ., aes(x = log(Harmonic.Mean), y = Matrix.Similarity.RS), varwidth = T) +
+  ggplot( ., aes(x = Harmonic.Mean.inverso, y = Matrix.Similarity.RS), varwidth = T) +
   geom_point(color = "grey") +
   stat_smooth(method="lm", aes(group=1), color = "red") +
   #scale_x_continuous(limits = c(0.1, 0.7)) +
   #scale_y_continuous(limits = c(1, 7)) +
   theme_bw() +
-  geom_text(x = 3.8,  y = 0.4, label = "r.squared = 0.328 \n 818 DF,  p-value: < 2.2e-16 \n MatrixCor = 0.602", color = "red", size = 2) + 
+  geom_text(x = 0.02,  y = 0.4, label = "r.squared = 0.3518 \n 818 DF,  p-value: < 2.2e-16 \n MatrixCor = -0.65", color = "red", size = 2) + 
   #ggtitle("Geometric mean x PC1.percent") +
   #theme(legend.position  ="none") +
   theme(plot.title = element_text(lineheight=.8, face="bold") ) +
-        xlab( "Harmonic mean") +
+        xlab( "1/ sample size harmonic mean") +
         ylab("Matrix similarity by RS")
 
-summary(lm(Matrix.Similarity.RS ~ log(Harmonic.Mean) , data = COr.PHyHM))
-MatrixCor(as.matrix(harm_matrix)[-c(41, 43:44), -c(41, 43:44)], mx.compare$BS.RS$correlations[-c(41,43:44), -c(41,43:44)])
+COr.PHyHM$Harmonic.Mean.inverso<- 1/(COr.PHyHM$Harmonic.Mean)
+
+summary(lm(Matrix.Similarity.RS ~ COr.PHyHM$Harmonic.Mean.inverso, data = COr.PHyHM))
+MatrixCor(1/(as.matrix(harm_matrix)[-c(41, 43:44), -c(41, 43:44)] ), mx.compare$BS.RS$correlations[-c(41,43:44), -c(41,43:44)])
 
 plot_grid(Plot.GM.PC1, Plot.R2.PC1, Plot.HM.SIM, Plot.Phy.SIM, labels = LETTERS[1:4], ncol = 2)
 
@@ -190,3 +183,6 @@ Plot.HM.PHy<-
 summary(lm(Phylogenetic.Distance ~ log(Harmonic.Mean) , data = COr.PHyHM))
 MatrixCor(as.matrix(harm_matrix)[-c(41, 43:44), -c(41, 43:44)], phylo.dist.all.at.tree[rownames( mx.all.at.tree), rownames( mx.all.at.tree)])
 
+
+
+mx.compare$BS.RS$correlations -6.437 /harm_matrix

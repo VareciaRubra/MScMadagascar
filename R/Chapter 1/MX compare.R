@@ -108,7 +108,11 @@
     sig.mx <- t(sig.mx)
     melted.sig <- melt(sig.mx)
     names(melted.sig) <- c("Sp1", "Sp2", "prob")
+    melted.sig$black
     Prob <- melted.sig$prob
+    
+    
+    if method !=RS 
 
     mixed.mx = melt(mat_data) 
     mixed.mx.position =  mixed.mx
@@ -125,12 +129,12 @@
       scale_y_discrete(limits = rev(levels(mixed.mx.position$Var1))) +
       # scale_x_discrete() +
       theme_minimal() +  
-      theme(axis.text.x = element_text(angle = 270, hjust = 0, face = 'italic', size =7),
-            axis.text.y = element_text(face = "italic", size =10),
+      theme(axis.text.x = element_text(angle = 270, hjust = 0, face = 'italic', size =13),
+            axis.text.y = element_text(face = "italic", size =13),
             axis.ticks = element_line(size = 0),
             legend.title = element_text(size = 20),
             legend.text = element_text(size = 20),
-            rect = element_blank(), line = element_blank())
+            rect = element_blank(), line   Steppan$Plot$KRZ = element_blank())
     
     return(mixed.mx.cute.plot)
     
@@ -139,6 +143,14 @@
   ########################## Montando os plots de combinação valores de comparação corrigidos, nao corrigidos e por método
 
   Combine.Mx.Plot(Mx1 =   mx.compare.sizeless$RS$correlations, Mx2 = t(mx.compare.log$RS$correlations), prob =   mx.compare.sizeless$RS$probabilities, diag.info = sample.size.list, titulo = "Species matrices comparisons")
+  Steppan <- list("RS" = mx.compare$BS.RS$correlations - (-6.437 /harm_matrix),
+                  "KRZ" = mx.compare$BS.KRZ$correlations - (-6.437 /harm_matrix))
+  
+    Steppan$Plot$RS <- Combine.Mx.Plot(Mx1 = t(mx.compare$BS.RS$correlations), Mx2 = t(Steppan$RS) , prob = mx.compare$BS.RS$probabilities, diag.info = c(n.size[mask,2], 130, 12), titulo = "Species matrices comparisons via Random Skewers")
+  Steppan$Plot$RS
+  Steppan$Plot$KRZ <- Combine.Mx.Plot(Mx1 = (mx.compare$BS.KRZ$correlations), Mx2 = t(Steppan$KRZ) , prob = mx.compare$BS.RS$probabilities, diag.info = c(n.size[mask,2], 130, 12), titulo = "Species matrices comparisons via Krzanowski")
+  Steppan$Plot$KRZ   
+  
   
   plot.mix.raw<- Combine.Mx.Plot(Mx1 = t(mx.compare$BS.RS$correlations), Mx2 = t(mx.compare$BS.KRZ$correlations), prob = mx.compare$BS.RS$probabilities, diag.info = sample.size.list, titulo = "Species matrices comparisons")
   plot.mix.correct.rep.mx<- Combine.Mx.Plot(Mx1 = mx.compare$BS.RS$correlations, Mx2 = mx.compare$BS.KRZ$correlations, diag.info = sample.size.list, titulo = "Matrices comparisons")
