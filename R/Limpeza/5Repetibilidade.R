@@ -147,17 +147,13 @@ REP %>% na.omit(.) %>%
 ############# de densidade
 REP %>% na.omit(.) %>%
   ggplot(., aes_string(x = "Repetability" )) +
-  geom_density(aes(group = Trait))+
+  geom_density(aes(group = Trait)) +
 
   #geom_text(aes(group = "Trait", label = Specie)) +
   #facet_wrap(~Trait, scale="free_y", ncol =5, nrow = 8) +
   theme_bw() +
   theme(legend.position="none") +
-  theme(axis.text.x = element_text(size =20), 
-        axis.text.y = element_text(size = 20)
-        axis.title.x = element_text(size =),
-        #axis.title.y = element_text(size=17),
-        ) +
+  ylab("Density")
   #ggtitle("Traits Repetabilities") + 
   theme(plot.title = element_text(lineheight=.8, face="bold", size = 8)) 
 

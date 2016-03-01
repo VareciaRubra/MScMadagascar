@@ -6,7 +6,6 @@ correct.euoticus.mx <- CalculateMatrix(correct.euoticus)
 
 max(RandomSkewers(cov.x = cov.list, cov.y = correct.euoticus.mx, num.vectors = 100)$correlation)
 
-
 ########## Microcebus griseorrufus
 current.data <- Sp.raw.main.data$Microcebus_griseorufus
 current.data %>% 
@@ -24,8 +23,6 @@ temp.microcebus <- cov(sp.main.data$Microcebus_griseorufus$ed[removed,])
 RandomSkewers(cov.x = cov.list[names(cov.list) != "Microcebus_griseorufus"], cov.y =  temp.microcebus, num.vectors = 100)
 as.matrix(eigen (temp.microcebus) $ values/sum (eigen (temp.microcebus) $ values) )
 as.matrix(eigen (sp.main.data$Microcebus_griseorufus$matrix$cov) $ values/sum (eigen (sp.main.data$Microcebus_griseorufus$matrix$cov) $ values) )
-
-
 
 mean(RandomSkewers(cov.x = cov.list[names(cov.list) != "Microcebus_griseorufus"], cov.y =  temp.microcebus, num.vectors = 100)$correlation)
 mean(RandomSkewers(cov.x = cov.list[names(cov.list) != "Microcebus_griseorufus"], cov.y =  cov.list$Microcebus_griseorufus, num.vectors = 100)$correlation)

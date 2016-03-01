@@ -189,3 +189,4 @@ Plot.HM.PHy<-
 
 summary(lm(Phylogenetic.Distance ~ log(Harmonic.Mean) , data = COr.PHyHM))
 MatrixCor(as.matrix(harm_matrix)[-c(41, 43:44), -c(41, 43:44)], phylo.dist.all.at.tree[rownames( mx.all.at.tree), rownames( mx.all.at.tree)])
+

@@ -117,12 +117,16 @@ Plotao <- plot_grid( Plot.PC, Plot.gm, labels = LETTERS[1:2])
 
 }
  
-temp.chol <- MonteCarloPCPercent (x = sp.main.data$Varecia_variegata, iterations = 100, parallel = TRUE)
+mc.pc.percent <- MonteCarloPCPercent (x = sp.main.data, iterations = 100, parallel = TRUE)
 temp$Plotao
 ############################ usando essa with o bagulho ta reciclando o objeto anterior! 
 Variae <- llply(sp.main.data[mask], .fun =  MonteCarloPCPercent, .progress = "text")
-Variae$Loris_tardigradus$Plot
+
+Variae$Tarsius_bancanus$ProjectedPC[,1:4]
 
 
+Var1to4<- Variae %>% ldply(function (x) x$ProjectedPC[,1])
+str(Var1to4)
+rownames(Var1to4) <- names(Variae)
 
-gm.mean[mask,] %>% tbl_df %>% ggplot(., aes(x = Especie, y = V1)) 
+Var1to4 <- ggplot() + geom_bar()
