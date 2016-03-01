@@ -125,3 +125,24 @@ Plot.R2.PC1 <- MMxStats.gm %>%
   ylab("PC1 % of variance")
 
 summary(lm(MeanSquaredCorrelation ~ PC1.percent , data = MMxStats.gm))
+
+EigVal <- cov.mx[mask] %>% ldply(function(x) eigen (x)$ values) 
+MMxStats.gm$EigVal1 <- EigVal$V1
+
+Plot.GM.EigenVal1 <- MMxStats.gm %>%
+  ggplot( ., aes(x = Geometric.mean, y = EigVal1, label = .sp), varwidth = T) +
+  geom_text(size =2, vjust = 1, alpha = 0.8)  +
+  stat_smooth(method="lm", aes(group=1), color = "red") +
+  #scale_y_continuous(limits = c(0.15, 0.77), breaks = c(0.25, 0.5, 0.75) )+
+  theme_bw() +
+  geom_point(pch = 20) +
+  geom_text(x = 20,  y = 0.64, label = "r.squared = 0.1986 \n 40 DF,  p-value: 0.0031", color = "red", size = 2) + 
+  #ggtitle("Geometric mean x PC1.percent") +
+  theme(legend.position  ="none") +
+  theme(plot.title = element_text(lineheight=.8, face="bold")) +
+  xlab("Geometric mean") +
+  ylab("PC1")
+
+summary(lm(Geometric.mean ~ EigVal1 , data = MMxStats.gm))
+
+
