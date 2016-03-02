@@ -18,6 +18,10 @@ if(!require(cowplot)) {install.packages('cowplot'); library(cowplot)}
 if(!require(mvoutlier)) {install.packages('mvoutlier'); library(mvoutlier)}
 if(!require(MVN)) {install.packages('MVN'); library(MVN)}
 if(!require(mvtnorm)) {install.packages('mvtnorm'); library(mvtnorm)}
+if(!require(ade4)) {install.packages('ad4'); library(ad4)}
+if(!require(vegan)) {install.packages('vegan'); library(vegan)}
+
+
 
 
 #if(!require()) {install.packages(''); library()}
