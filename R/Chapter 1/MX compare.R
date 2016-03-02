@@ -146,7 +146,7 @@
   Steppan <- list("RS" = mx.compare$BS.RS$correlations - (-6.437 /harm_matrix),
                   "KRZ" = mx.compare$BS.KRZ$correlations - (-6.437 /harm_matrix))
   
-    Steppan$Plot$RS <- Combine.Mx.Plot(Mx1 = t(mx.compare$BS.RS$correlations), Mx2 = t(Steppan$RS) , prob = mx.compare$BS.RS$probabilities, diag.info = c(n.size[mask,2], 130, 12), titulo = "Species matrices comparisons via Random Skewers")
+  Steppan$Plot$RS <- Combine.Mx.Plot(Mx1 = t(mx.compare$BS.RS$correlations), Mx2 = t(Steppan$RS) , prob = mx.compare$BS.RS$probabilities, diag.info = c(n.size[mask,2], 130, 12), titulo = "Species matrices comparisons via Random Skewers")
   Steppan$Plot$RS
   Steppan$Plot$KRZ <- Combine.Mx.Plot(Mx1 = (mx.compare$BS.KRZ$correlations), Mx2 = t(Steppan$KRZ) , prob = mx.compare$BS.RS$probabilities, diag.info = c(n.size[mask,2], 130, 12), titulo = "Species matrices comparisons via Krzanowski")
   Steppan$Plot$KRZ   
@@ -336,7 +336,7 @@ Iso.Compare.reoriented %>% gather(key=".pcScore", value=value, 2:5 ) %>%
   geom_tile(aes(x = .pcScore, y = .ed, fill = value)) +
   facet_wrap(~.sp) +
   theme_bw() +
-  scale_fill_gradientn(name = 'PC.Score', colours = myPalette(1000)) +
+  scale_fill_gradient(name = 'PC.Score', colours = myPalette(1000)) +
   ylab ('PC.Scores') + xlab ('') + labs(title = "First 4 PC's scores") +
   #scale_y_discrete(limits = levels(PCs1to4$.pcScore))) +
   theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5),
