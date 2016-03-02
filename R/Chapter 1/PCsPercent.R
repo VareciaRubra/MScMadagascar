@@ -183,11 +183,13 @@ VarGM$.id %<>% gsub("_", ' ',.)
 VarGM$.id <- factor(VarGM$.id, levels = unique(VarGM$.id)[42:1])
 
 VarGM%>% ggplot() + 
-  geom_errorbar(aes(x = .id, ymin = min, ymax = max)) +
-  geom_point(aes(x = .id, y = observed)) +
-  scale_x_discrete()  +
+  geom_linerange(aes(x = .id, ymin = min, ymax = max), alpha = 0.1, size =3) +
+  geom_point(aes(x = .id, y = observed), size = 1) +
   #  scale_y_continuous(limits = c(0, 0.77), breaks = c(0.25, 0.5, 0.75) ) +
-  coord_flip()
+  theme(axis.text.x = element_text(family =  "italic", size =19)) + 
+  xlab("") + ylab("Geometric mean (Skull size)") +
+  coord_flip() +
+  theme_bw()
 
 VarR2<- Variae %>% ldply(function (x) x$intervalo.mc.r2)
 VarR2$.id %<>% gsub("_", ' ',.)
