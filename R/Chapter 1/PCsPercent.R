@@ -171,12 +171,12 @@ pc.plot <- Var1to4 %>% ggplot() +
             geom_point(aes(x = .id, y = observed, color = PC )) +
             #facet_wrap(~ PC, scales = 'free') +
             scale_colour_brewer(palette = "Spectral", direction = -1) +
-            xlab("") + ylab("% of variance") +
-  theme(axis.text.x = element_text(family =  "italic", size =19)) + 
+  xlab("") + ylab("") + labs(title = "PCs % of variance") + theme(plot.title = element_text(face = "bold", size = 30)) +
+  theme(axis.text.x = element_text(face =  "italic", size =19)) + 
   #theme(legend.position="none") +
 #scale_x_continuous(limits = c(0, 0.9), breaks = c(0.2, 0.4, 0.6, 0.8)) 
             coord_flip() +
-            theme_bw()
+            theme_bw() + theme(axis.text.x = element_text(size =19))
 
 VarGM<- Variae %>% ldply(function (x) x$intervalo.mc.gm)
 VarGM$.id %<>% gsub("_", ' ',.)
@@ -186,26 +186,29 @@ VarGM%>% ggplot() +
   geom_linerange(aes(x = .id, ymin = min, ymax = max), alpha = 0.1, size =3) +
   geom_point(aes(x = .id, y = observed), size = 1) +
   #  scale_y_continuous(limits = c(0, 0.77), breaks = c(0.25, 0.5, 0.75) ) +
-  theme(axis.text.x = element_text(family =  "italic", size =19)) + 
+  theme(axis.text.x = element_text(face =  "italic", size =19)) + 
   xlab("") + ylab("Geometric mean (Skull size)") +
   coord_flip() +
-  theme_bw()
+  theme_bw() 
 
 VarR2<- Variae %>% ldply(function (x) x$intervalo.mc.r2)
 VarR2$.id %<>% gsub("_", ' ',.)
 VarR2$.id <- factor(VarR2$.id, levels = unique(VarR2$.id)[42:1])
+
+
 r2.plot <- VarR2%>% ggplot() + 
   geom_linerange(aes(x = .id, ymin = min, ymax = max), size =4, alpha = 0.1) +
   geom_point(aes(x = .id, y = observed)) +
   scale_x_discrete()  +
   #  scale_y_continuous(limits = c(0, 0.77), breaks = c(0.25, 0.5, 0.75) ) +
-  xlab("") + 
-  ylab("Mean squared correlation") +
+  xlab("") + ylab("") + labs(title = "Mean squared correlation (r²)") + theme(plot.title = element_text(face = "bold", size = 30)) +
   coord_flip() +
-  
-  theme_bw()
+  theme_bw() +
+ theme(axis.text.y = element_text(face =  "italic", size =19),
+       axis.text.x = element_text(size =19)
+       ) 
 
-pc.plot <- pc.plot + theme(axis.text.y = element_blank())  
 
-plot_grid(r2.plot, pc.plot, labels = LETTERS[1:2])
+pc.plot <- pc.plot + theme(axis.text.y = element_blank(), axis.ticks.y = element_line(size =0)) + guides(col = guide_legend(reverse = TRUE), size = guide_legend(reverse = TRUE))
 
+plot_grid(r2.plot, pc.plot, labels = LETTERS[1:2], rel_widths = c(1.2,1), hjust = c(-25, -0.5))
