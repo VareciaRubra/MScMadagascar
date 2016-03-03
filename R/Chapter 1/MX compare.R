@@ -86,7 +86,7 @@
   diag(mat_data) <- sample.size.list
   
   ##################################################################################################
-  Combine.Mx.Plot <- function(Mx1, Mx2, diag.info = NA, prob = NULL, titulo = "blé"){
+  Combine.Mx.Plot <- function(Mx1, Mx2, diag.info = NA, prob = NULL, titulo = "blé", method = NULL){
     ## Mx1 = Matriz que vai pegar os valores da diagonal de cima e manter na diagonal de cima (geralmente os results de RS)
     ## Mx2 = Matriz que vai pegar os valores da diagonal de cima e passar pra diagonal de baixo (geralmente os results de KRZ)
     ## prob = Matriz com as probabilidades do result comparação de RS
@@ -108,11 +108,10 @@
     sig.mx <- t(sig.mx)
     melted.sig <- melt(sig.mx)
     names(melted.sig) <- c("Sp1", "Sp2", "prob")
-    melted.sig$black
-    Prob <- melted.sig$prob
-    
-    
-    if method !=RS 
+    melted.sig$black <- melted.sig$prob
+    sig.mx [sig.mx == "white"] <- "black"
+
+    Prob <-  if (method == "RS") melted.sig$prob else melted.sig$black
 
     mixed.mx = melt(mat_data) 
     mixed.mx.position =  mixed.mx
@@ -122,19 +121,22 @@
     myPalette <- colorRampPalette(rev(brewer.pal(5, 'Spectral')), space = 'Lab')(n = 3)
     mixed.mx.cute.plot <- 
       ggplot (mixed.mx.position) +
-      geom_tile(aes(x = Var2, y = Var1, fill = value)) +
+      geom_tile(aes(x = Var2, y = Var1, fill = value), alpha = 0.6) +
       scale_fill_gradientn(name = '', colours = myPalette, limits = range.values, na.value = "white") +
-      ylab ('') + xlab ('') + labs(title = titulo) + theme(plot.title = element_text(face = "bold", size = 30)) +
+      ylab ('') + xlab ('') + labs(title = paste(titulo, method) )+ theme(plot.title = element_text(face = "bold", size = 30)) +
       geom_text(aes(x = Var2, y = Var1, label = value), size = 3, color = as.character(Prob) ) +
       scale_y_discrete(limits = rev(levels(mixed.mx.position$Var1))) +
       # scale_x_discrete() +
       theme_minimal() +  
+      scale_fill_continuous(guide = guide_legend(title = "Value of \ncomparison")) +
       theme(axis.text.x = element_text(angle = 270, hjust = 0, face = 'italic', size =13),
             axis.text.y = element_text(face = "italic", size =13),
             axis.ticks = element_line(size = 0),
             legend.title = element_text(size = 20),
             legend.text = element_text(size = 20),
-            rect = element_blank(), line   Steppan$Plot$KRZ = element_blank())
+            legend.position =  c(.06, .15), 
+            rect = element_blank(), 
+            line = element_blank())
     
     return(mixed.mx.cute.plot)
     
@@ -142,13 +144,25 @@
   
   ########################## Montando os plots de combinação valores de comparação corrigidos, nao corrigidos e por método
 
-  Combine.Mx.Plot(Mx1 =   mx.compare.sizeless$RS$correlations, Mx2 = t(mx.compare.log$RS$correlations), prob =   mx.compare.sizeless$RS$probabilities, diag.info = sample.size.list, titulo = "Species matrices comparisons")
+  Combine.Mx.Plot(Mx1 =   mx.compare.sizeless$RS$correlations, Mx2 = t(mx.compare.log$RS$correlations), prob =   mx.compare.sizeless$RS$probabilities, diag.info = sample.size.list[-c(43:44)], titulo = "Species matrices comparisons", method = "RS")
   Steppan <- list("RS" = mx.compare$BS.RS$correlations - (-6.437 /harm_matrix),
                   "KRZ" = mx.compare$BS.KRZ$correlations - (-6.437 /harm_matrix))
   
-  Steppan$Plot$RS <- Combine.Mx.Plot(Mx1 = t(mx.compare$BS.RS$correlations), Mx2 = t(Steppan$RS) , prob = mx.compare$BS.RS$probabilities, diag.info = c(n.size[mask,2], 130, 12), titulo = "Species matrices comparisons via Random Skewers")
-  Steppan$Plot$RS
-  Steppan$Plot$KRZ <- Combine.Mx.Plot(Mx1 = (mx.compare$BS.KRZ$correlations), Mx2 = t(Steppan$KRZ) , prob = mx.compare$BS.RS$probabilities, diag.info = c(n.size[mask,2], 130, 12), titulo = "Species matrices comparisons via Krzanowski")
+  Steppan$Plot$RS <- 
+    Combine.Mx.Plot(Mx1 = t(mx.compare$BS.RS$correlations), 
+                    Mx2 = t(Steppan$RS) , 
+                    prob = mx.compare$BS.RS$probabilities, 
+                    diag.info = c(n.size[mask,2], 130, 12), 
+                    method = "Random Skewers",
+                    titulo = "Species matrices comparisons via Random Skewers")
+
+  Steppan$Plot$KRZ <- 
+    Combine.Mx.Plot(Mx1 = (mx.compare$BS.KRZ$correlations), 
+                                      Mx2 = t(Steppan$KRZ), 
+                                      prob = NULL, 
+                                      method = "KRZ",
+                                      diag.info = c(n.size[mask,2], 130, 12), 
+                                      titulo = "Species matrices comparisons via Krzanowski")
   Steppan$Plot$KRZ   
   
   

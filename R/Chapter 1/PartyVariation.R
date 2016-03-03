@@ -27,7 +27,7 @@ dimnames(mx.dissimilarity$BS.RS)
 #3# Arrumando a árvore de quem entra na análise: pruned.tree.with.mx
 # treefile = read.nexus(file = "attaches/fbd421agerange_edited.tre")
 plot(treefile, cex = 0.5)
-nodelabels(bg = NULL, frame = "none", node = 222, pch = 21, col = "red", text = "Indroidea" )
+nodelabels(bg = NULL, frame = "none")
 
 notat.tree <- is.na(match(dimnames(mx.dissimilarity$BS.RS)[[1]], treefile$tip.label)) 
 names.at.tree <- dimnames(mx.dissimilarity$BS.RS)[[1]][!notat.tree] 
