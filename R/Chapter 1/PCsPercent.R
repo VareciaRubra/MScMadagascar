@@ -167,17 +167,21 @@ Var1to4[Var1to4$.id == "Lemur_catta" ,]
 Var1to4$.id %<>% gsub("_", ' ',.)
 
 pc.plot <- Var1to4 %>% ggplot() + 
-            geom_linerange(aes(x = .id, ymin = min, ymax = max, color = PC, size = PC), alpha = 0.1)+
+            geom_linerange(aes(x = .id, ymin = min, ymax = max, color = PC, size = PC), alpha = 0.2)+
             geom_point(aes(x = .id, y = observed, color = PC )) +
             #facet_wrap(~ PC, scales = 'free') +
             scale_colour_brewer(palette = "Spectral", direction = -1) +
-  xlab("") + ylab("") + labs(title = "PCs % of variance") + theme(plot.title = element_text(face = "bold", size = 30)) +
-  theme(axis.text.x = element_text(face =  "italic", size =19)) + 
+  xlab("") + ylab("") + labs(title = "PCs % of variance") + 
   #theme(legend.position="none") +
 #scale_x_continuous(limits = c(0, 0.9), breaks = c(0.2, 0.4, 0.6, 0.8)) 
             coord_flip() +
-            theme_bw() + theme(axis.text.x = element_text(size =19))
-
+            theme_bw() + 
+  theme(plot.title = element_text(face = "bold", size = 12),
+        axis.text.y = element_text(face =  "italic", size =13),
+        axis.text.x = element_text(size =10),
+        legend.justification=c(1,0), legend.position= c(1,0.3)) +
+  guides(col = guide_legend(reverse = TRUE), size = guide_legend(reverse = TRUE))
+       
 VarGM<- Variae %>% ldply(function (x) x$intervalo.mc.gm)
 VarGM$.id %<>% gsub("_", ' ',.)
 VarGM$.id <- factor(VarGM$.id, levels = unique(VarGM$.id)[42:1])
@@ -197,18 +201,19 @@ VarR2$.id <- factor(VarR2$.id, levels = unique(VarR2$.id)[42:1])
 
 
 r2.plot <- VarR2%>% ggplot() + 
-  geom_linerange(aes(x = .id, ymin = min, ymax = max), size =4, alpha = 0.1) +
+  geom_linerange(aes(x = .id, ymin = min, ymax = max), size =4, alpha = 0.2) +
   geom_point(aes(x = .id, y = observed)) +
   scale_x_discrete()  +
   #  scale_y_continuous(limits = c(0, 0.77), breaks = c(0.25, 0.5, 0.75) ) +
-  xlab("") + ylab("") + labs(title = "Mean squared correlation (r²)") + theme(plot.title = element_text(face = "bold", size = 30)) +
+  xlab("") + ylab("") + labs(title = "Mean squared correlation (r²)") + 
   coord_flip() +
   theme_bw() +
- theme(axis.text.y = element_text(face =  "italic", size =19),
-       axis.text.x = element_text(size =19)
-       ) 
+ theme(plot.title = element_text(face = "bold", size = 12),
+       #axis.text.y = element_text(face =  "italic", size =13),
+       axis.text.x = element_text(size =10),
+       axis.text.y = element_blank(), axis.ticks.y = element_line(size =0)) 
 
 
-pc.plot <- pc.plot + theme(axis.text.y = element_blank(), axis.ticks.y = element_line(size =0)) + guides(col = guide_legend(reverse = TRUE), size = guide_legend(reverse = TRUE))
+r2.plot <- r2.plot + theme(axis.text.y = element_blank(), axis.ticks.y = element_line(size =0)) 
 
-plot_grid(r2.plot, pc.plot, labels = LETTERS[1:2], rel_widths = c(1.2,1), hjust = c(-25, -0.5))
+plot_grid(pc.plot, r2.plot, labels = LETTERS[1:2], rel_widths = c(1.3,0.9), hjust = c(-22, -0.5))
