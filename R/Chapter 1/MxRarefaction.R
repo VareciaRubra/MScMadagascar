@@ -41,7 +41,7 @@ ic.max.sim<-function(x) {
   t_<- dim(x)[[1]] -1
   ic<- apply(x, 2, FUN = function (a) sort(a)[t_-1]  )
   return(ic)
-}
+} Prob <- if (prob == NULL) 
 
 ic.min.sim<-function(x) {
   x[lower.tri(x)]<-t(x)[lower.tri(x)]
@@ -86,46 +86,52 @@ range.compare <- range.compare.backup
   plot.df <- melt(temp.rar.rs , value.name = "Mean.BS.RS")
   names(plot.df) <- c("Mean.BS.RS", "n") 
   plot.df <- as.data.frame(lapply(plot.df, as.numeric))
-rarefaction.plot.rs<- 
+Plot.Raref.rs<- 
     ggplot(data = plot.df, aes(x= n, y = Mean.BS.RS)) + 
     geom_boxplot(aes( group = n), color="grey", outlier.shape = 8 ) + 
     geom_point(data = range.compare, aes(x = n, y = Mean.BS.RS), shape=17, size = 2.2, color = "red") +
     #geom_text(data = range.compare, aes(x = n, y = Mean.BS.RS, label = .id), color = "blue", size = 3, alpha = 0.3, angle = 70, hjust =  0.6) +
     geom_errorbar(data = range.compare, aes(x= n, ymin = Min.BS.RS, ymax = Max.BS.RS), alpha = 0.3, size = 1.2, color = "red") +
     geom_hline(data = range.compare, aes(yintercept = mean (Mean.BS.RS), y = mean (Mean.BS.RS)), alpha = 0.1, size = 2.5, color = "red") +
-  #  ggtitle("Rarefaction and Observed range of similarity") +
+   ggtitle("Random Skewers") +
+  theme_bw() +
     theme(plot.title = element_text(lineheight=.8, face="bold"),
             axis.text.x = element_text(size = 15), 
-            axis.title.x = element_text(size = 15)) +
-    ylab(label = "Random Skewers") + 
-  xlab("") +
+            axis.text.y = element_text(size = 15)) +
+    ylab(label = "") + 
+  xlab("Number of sampled specimens") +
    #xlab("Number of sampled specimens") + 
     scale_y_continuous(limits = c(0,1), breaks = c(0.00, 0.25, 0.5, 0.66, 0.75, 1.00)) +
-    scale_x_continuous(limits = c(0, 68)) +
-    theme_bw()
+    scale_x_continuous(limits = c(0, 68)) 
+   
     
 
-    plot.df <- melt(temp.rar.krz, value.name = "Mean.BS.KRZ")
-    names(plot.df) <- c("Mean.BS.KRZ", "n") 
-    plot.df <- as.data.frame(lapply(plot.df, as.numeric))
-rarefaction.plot.krz<- 
-    ggplot(data = plot.df, aes(x= n, y = Mean.BS.KRZ)) + 
+    plot.df.krz <- melt(temp.rar.krz, value.name = "Mean.BS.KRZ")
+    names(plot.df.krz) <- c("Mean.BS.KRZ", "n") 
+    plot.df.krz <- as.data.frame(lapply(plot.df.krz, as.numeric))
+Plot.Raref.krz<- 
+    ggplot(data = plot.df.krz, aes(x= n, y = Mean.BS.KRZ)) + 
       geom_boxplot(aes( group = n), color="grey", outlier.colour = "grey", outlier.shape = 8) + 
-      geom_point(data = range.compare, aes(x = n, y = Mean.BS.KRZ), shape=17, size = 2.2, color = "red") +
+      geom_point(data = range.compare, aes(x = n, y = Mean.BS.KRZ), shape=17, size = 2.2, color = "blue") +
       #geom_text(data = range.compare, aes(x = n, y = Mean.BS.KRZ, label = .id), color = "blue", size = 3, alpha = 0.3, angle = 70, hjust =  0.6) +
-      geom_errorbar(data = range.compare, aes(x= n, ymin = Min.BS.KRZ, ymax = Max.BS.KRZ), alpha = 0.3, size = 1.2, color = "red") +
-      geom_hline(data = range.compare, aes(yintercept = mean (Mean.BS.KRZ), y = mean (Mean.BS.KRZ)), alpha = 0.1, size = 2.5, color = "red") +
-   #   ggtitle("Rarefaction and Observed range of similarity") +
-      theme(plot.title = element_text(lineheight=.8, face="bold"),
+      geom_errorbar(data = range.compare, aes(x= n, ymin = Min.BS.KRZ, ymax = Max.BS.KRZ), alpha = 0.3, size = 1.2, color = "blue") +
+      geom_hline(data = range.compare, aes(yintercept = mean (Mean.BS.KRZ), y = mean (Mean.BS.KRZ)), alpha = 0.1, size = 2.5, color = "blue") +
+   ggtitle("Krzanowski") +
+  theme_bw() +    
+  theme(plot.title = element_text(lineheight=.8, face="bold"),
             axis.text.x = element_text(size = 15), 
-            axis.title.x = element_text(size = 15)) +
-      ylab("Krzanowski") + 
+            axis.text.y = element_text(size = 15)) +
+      ylab("") + 
   #  xlab("") +
   xlab("Number of sampled specimens") + 
       scale_y_continuous(limits = c(0,1), breaks = c(0.00, 0.25, 0.5, 0.75, 0.82, 1.00)) +
-      scale_x_continuous(limits = c(0, 68)) +
-      theme_bw()
-micro.rar.obs.sim <- plot_grid(rarefaction.plot.rs, rarefaction.plot.rs.large, rarefaction.plot.krz, rarefaction.plot.krz.large, labels = LETTERS[1:4], ncol=2)
+      scale_x_continuous(limits = c(0, 68)) 
+      
+Plot.Raref <- plot_grid(Plot.Raref.rs, 
+                               #rarefaction.plot.rs.large, 
+                               Plot.raref.krz, 
+                               #rarefaction.plot.krz.large, 
+                               labels = LETTERS[1:2], ncol=2)
 
 #Antigo plot de rarefaçao
 p1 <- PlotRarefaction(sp.main.data$Microcebus_griseorufus$rarefaction$krz) + 
