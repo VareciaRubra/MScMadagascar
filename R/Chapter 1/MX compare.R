@@ -111,7 +111,7 @@
     melted.sig$black <- melted.sig$prob
     sig.mx [sig.mx == "white"] <- "black"
 
-    Prob <-  if (method == "RS") melted.sig$prob else melted.sig$black
+    Prob <-  if (method == "Random Skewers") melted.sig$prob else melted.sig$black
 
     mixed.mx = melt(mat_data) 
     mixed.mx.position =  mixed.mx
@@ -154,7 +154,7 @@
                     prob = mx.compare$BS.RS$probabilities, 
                     diag.info = c(n.size[mask,2], 130, 12), 
                     method = "Random Skewers",
-                    titulo = "Species matrices comparisons via Random Skewers")
+                    titulo = "Species matrices comparisons via )
 
   Steppan$Plot$KRZ <- 
     Combine.Mx.Plot(Mx1 = (mx.compare$BS.KRZ$correlations), 
@@ -165,6 +165,8 @@
                                       titulo = "Species matrices comparisons via Krzanowski")
   Steppan$Plot$KRZ   
   
+  
+  Mixed.Mx.RS.Steppan <- Combine.Mx.Plot(Mx1 = t(mx.compare$BS.RS$correlations), Mx2 = t(mx.compare$BS.KRZ$correlations), prob = mx.compare$BS.RS$probabilities, diag.info = sample.size.list, titulo = "Species matrices comparisons")
   
   plot.mix.raw<- Combine.Mx.Plot(Mx1 = t(mx.compare$BS.RS$correlations), Mx2 = t(mx.compare$BS.KRZ$correlations), prob = mx.compare$BS.RS$probabilities, diag.info = sample.size.list, titulo = "Species matrices comparisons")
   plot.mix.correct.rep.mx<- Combine.Mx.Plot(Mx1 = mx.compare$BS.RS$correlations, Mx2 = mx.compare$BS.KRZ$correlations, diag.info = sample.size.list, titulo = "Matrices comparisons")
