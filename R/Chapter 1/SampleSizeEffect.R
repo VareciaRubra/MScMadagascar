@@ -23,15 +23,10 @@ for (j in 1:length(harmonic.n.size)) {
 ### Testando o efeito do n na similaridade e removendo
 #correlacao entre os valores de similaridade e os valores de media harmonica
 Matrix.Similarity <- mx.compare$BS.RS$correlations
+Matrix.Similarity.KRZ <- mx.compare$BS.KRZ$correlations
 Harm.Mx<- harm_matrix
-
-cor.test(Matrix.Similarity[upper.tri(Matrix.Similarity, diag = F)], harm_matrix[upper.tri(harm_matrix, diag = F)])
-
 cor.test(Matrix.Similarity[lower.tri(Matrix.Similarity, diag = F)], harm_matrix[upper.tri(harm_matrix, diag = F)])
-
-
-
-#Pearson's product-moment correlation
+{# #Pearson's product-moment correlation (RS)
 # 
 # data:  mx.compare$BS.RS$correlations[upper.tri(mx.compare$BS.RS$correlations,  and harm_matrix[upper.tri(harm_matrix, diag = F)]    diag = F)] and harm_matrix[upper.tri(harm_matrix, diag = F)]
 # t = 13.375, df = 944, p-value < 2.2e-16
@@ -41,10 +36,23 @@ cor.test(Matrix.Similarity[lower.tri(Matrix.Similarity, diag = F)], harm_matrix[
 # sample estimates:
 #       cor 
 # 0.3991408 
+}
+cor.test(Matrix.Similarity.KRZ[lower.tri(Matrix.Similarity.KRZ, diag = F)], harm_matrix[upper.tri(harm_matrix, diag = F)])
+{# Pearson's product-moment correlation (KRZ)
+# 
+# data:  Matrix.Similarity.KRZ[lower.tri(Matrix.Similarity.KRZ, diag = F)] and harm_matrix[upper.tri(harm_matrix, diag = F)]
+# t = -0.59072, df = 944, p-value = 0.5548
+# alternative hypothesis: true correlation is not equal to 0
+# 95 percent confidence interval:
+#  -0.08285989  0.04457057
+# sample estimates:
+#         cor 
+# -0.01922273 
+}
 
+model.harmonic.mean <- lm(mx.compare$BS.RS$correlations [lower.tri(mx.compare$BS.RS$correlations, diag = F)] ~ harm_matrix[upper.tri(harm_matrix, diag = F)])
+model.harmonic.mean <- lm(mx.compare$BS.KRZ$correlations [lower.tri(mx.compare$BS.RS$correlations, diag = F)] ~ harm_matrix[upper.tri(harm_matrix, diag = F)])
 
-
-model.harmonic.mean <- lm(mx.compare$BS.RS$correlations [upper.tri(mx.compare$BS.RS$correlations, diag = F)] ~ harm_matrix[upper.tri(harm_matrix, diag = F)])
 #modelo linear: similaridade por RS explicado por medias harmonicas
 Harm.Mean <- harm_matrix[upper.tri(harm_matrix, diag = F)]
 ###################################################################################################################
@@ -57,13 +65,8 @@ plot(y = Similaridade.Mx, x = log(Harm.Mean), pch = 20, col = 'grey', xlab = "lo
 abline(coef = model.harmonic.mean$coefficients, col = 'red')
 title(main = 'Sample size effect in comparison values')
 cor.test.values<- cor.test(Similaridade.Mx, Harm.Mean)
-###################################################################################################################
-Similaridade.Mx <- mx.compare$MC.RS$correlations [upper.tri(mx.compare$MC.RS$correlations, diag = F)]
-model.harmonic.mean <- lm(Similaridade.Mx ~  log(Harm.Mean))
-plot(y = Similaridade.Mx, x = log(Harm.Mean), pch = 20, col = 'grey', xlab = "log sample sizes' harmonic mean", ylab = 'Matrices similarity via RS', xlim=c(2.5,4.8), ylim = c(0.2, 0.9)) 
-abline(coef = model.harmonic.mean$coefficients, col = 'red')
-title(main = 'Comparison value corrected by MC Repetability')
 
+###### excluindo o Otolemur kirkii pq nao tem ele na arvore do James (ele é a sp. 41. 43: 44 é a P e G de Saguinus)
 
 Harm.Mean <- harm_matrix[-c(41, 43:44), -c(41, 43:44)]
 Harm.Mean <- Harm.Mean[upper.tri(Harm.Mean, diag = F)]
@@ -80,11 +83,10 @@ plot(y = Similaridade.Mx, x = log(Harm.Mean), pch = 20, col = 'grey', xlab = "lo
 temp5 <- array(0, c(44,44) ) #array de dez linhas por dez colunas (tenho 10 especies)
 temp5[upper.tri(temp5)] <- model.harmonic.mean$residuals #pegando os residuos da regressao: variacao na similaridade nao explicada
 #pela media harmonica dos n
-CalculateMatrix(lm(mx.compare$BS.RS$correlations [upper.tri(mx.compare$BS.RS$correlations)] ~ harm_matrix[upper.tri(harm_matrix)]))
-
 mx.compare$BS.RS$correlations.residual5 <- temp5 + t(temp5) #tornando os residuos uma matriz quadrada
-
+mx.compare$BS.RS$correlations.residual5 <- var(mx.compare$BS.RS$correlations.residual5)
 #Agora voce pode correlacionar uma matriz de similaridade sem efeito do n com qualquer fator
+MatrixCor(mx.compare$BS.RS$correlations, mx.compare$BS.RS$correlations.residual5)
 
 ############################# Vendo efeito de filogenia ##########################################
 notat.tree<- is.na(match(dimnames(mx.compare$RS$correlations)[[1]], treefile$tip.label)) 
@@ -112,18 +114,50 @@ MatrixCor(as.matrix(harm_matrix)[-c(41, 43:44), -c(41, 43:44)], mx.compare$BS.RS
 
 Phylo.Dist<- phylo.dist.all.at.tree[rownames( mx.all.at.tree), rownames( mx.all.at.tree)]
 Phylo.Dist <- Phylo.Dist[upper.tri(Phylo.Dist, diag=F)]
-Sim.Mx <- mx.compare$BS.RS$correlations[-c(41, 43:44), -c(41, 43:44)]
-Sim.Mx <- Sim.Mx[upper.tri(t(Sim.Mx), diag = F)]
+Sim.Mx.bs.rs <- mx.compare$BS.RS$correlations[-c(41, 43:44), -c(41, 43:44)]
+Sim.Mx.bs.rs <- Sim.Mx.bs.rs[upper.tri(t(Sim.Mx.bs.rs), diag = F)]
+Sim.Mx.bs.krz <- mx.compare$BS.KRZ$correlations[-c(41, 43:44), -c(41, 43:44)]
+Sim.Mx.bs.krz <- Sim.Mx.bs.krz[upper.tri(t(Sim.Mx.bs.krz), diag = F)]
+Sim.Mx.mc.rs <- mx.compare$MC.RS$correlations[-c(41, 43:44), -c(41, 43:44)]
+Sim.Mx.mc.rs <- Sim.Mx.mc.rs[upper.tri(t(Sim.Mx.mc.rs), diag = F)]
+Sim.Mx.mc.krz <- mx.compare$MC.KRZ$correlations[-c(41, 43:44), -c(41, 43:44)]
+Sim.Mx.mc.krz <- Sim.Mx.mc.krz[upper.tri(t(Sim.Mx.mc.krz), diag = F)]
 Harm.M <- as.matrix(harm_matrix)[-c(41, 43:44), -c(41, 43:44)]
 Harm.M  <- Harm.M[upper.tri(Harm.M, diag = F)]
-str(Sim.Mx)
-str(Phylo.Dist)
-str(Harm.M)
 
-COr.PHyHM <- cbind(Sim.Mx, Harm.M, Phylo.Dist)
+COr.PHyHM <- cbind(Sim.Mx.bs.rs, 
+                   Sim.Mx.bs.krz, 
+                   Sim.Mx.mc.rs, 
+                   Sim.Mx.mc.krz, 
+                   Harm.M, 
+                   Phylo.Dist)
 COr.PHyHM <- as.data.frame(COr.PHyHM)
-names(COr.PHyHM) <- c("Matrix.Similarity.RS", "Harmonic.Mean", "Phylogenetic.Distance")
+names(COr.PHyHM) <- c("Matrix.Similarity.RS", 
+                      "Matrix.Similarity.KRZ", 
+                      "Matrix.Similarity.RS.mc", 
+                      "Matrix.Similarity.KRZ.mc",
+                      "Harmonic.Mean", 
+                      "Phylogenetic.Distance")
 
+COr.PHyHM$Harmonic.Mean.inverso<- 1/(COr.PHyHM$Harmonic.Mean)
+
+#######################################################################################
+#Corrigindo os valores de similaridade observado do jeito do Steppan 1997 @ Evolution (I)
+######### Valor corrigido = Valor observado - (slope)/ (média harmonica dos tamanhos amostrais)
+############################################## slope = slope da regressao valor observado ~ 1/ (média harmonica dos tamanhos amostrais)
+
+summary(lm(Matrix.Similarity.RS ~ COr.PHyHM$Harmonic.Mean.inverso, data = COr.PHyHM)) ### slope = -6.43707
+summary(lm(Matrix.Similarity.KRZ ~ COr.PHyHM$Harmonic.Mean.inverso, data = COr.PHyHM)) ### slope = -0.389137
+summary(lm(Matrix.Similarity.RS.mc ~ COr.PHyHM$Harmonic.Mean.inverso, data = COr.PHyHM)) ### slope = -6.28693 
+summary(lm(Matrix.Similarity.KRZ.mc ~ COr.PHyHM$Harmonic.Mean.inverso, data = COr.PHyHM)) ### slope = -5.18420
+
+Steppan <- list("BS.RS" = mx.compare$BS.RS$correlations - (-6.43707 /harm_matrix),
+                "BS.KRZ" = mx.compare$BS.KRZ$correlations - (-0.389137 /harm_matrix),
+                "MC.RS" = mx.compare$MC.RS$correlations - (-6.28693 /harm_matrix),
+                "MC.KRZ" = mx.compare$MC.KRZ$correlations - (-5.18420 /harm_matrix))
+
+
+COr.PHyHM$Matrix.Similarity.KRZ <- Sim.Mx.bs.krz
  Plot.Phy.SIM<- 
  COr.PHyHM %>% 
   ggplot( ., aes(x = Phylogenetic.Distance, y = Matrix.Similarity.RS), varwidth = T) +
@@ -142,6 +176,23 @@ names(COr.PHyHM) <- c("Matrix.Similarity.RS", "Harmonic.Mean", "Phylogenetic.Dis
 summary(lm(Matrix.Similarity.RS ~ Phylogenetic.Distance , data = COr.PHyHM))
 MatrixCor(phylo.dist.all.at.tree[rownames( mx.all.at.tree), rownames( mx.all.at.tree)], mx.compare$BS.RS$correlations[-c(41,43:44), -c(41,43:44)])
 
+COr.PHyHM$Matrix.Similarity.KRZ <- Sim.Mx.bs.krz
+Plot.Phy.SIM.k<- 
+  COr.PHyHM %>% 
+  ggplot( ., aes(x = Phylogenetic.Distance, y = Matrix.Similarity.KRZ.mc), varwidth = T) +
+  geom_point(color = "grey") +
+  stat_smooth(method="lm", aes(group=1), color = "red") +
+  #scale_x_continuous(limits = c(0.1, 0.7)) +
+  scale_y_continuous(limits = c(0.5, 1)) +
+  theme_bw() +
+  geom_text(x = 26,  y = 0.7, label = "r.squared = 0.2644 \n 818 DF,  p-value: < 2.2e-16 \n MatrixCor = -0.577 ", color = "red", size = 2) + 
+  theme(legend.position  ="none") +
+  theme(plot.title = element_text(lineheight=.8, face="bold")) +
+  xlab( "Phylogenetic distance") + 
+  ylab("Matrix similarity by KRZ")
+
+summary(lm(Matrix.Similarity.KRZ.mc ~ Phylogenetic.Distance , data = COr.PHyHM))
+MatrixCor(phylo.dist.all.at.tree[rownames( mx.all.at.tree), rownames( mx.all.at.tree)], mx.compare$BS.KRZ$correlations[-c(41,43:44), -c(41,43:44)])
 
 Plot.HM.SIM<- 
   COr.PHyHM %>% 
@@ -157,8 +208,6 @@ Plot.HM.SIM<-
   theme(plot.title = element_text(lineheight=.8, face="bold") ) +
         xlab( "1/ sample size harmonic mean") +
         ylab("Matrix similarity by RS")
-
-COr.PHyHM$Harmonic.Mean.inverso<- 1/(COr.PHyHM$Harmonic.Mean)
 
 summary(lm(Matrix.Similarity.RS ~ COr.PHyHM$Harmonic.Mean.inverso, data = COr.PHyHM))
 MatrixCor(1/(as.matrix(harm_matrix)[-c(41, 43:44), -c(41, 43:44)] ), mx.compare$BS.RS$correlations[-c(41,43:44), -c(41,43:44)])
@@ -182,7 +231,3 @@ Plot.HM.PHy<-
 
 summary(lm(Phylogenetic.Distance ~ log(Harmonic.Mean) , data = COr.PHyHM))
 MatrixCor(as.matrix(harm_matrix)[-c(41, 43:44), -c(41, 43:44)], phylo.dist.all.at.tree[rownames( mx.all.at.tree), rownames( mx.all.at.tree)])
-
-
-
-mx.compare$BS.RS$correlations -6.437 /harm_matrix
