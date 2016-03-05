@@ -101,40 +101,44 @@
     range.values<- range.values- c(0.01, -0.01)
     diag(mat_data) <- diag.info
     
+   
+    
     sig.mx <- prob >= 0.04
-    sig.mx[upper.tri(sig.mx, diag = T)] <- FALSE
+    sig.mx[upper.tri(sig.mx, diag = T)] <- FALSE 
+    ############# se for plotar duas mx de RS coment essa linha de cima e gera essa mx mista por fora
+    # combined.prob <- MX1$probabilities
+    # combined.prob [upper.tri(combined.prob, diag = F)] <- t(MX2$probabilities)[upper.tri(MX2$probabilities, diag = F) ]
+    
     sig.mx [sig.mx == TRUE] <- "white"
     sig.mx [sig.mx == FALSE] <- "black"
     sig.mx <- t(sig.mx)
     melted.sig <- melt(sig.mx)
     names(melted.sig) <- c("Sp1", "Sp2", "prob")
     melted.sig$black <- melted.sig$prob
-    sig.mx [sig.mx == "white"] <- "black"
+    melted.sig$black [melted.sig$black == "white"] <- "black"
 
     Prob <-  if (method == "Random Skewers") melted.sig$prob else melted.sig$black
 
     mixed.mx = melt(mat_data) 
     mixed.mx.position =  mixed.mx
     mixed.mx.position$value = round( mixed.mx.position$value, 2)
-    
-    
-    myPalette <- colorRampPalette(rev(brewer.pal(5, 'Spectral')), space = 'Lab')(n = 3)
+    mixed.mx.position$texto <-  mixed.mx.position$value %>% gsub("0.", ".", .)
+   
+    myPalette <- colorRampPalette(rev(brewer.pal(5, 'Spectral')), space = 'Lab')(n = 40)
     mixed.mx.cute.plot <- 
       ggplot (mixed.mx.position) +
-      geom_tile(aes(x = Var2, y = Var1, fill = value), alpha = 0.6) +
-      scale_fill_gradientn(name = '', colours = myPalette, limits = range.values, na.value = "white") +
-      ylab ('') + xlab ('') + labs(title = paste(titulo, method) )+ theme(plot.title = element_text(face = "bold", size = 30)) +
-      geom_text(aes(x = Var2, y = Var1, label = value), size = 3, color = as.character(Prob) ) +
+      geom_tile(aes(x = Var2, y = Var1, fill = value), alpha = 0.9) +
+      scale_fill_gradientn(name = "Value of \ncomparison", colours = myPalette, limits = range.values, na.value = "white") +
+      geom_text(aes(x = Var2, y = Var1, label = texto), size = 4, color = as.character(Prob)) +
       scale_y_discrete(limits = rev(levels(mixed.mx.position$Var1))) +
-      # scale_x_discrete() +
+      ylab ('') + xlab ('') + labs(title = paste(titulo, method) ) + 
       theme_minimal() +  
-      scale_fill_continuous(guide = guide_legend(title = "Value of \ncomparison")) +
-      theme(axis.text.x = element_text(angle = 270, hjust = 0, face = 'italic', size =13),
+      theme(plot.title = element_text(face = "bold", size = 20),
+            axis.text.x = element_text(angle = 270, hjust = 0, face = 'italic', size =13),
             axis.text.y = element_text(face = "italic", size =13),
             axis.ticks = element_line(size = 0),
-            legend.title = element_text(size = 20),
-            legend.text = element_text(size = 20),
-            legend.position =  c(.06, .15), 
+            legend.title = element_text(size = 15),
+            legend.text = element_text(size = 10),
             rect = element_blank(), 
             line = element_blank())
     
@@ -145,56 +149,38 @@
   ########################## Montando os plots de combinação valores de comparação corrigidos, nao corrigidos e por método
 
   Combine.Mx.Plot(Mx1 =   mx.compare.sizeless$RS$correlations, Mx2 = t(mx.compare.log$RS$correlations), prob =   mx.compare.sizeless$RS$probabilities, diag.info = sample.size.list[-c(43:44)], titulo = "Species matrices comparisons", method = "RS")
-  Steppan <- list("RS" = mx.compare$BS.RS$correlations - (-6.437 /harm_matrix),
-                  "KRZ" = mx.compare$BS.KRZ$correlations - (-6.437 /harm_matrix))
-  
-  Steppan$Plot$RS <- 
+
+  Steppan$Plot$BS.RS <- 
     Combine.Mx.Plot(Mx1 = t(mx.compare$BS.RS$correlations), 
-                    Mx2 = t(Steppan$RS) , 
+                    Mx2 = Steppan$BS.RS, 
                     prob = mx.compare$BS.RS$probabilities, 
                     diag.info = c(n.size[mask,2], 130, 12), 
                     method = "Random Skewers",
-                    titulo = "Species matrices comparisons via )
+                    titulo = "Species matrices comparisons via " )
 
-  Steppan$Plot$KRZ <- 
-    Combine.Mx.Plot(Mx1 = (mx.compare$BS.KRZ$correlations), 
-                                      Mx2 = t(Steppan$KRZ), 
-                                      prob = NULL, 
-                                      method = "KRZ",
-                                      diag.info = c(n.size[mask,2], 130, 12), 
-                                      titulo = "Species matrices comparisons via Krzanowski")
-  Steppan$Plot$KRZ   
+  Steppan$Plot$BS.KRZ <- 
+   Combine.Mx.Plot(Mx1 = t(mx.compare$BS.KRZ$correlations), 
+                  Mx2 = Steppan$BS.KRZ, 
+                  prob =  mx.compare$BS.RS$probabilities, 
+                  diag.info = c(n.size[mask,2], 130, 12), 
+                  method = "Krzanowski",
+                  titulo = "Species matrices comparisons via " )
   
+  Steppan$Plot$rawRaw.mc <- 
+#     Combine.Mx.Plot(Mx1 = t(mx.compare$MC.RS$correlations), 
+#                     Mx2 = t(mx.compare$MC.KRZ$correlations), 
+#                     prob =  mx.compare$MC.RS$probabilities, 
+#                     diag.info = c(n.size[mask,2], 130, 12), 
+#                     method = "Random Skewers",
+#                     titulo = "Raw values of comparison via Krzanowski and") # tamanho salvo 15 x 12
   
-  Mixed.Mx.RS.Steppan <- Combine.Mx.Plot(Mx1 = t(mx.compare$BS.RS$correlations), Mx2 = t(mx.compare$BS.KRZ$correlations), prob = mx.compare$BS.RS$probabilities, diag.info = sample.size.list, titulo = "Species matrices comparisons")
-  
-  plot.mix.raw<- Combine.Mx.Plot(Mx1 = t(mx.compare$BS.RS$correlations), Mx2 = t(mx.compare$BS.KRZ$correlations), prob = mx.compare$BS.RS$probabilities, diag.info = sample.size.list, titulo = "Species matrices comparisons")
-  plot.mix.correct.rep.mx<- Combine.Mx.Plot(Mx1 = mx.compare$BS.RS$correlations, Mx2 = mx.compare$BS.KRZ$correlations, diag.info = sample.size.list, titulo = "Matrices comparisons")
-  
-  plot.b<- Combine.Mx.Plot(Mx1 = mx.compare$PCA.s$correlations, Mx2 = mx.compare$KRZ$correlations, diag.info = sample.size.list, titulo = "Covariance matrices comparison values via KRZ and PCA Similarity ")
-  plot.c<- Combine.Mx.Plot(Mx1 = mx.compare$Mantel.Cor$correlations, Mx2 = mx.compare$KRZ.Cor$correlations, diag.info = sample.size.list, titulo = "B. Correlation matrices comparison values via KRZ and Mantel ")
-  
-  plot_grid(plot.a, plot.c, nrow = 2, vjust = 0.1)
-  
-  plot.a.log <- Combine.Mx.Plot(Mx1 = mx.compare.log$RS$correlations, Mx2 = mx.compare.log$KRZ$correlations, diag.info = n.size[mask,2], titulo = "A. Covariance matrices comparison values via KRZ and RS ")
-  plot.b.log <- Combine.Mx.Plot(Mx1 = mx.compare$PCA.s$correlations, Mx2 = mx.compare$KRZ$correlations, diag.info = sample.size.list, titulo = "Covariance matrices comparison values via KRZ and PCA Similarity ")
-  plot.c.log <- Combine.Mx.Plot(Mx1 = mx.compare$Mantel.Cor$correlations, Mx2 = mx.compare$KRZ.Cor$correlations, diag.info = sample.size.list, titulo = "B. Correlation matrices comparison values via KRZ and Mantel ")
-  
-  plot_grid(plot.a, plot.c, nrow = 2, vjust = 0.1)
-  
-  plot_grid(plot.a, plot.a.log, nrow = 2, vjust = 0.1)
-  
-   
- mat_data2 <- array (0, dim (mat_data))
- mat_data2 [lower.tri (mat_data2)] <- mat_data [lower.tri (mat_data)]
- mat_data2 <- mat_data2 + t(mat_data2)
- diag(mat_data2) <- 1
- dimnames (mat_data2) <- dimnames (mat_data)
-  
- eigen1matdata <- Re(eigen (mat_data2) $ vectors [,1])
- 
- mat_data2 <- mat_data2 [order(eigen1matdata, decreasing = T), order(eigen1matdata, decreasing = T)]
- diag(mat_data2) <- sample.size.list
+  Steppan$Plot$correct <- 
+#    Combine.Mx.Plot(Mx1 = Steppan$BS.RS, 
+#                     Mx2 = Steppan$BS.KRZ, 
+#                     prob =  mx.compare$BS.RS$probabilities, 
+#                     diag.info = c(n.size[mask,2], 130, 12), 
+#                     method = "Random Skewers",
+#                     titulo = "Steppan's correction values of comparison via Krzanowski and") # tamanho salvo 15 x 12
 
   log.cov.mx <- current.data %>% llply(function(x) x$matrix$cov.log)
   log.cor.mx <- llply(log.cov.mx[mask], cov2cor)
@@ -208,7 +194,48 @@
   names(mx.compare.log)[1:5] <-  c('RS', 'KRZ','PCA.s', 'Mantel', 'KRZ')
   mx.class<- c('V/CV', 'V/CV','V/CV', 'COR', 'COR')
   for (i in 1:5)  {mx.compare.log[[i]]$method <- names(mx.compare.log)[i]}
-  for (i in 1:5)  {mx.compare.log[[i]]$mx.class <- mx.class[i]}
+  for (i in 1:5)  {mx.compare.log[[i]]$mx.class <- mx.class[i]}    
+    
+Steppan$Plot$SizelesAndLog <- 
+    Combine.Mx.Plot(Mx1 = t(mx.compare.log$RS$correlations), 
+                    Mx2 = t(mx.compare.log$KRZ$correlations), 
+                    prob = mx.compare.log$RS$probabilities, 
+                    diag.info = c(n.size[mask,2]), 
+                    method = "Random Skewers",
+                    titulo = "Species matrices comparisons via " )
+
+combined.prob <- mx.compare.log$RS$probabilities
+combined.prob [upper.tri(combined.prob, diag = F)] <- t(mx.compare.sizeless$RS$probabilities)[upper.tri(mx.compare.sizeless$RS$probabilities, diag = F) ]
+
+Log.cov.mx <- sp.main.data[mask] %>% llply(function(x) x$matrix$cov.log )
+Sizeless.cov.mx <- sp.main.data[mask] %>% llply(function(x) x$matrix$cov.sizeless )
+
+ChechSizeMatters <- sp.main.data[mask] %>% llply(function(x) x$rs.size.comparisson$correlations ) %>% ldply (function(x) x[lower.tri(x, diag= F)] ) 
+names (ChechSizeMatters) <- c(".id", "gmXreg", "regXlog", "gmXlog")
+
+ChechSizeMatters<- list("comparison" = ChechSizeMatters, 
+                        "Plot" = "Plot missing")
+
+ChechSizeMatters$Plot <- Combine.Mx.Plot(Mx1 = t(mx.compare.log$RS$correlations), 
+                Mx2 = t(mx.compare.sizeless$RS$correlations), 
+                prob = t(combined.prob) , 
+                diag.info = ChechSizeMatters$comparison$gmXlog, 
+                method = "Random Skewers",
+                titulo = "ed/GM and Log(ed) Matrices comparisons via " )
+
+
+ mat_data2 <- array (0, dim (mat_data))
+ mat_data2 [lower.tri (mat_data2)] <- mat_data [lower.tri (mat_data)]
+ mat_data2 <- mat_data2 + t(mat_data2)
+ diag(mat_data2) <- 1
+ dimnames (mat_data2) <- dimnames (mat_data)
+  
+ eigen1matdata <- Re(eigen (mat_data2) $ vectors [,1])
+ 
+ mat_data2 <- mat_data2 [order(eigen1matdata, decreasing = T), order(eigen1matdata, decreasing = T)]
+ diag(mat_data2) <- sample.size.list
+
+ 
 
   
   
