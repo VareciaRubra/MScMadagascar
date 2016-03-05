@@ -41,7 +41,7 @@ ic.max.sim<-function(x) {
   t_<- dim(x)[[1]] -1
   ic<- apply(x, 2, FUN = function (a) sort(a)[t_-1]  )
   return(ic)
-} Prob <- if (prob == NULL) 
+}
 
 ic.min.sim<-function(x) {
   x[lower.tri(x)]<-t(x)[lower.tri(x)]
