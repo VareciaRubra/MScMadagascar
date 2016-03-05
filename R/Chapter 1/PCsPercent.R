@@ -72,7 +72,15 @@ MonteCarloPCPercent <- function (x, iterations = 1000, parallel = FALSE)
                               CalcR2(mc.mx) 
                               
                             }, .parallel = parallel)
-        
+         
+         icv.dists<- aaply (1:iterations, 1, 
+                           function (i)
+                           {
+                             mc.mx <- cov(rmvnorm (x$sample.size, mean= x$ed.means, sigma = x$matrix$cov, method = 'svd') )## gerando valores a partir duma distribuiçao com o jeitao da sua matriz e com média igual a da sp
+                               CalcICV(mc.mx) 
+                             
+                           }, .parallel = parallel)
+         
           intervalo.mc.pc <- projec.B.A %>% adply(., 2, function (x) sort(x)[ c(3,97) ] )
           names(intervalo.mc.pc) <- c("PC", "min", "max")
           intervalo.mc.pc$observed <- PCpercent   
@@ -140,7 +148,9 @@ Plotao <- plot_grid( Plot.PC, Plot.gm, Plot.r2, labels = LETTERS[1:3], ncol = 3)
                       "Plotao" = Plotao,
                       "Plot.RS" = Plot.r2,
                       "Plot.PC" = Plot.PC,
-                      "Plot.GM" = Plot.gm ) )
+                      "Plot.GM" = Plot.gm,
+                      "icv.dist" = icv.dists,
+                      "r2.dist" = r2.dists) )
 
 }
  
@@ -151,20 +161,11 @@ Variae <- llply(.data = sp.main.data[mask], .fun =  MonteCarloPCPercent, .progre
 
 Variae$Lemur_catta$intervalo.mc.pc[1:4]
 
-
 Var1to4<- Variae %>% ldply(function (x) x$intervalo.mc.pc[1:4,])
 Var1to4$.id %<>% gsub("_", ' ',.)
 Var1to4$.id <- factor(Var1to4$.id, levels = unique(Var1to4$.id)[42:1])
 Var1to4$PC <- factor(Var1to4$PC, levels = unique(Var1to4$PC)[4:1])
-
 str(Var1to4)
-#Var1to4$.id <- as.character(Var1to4$.id)
-
-
-Var1to4[Var1to4$.id == "Indri_indri" ,]
-Var1to4[Var1to4$.id == "Loris_tardigradus" ,]
-Var1to4[Var1to4$.id == "Lemur_catta" ,]
-Var1to4$.id %<>% gsub("_", ' ',.)
 
 pc.plot <- Var1to4 %>% ggplot() + 
             geom_linerange(aes(x = .id, ymin = min, ymax = max, color = PC, size = PC), alpha = 0.2)+
@@ -186,6 +187,7 @@ VarGM<- Variae %>% ldply(function (x) x$intervalo.mc.gm)
 VarGM$.id %<>% gsub("_", ' ',.)
 VarGM$.id <- factor(VarGM$.id, levels = unique(VarGM$.id)[42:1])
 
+### ficou muito tosco... parecem as naves do star wars :(
 VarGM%>% ggplot() + 
   geom_linerange(aes(x = .id, ymin = min, ymax = max), alpha = 0.1, size =3) +
   geom_point(aes(x = .id, y = observed), size = 1) +
@@ -209,11 +211,61 @@ r2.plot <- VarR2%>% ggplot() +
   coord_flip() +
   theme_bw() +
  theme(plot.title = element_text(face = "bold", size = 12),
-       #axis.text.y = element_text(face =  "italic", size =13),
-       axis.text.x = element_text(size =10),
-       axis.text.y = element_blank(), axis.ticks.y = element_line(size =0)) 
+       axis.text.y = element_text(face =  "italic", size =13),
+       axis.text.x = element_text(size =10)) 
+       #axis.text.y = element_blank(), axis.ticks.y = element_line(size =0)) 
 
+flex <- 
+  sp.main.data[mask] %>% 
+  llply(function (x) Flexibility( x$matrix$cov, iterations = 100) ) %>% ldply(rbind) 
+flex$.id %<>% gsub("_", " ",.) 
+flex$.id <- factor(flex$.id, levels = unique(VarR2$.id)[42:1])
 
-r2.plot <- r2.plot + theme(axis.text.y = element_blank(), axis.ticks.y = element_line(size =0)) 
+flex <- flex %>% melt(variable.name = "iteration" ) %>% 
+  group_by(.id) %>%   
+  summarise(mean = mean(value), min = min(value), max= max(value) )  
 
-plot_grid(pc.plot, r2.plot, labels = LETTERS[1:2], rel_widths = c(1.3,0.9), hjust = c(-22, -0.5))
+flex.plot <- flex%>% ggplot() + 
+  geom_linerange(aes(x = .id, ymin = min, ymax = max), size =4, alpha = 0.2) +
+  geom_point(aes(x = .id, y = mean)) +
+  scale_x_discrete()  +
+  #  scale_y_continuous(limits = c(0, 0.77), breaks = c(0.25, 0.5, 0.75) ) +
+  xlab("") + ylab("") + labs(title = "Flexibility") + 
+  coord_flip() +
+  theme_bw() +
+  theme(plot.title = element_text(face = "bold", size = 12),
+        #axis.text.y = element_text(face =  "italic", size =13),
+        axis.text.x = element_text(size =10),
+        axis.text.y = element_blank(), axis.ticks.y = element_line(size =0)) 
+
+icv <- 
+  Variae %>% 
+  llply(function (x) x$icv.dist) %>% ldply(rbind) 
+icv$.id %<>% gsub("_", " ",.) 
+icv$.id <- factor(icv$.id, levels = unique(VarR2$.id)[42:1])
+
+icv <- icv %>% melt(variable.name = "iteration" ) %>% 
+  group_by(.id) %>%   
+  summarise(mean = mean(value), min = min(value), max= max(value) )  
+
+icv.plot <- icv%>% ggplot() + 
+  geom_linerange(aes(x = .id, ymin = min, ymax = max), size =4, alpha = 0.2) +
+  geom_point(aes(x = .id, y = mean)) +
+  scale_x_discrete()  +
+  #  scale_y_continuous(limits = c(0, 0.77), breaks = c(0.25, 0.5, 0.75) ) +
+  xlab("") + ylab("") + labs(title = "ICV") + 
+  coord_flip() +
+  theme_bw() +
+  theme(plot.title = element_text(face = "bold", size = 12),
+        #axis.text.y = element_text(face =  "italic", size =13),
+        axis.text.x = element_text(size =10),
+        axis.text.y = element_blank(), axis.ticks.y = element_line(size =0)) 
+
+plot_grid(pc.plot, 
+          flex.plot,
+          r2.plot, 
+          icv.plot, 
+          ncol = 2, labels = LETTERS[c(1,3,2,4)] , 
+          rel_widths = c(0.9, 0.5, 0.9, 0.5), 
+          hjust = c(-22, -3, -22, -3) )
+
