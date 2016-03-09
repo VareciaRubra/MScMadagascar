@@ -134,27 +134,31 @@ REP %>% na.omit(.) %>%
   #geom_line(aes(group = Specie)) +
   geom_point(aes(group = "Trait"),  size=1 ) +
   geom_text(aes(group = "Trait", label = Specie)) +
-  facet_wrap(~Trait, scale="fixed", ncol =5, nrow = 8) +
+  facet_wrap(~Trait, scale="fixed", ncol =8, nrow = 5) +
   theme_bw() +
-  theme(legend.position="none") +
-  theme(axis.text.x = element_blank(), 
-        axis.text.y = element_text(size = 11),
+  theme(legend.position="none",
+        axis.text.x = element_blank(), 
+        axis.text.y = element_text(size = 16),
         axis.title.x = element_blank(),
         axis.title.y = element_text(size=17),
-        strip.text= element_text(size=15)) +
-  #ggtitle("Traits Repetabilities") + 
-  theme(plot.title = element_text(lineheight=.8, face="bold", size = 8)) 
+        strip.text= element_text(size=15),
+        plot.title = element_text(lineheight=.8, face="bold", size = 8)) 
+
 ############# de densidade
 REP %>% na.omit(.) %>%
   ggplot(., aes_string(x = "Repetability" )) +
   geom_density(aes(group = Trait)) +
-
   #geom_text(aes(group = "Trait", label = Specie)) +
   #facet_wrap(~Trait, scale="free_y", ncol =5, nrow = 8) +
   theme_bw() +
-  theme(legend.position="none") +
-  ylab("Density")
-  #ggtitle("Traits Repetabilities") + 
-  theme(plot.title = element_text(lineheight=.8, face="bold", size = 8)) 
+  ylab("Density") +
+  ggtitle("Density of traits' Repetabilities") + 
+theme(legend.position="none",
+      axis.text.x = element_blank(), 
+      axis.text.y = element_text(size = 16),
+      axis.title.x = element_blank(),
+      axis.title.y = element_text(size=19),
+      strip.text= element_text(size=15),
+      plot.title = element_text(lineheight=.8, face="bold", size = 17))  
 
 

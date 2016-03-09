@@ -41,8 +41,16 @@ lista.sex.microcebus <- list("machos" = mx.mac,
                              "sex.fit" = sex.sig.$Microcebus_griseorufus$cov.fit,
                              "raw.cov" =  sex.sig.$Microcebus_griseorufus$cov)
 RandomSkewers(lista.sex.microcebus)$correlations
-KrzProjection(lista.sex.microcebus)
+KrzCor(lista.sex.microcebus)
 ldply(lista.sex.microcebus, MeanMatrixStatistics)
+
+Combine.Mx.Plot(Mx1 = t(RandomSkewers(lista.sex.microcebus)$correlations), 
+                Mx2 = t(KrzCor(lista.sex.microcebus)), 
+                prob = RandomSkewers(lista.sex.microcebus)$probabilities, 
+                diag.info = c(32,34, 68, 68), 
+                method = "Random Skewers",
+                titulo = "Species matrices comparisons via " )
+
 
 
 
