@@ -111,6 +111,8 @@ mx.rep.mc.dist$.id %<>% gsub("_", " ",.)
 mx.rep.mc.dist$.id <- factor(mx.rep.mc.dist$.id, levels = unique(mx.rep.mc.dist$.id)[42:1])
 str(mx.rep.mc.dist)
 
+
+
 mx.rep.mc.dist.sumarry <- mx.rep.mc.dist %>% melt(variable.name = "rep") %>% group_by(rep, .id) %>%
   summarise(mean = mean(value), min = min(value), max= max(value) )  
 RepPlotMC <- 
@@ -120,13 +122,30 @@ RepPlotMC <-
   geom_point(aes(x = .id, y = mean, color = rep )) +
   #facet_wrap(~ PC, scales = 'free') +
   scale_colour_brewer(palette = "Set1", direction = -1) +
-  xlab("") + ylab("") + labs(title = "Matrices repetabilities via MC") + theme(plot.title = element_text(face = "bold", size = 30)) +
-  #theme(legend.position="none") +
-  #scale_x_continuous(limits = c(0, 0.9), breaks = c(0.2, 0.4, 0.6, 0.8)) 
+  xlab("") + ylab("") + labs(title = "Matrices repetabilities via MC") +
   coord_flip() +
+  theme_bw() +
   facet_grid(~rep) + 
-  theme(axis.text.y = element_text(face =  "italic", size =19)) + 
-  theme_bw() + theme(axis.text.x = element_text(size =19))
+  theme(legend.position="none",
+        axis.text.y = element_text(face =  "italic", size =10),
+        axis.text.x = element_text(size =19),
+        strip.text= element_text(size=19),
+        plot.title = element_text(face = "bold", size = 20)) 
+
+ mx.rep.mc.dist %>% melt(variable.name = "rep") %>% group_by(rep, .id)  %>%
+  ggplot(.) +
+   geom_violin(aes(x = .id, y =  rep, color = rep), alpha = 0.4) +
+   geom_jitter(aes(x = .id, y =  rep, color = rep), alpha = 0.3, size = 1, shape = 4) +
+  coord_flip() +
+  theme_bw() +
+  facet_grid(~rep) + 
+  scale_colour_brewer(palette = "Set1", direction = -1) +
+  theme(legend.position="none",
+        axis.text.y = element_text(face =  "italic", size =10),
+        axis.text.x = element_text(size =19),
+        strip.text= element_text(size=19),
+        plot.title = element_text(face = "bold", size = 20)) 
+
 
 SummaySim <- function (x, tri = lower.tri) 
   { ## x = similarity matrix

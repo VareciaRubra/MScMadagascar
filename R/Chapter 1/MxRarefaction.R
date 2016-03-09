@@ -134,7 +134,7 @@ Plot.Raref <- plot_grid(Plot.Raref.rs,
                                labels = LETTERS[1:2], ncol=2)
 
 #Antigo plot de rarefaçao
-p1 <- PlotRarefaction(sp.main.data$Microcebus_griseorufus$rarefaction$krz) + 
+p1 <- PlotRarefaction(sp.main.data$Microcebus_griseorufus$rarefaction$rs) + 
   labs(title = "Microcebus griseorufus") + 
   theme(plot.title = element_text(face = "italic", size = 20), 
         axis.title.x = element_blank(), 

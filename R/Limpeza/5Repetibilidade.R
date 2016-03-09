@@ -161,4 +161,4 @@ theme(legend.position="none",
       strip.text= element_text(size=15),
       plot.title = element_text(lineheight=.8, face="bold", size = 17))  
 
-
+table(na.omit(REP$Repetability) >=0.95)
