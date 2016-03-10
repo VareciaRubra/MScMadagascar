@@ -134,12 +134,14 @@ RepPlotMC <-
 
  mx.rep.mc.dist %>% melt(variable.name = "rep") %>% group_by(rep, .id)  %>%
   ggplot(.) +
-   geom_violin(aes(x = .id, y =  rep, color = rep), alpha = 0.4) +
-   geom_jitter(aes(x = .id, y =  rep, color = rep), alpha = 0.3, size = 1, shape = 4) +
+   geom_violin(aes(x = .id, y =  value, color = rep), alpha = 0.4) +
+   geom_jitter(aes(x = .id, y =  value, color = rep), alpha = 0.3, size = 1, shape = 4) +
   coord_flip() +
   theme_bw() +
   facet_grid(~rep) + 
   scale_colour_brewer(palette = "Set1", direction = -1) +
+   xlab("")+
+  ylab( "Matrix repetabilities (MC)")+
   theme(legend.position="none",
         axis.text.y = element_text(face =  "italic", size =10),
         axis.text.x = element_text(size =19),

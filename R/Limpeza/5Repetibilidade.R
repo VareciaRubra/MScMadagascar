@@ -1,4 +1,4 @@
-current.data <- Sp.raw.main.data[[6]]
+current.data <- Sp.raw.main.data$
 DoubleRep <- function (current.data, detailed = FALSE) {
   x = vector("list", 10)
   x[[1]] <- dplyr::select(current.data, c(Arquivo:Take)) # pegando as info de cada replica
@@ -20,12 +20,15 @@ DoubleRep <- function (current.data, detailed = FALSE) {
   X2dists<- as.matrix(apply(x[[5]], 2, function (x) sum(x != 0)))
   total <- dim(x[[3]])[1]
   doub.rep<- X2dists
+  cat(paste(unique(x$info.raw$Especie)))
+  
     
   ##### testes logicos pra ver se rola de calcular a repetibilidade:
   ###### 1. ver se tem diferença entre as replicas de pelo menos algum indivíduo, 
   ###### 2. ver se tem diferença entre as replicas de pelo menos algum indivíduo, 
   ###### 3. ver se tem mais de 4 bichos medidos com replica
-  if( dim( table(x[[5]] !=0) ) !=1 & sum((x[[5]] !=0) == TRUE) !=0 & sum(X2dists) >= (39*4)  )
+  
+  if( dim( table(x[[5]] !=0) ) !=0 & sum((x[[5]] !=0) == TRUE) !=0 & sum(X2dists) >= (39*4)  )
   { 
    ####### matriz para indexar quais replicas sao diferentes entre si #############
    indexX2<- aggregate(x[[2]], by =list(x[[1]]$Tombo) , FUN = function (x) x[1] != x[2])
@@ -56,12 +59,16 @@ DoubleRep <- function (current.data, detailed = FALSE) {
    reps<- cbind(names(doub.rep) , as.data.frame(doub.rep), as.data.frame(all.rep), total,  X2dists, quantos  )
    if (detailed == TRUE) return(reps) else return(as.data.frame(doub.rep))
   } else return( as.data.frame(doub.rep)/NA )
-   
+  
 } 
 
 mask.rep = ldply(Sp.raw.main.data, count, Especie)[,2] > 10
 
-rep.sp <- ldply(Sp.raw.main.data, DoubleRep, detailed = TRUE)
+mask.rep <- mask.rep & ldply(Sp.raw.main.data, function(x) unique(x$Status) == "Extant" )[,2]
+
+DoubleRep(Sp.raw.main.data[[28]], detailed = T)
+
+rep.sp <- ldply(Sp.raw.main.data[mask.rep], DoubleRep, detailed = TRUE)
 rep.gen <- ldply(Gen.raw.main.data, DoubleRep, detailed = FALSE) 
 rep.sp <- rep.sp[,-2]
 REP <- rep.sp
@@ -74,7 +81,7 @@ REP$Diff <- abs(REP$Repetability - REP$all.rep)
 names(REP)
 
 REP[,2] <- c( names(raw.main.data[[1]][12:50]) )
-REP[,2] <- factor (REP[,2], levels = unique(REP[,2]) )
+REP[,2] <- factor (REP[,2], levels = unique(REP[ ,2])[39:1] )
 
 ####### Plotando os valores de repetibilidade
 
@@ -162,3 +169,39 @@ theme(legend.position="none",
       plot.title = element_text(lineheight=.8, face="bold", size = 17))  
 
 table(na.omit(REP$Repetability) >=0.95)
+
+
+REP %>% melt(. , variable)
+
+REP %>% na.omit %>% group_by(Trait)  %>%
+  ggplot(.) +
+  geom_violin(aes(x = Trait, y =  Repetability), alpha = 0.4) +
+  geom_jitter(aes(x = Trait, y =  Repetability), alpha = 0.8,color = "black", size = 2, shape = 4) +
+  geom_text(aes(x = Trait, y =  Repetability, label = Specie, alpha = abs(1.1-Repetability)), color = "darkgrey", size = 4) +
+  coord_flip() +
+  theme_bw() +
+  scale_colour_brewer(palette = "Set1", direction = -1) +
+  xlab("")+
+  #ylab( "Traits repetabilities")+
+  labs(title = "Traits repetabilities") +
+  theme(legend.position="none",
+        axis.text.y = element_text( size =10),
+        axis.text.x = element_text(size =19),
+        strip.text= element_text(size=19),
+        plot.title = element_text(face = "bold", size = 20)) 
+
+REP %>% na.omit %>% group_by(Trait)  %>%
+  ggplot(.) +
+  geom_violin(aes(x = Specie, y =  Repetability), alpha = 0.4) +
+  geom_jitter(aes(x = Specie, y =  Repetability), alpha = 0.3, size = 1, shape = 4) +
+  coord_flip() +
+  theme_bw() +
+  scale_colour_brewer(palette = "Set1", direction = -1) +
+  xlab("")+
+  ylab( "Traits repetabilities")+
+  theme(legend.position="none",
+        axis.text.y = element_text( size =10),
+        axis.text.x = element_text(size =19),
+        strip.text= element_text(size=19),
+        plot.title = element_text(face = "bold", size = 20)) 
+
