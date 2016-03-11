@@ -52,7 +52,7 @@ mean.sim<-function(x) {
   x<-rowMeans(x,na.rm=TRUE)
   return(x)
 }
-mean.compare.cov<- mx.compare[c(1:2)] %>% llply (function (x) x$correlations ) %>% ldply (function (x) mean.sim(x) )
+mean.compare.cov<- mx.compare[c(6:7)] %>% llply (function (x) x$correlations ) %>% ldply (function (x) mean.sim(x) )
 
 dimnames(mean.compare.cov)[[1]] <- c(paste("Mean", mean.compare.cov[,1] ))
 dimnames(mean.compare.cov)[[2]] <- dimnames(mean.compare.cov)[[2]]
@@ -60,9 +60,15 @@ dimnames(mean.compare.cov)[[2]] <- dimnames(mean.compare.cov)[[2]]
 row.names(mean.compare.cov)
 
 mean.compare.cov<- t(mean.compare.cov[,-1])
-tab.rep.mx.mix<- cbind(tab.rep.mx[mask,-1] , mean.compare.cov[-c(43:44),] )
+quantos.sexo<- Sp.raw.main.data %>% ldply(., function (x) table(x$Sexo, useNA = "always")/2)
 
+tab.rep.mx.mix<- cbind(tab.rep.mx[mask,-c(1:3)] , quantos.sexo[mask, -1], mean.compare.cov[-c(43:44),] )
+str(tab.rep.mx.mix)
+tab.rep.mx.mix$F <- as.integer(tab.rep.mx.mix$F)
+tab.rep.mx.mix[,6] <- as.integer(tab.rep.mx.mix[,6])
+tab.rep.mx.mix$M <- as.integer(tab.rep.mx.mix$M)
 xtable(tab.rep.mx.mix, digits = 3, caption = "Matrix repetabilities calculated via Bootstrap and Monte Carlo using RS and KRZ methods of comparisson.")
+
 
 
 MonteCarloCompleteRep <- function (cov.matrix, sample.size, ComparisonFunc, ..., iterations = 1000, 
