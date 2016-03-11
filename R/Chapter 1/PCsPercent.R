@@ -38,7 +38,7 @@ PcPercent.1to4 %>%
 
 require (mvtnorm)
 
-registerDoParallel(cores = 5)
+registerDoParallel(cores = 2)
 
 MonteCarloPCPercent <- function (x, iterations = 1000, parallel = FALSE) 
 {## B_A = t(E) B E
