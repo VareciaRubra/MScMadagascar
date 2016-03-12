@@ -27,7 +27,7 @@ SexSig <- function (current.data)
   names(sig) <- c(".ed", "V1")
   y[[11]] <- if(!is.na( y [[4]][1]) & !is.na(y$uni)) ldply(y$uni, .fun = function(x) x[4][2,] ) else sig
   names(y)[11] <- "sig.sex.uni"
-  y[[12]] <- 
+  y[[12]] <- getTable(y[[2]])[[6]][2] 
   names(y)[12] <- "sig.sex.multi"
   print (unique(current.data$info$Especie))
   return(y)
