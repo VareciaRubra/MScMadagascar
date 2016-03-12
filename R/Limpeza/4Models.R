@@ -43,13 +43,26 @@ xtable(na.omit(sex.sig), digits = 2)
 multi.sig <- sex.sig %>% llply(function(x) summary(x$multi) ) 
 multi.sig <- sex.sig %>% llply(function(x) x$multi )
 multi.sig[!is.na(multi.sig)] %>% ldply(function(x) getTable(x)[[6]][2]) %>% xtable(digits = 4)
+
+fixp <- function(x, dig=3){
+  x <- getTable(x)
+  
+  if(substr(names(x)[ncol(x)],1,2) != "Pr")
+    warning("The name of the last column didn't start with Pr. This may indicate that p-values weren't in the last row, and thus, that this function is inappropriate.")
+  x[,ncol(x)] <- round(x[,ncol(x)], dig)
+  for(i in 1:nrow(x)){
+    if(x[i,ncol(x)] == 0)
+      x[i,ncol(x)] <- paste0("< .", paste0(rep(0,dig-1), collapse=""), "1")
+  }
+  
+  x
+}
+multi.sig[!is.na(multi.sig)] %>% ldply(fixp) 
+
 #############################Tabela pra meter no relatório ################################
 rownames(sex.sig) <- sex.sig[,1]
 colnames(sex.sig) <- c("Especie", dimnames(sp.main.data$Tarsius_bancanus$matrix$cov)[[1]]) 
 table.sex.sig <- xtable(na.omit(sex.sig)[,-1], digits = 3)
-
-sex.sig %>% tbl_df() %>% 
-  ggplot()
 
 ##################3 Comparação entre matrizes de sexo e raw e residual ####################
 
@@ -153,5 +166,4 @@ getTable <- function (x, ...)
 t.test.sex.gm <- sp.main.data %>% ldply(function (x) table(x$info$Sexo, useNA = "always") ) %>% llply()
 sp.main.data %>% llply(function(x) t.test(x$gm.ind[!is.na(x$info$Sexo)] ~ x$info$Sexo[!is.na(x$info$Sexo)]) ) 
 
-t.test(sp.main.data$Tarsius_bancanus$ ~ )
 
