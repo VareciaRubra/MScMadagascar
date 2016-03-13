@@ -58,7 +58,7 @@ for (i in 1:length (.source.files))
 attach('WPCs_Strepsirrhini.RData')
 attach('WPCs_Strepsirrhini_ExtantsOnly.RData')
 
-hapalemur <- read.csv('R/Shapes/Hapalemur_7_AMNH_shape.csv', FALSE)
+hapalemur <- read.csv('Hapalemur_7_AMNH_shape.csv', FALSE)
 
 source ('~/MEGA/Doc/Func/glue.R')
 source ('~/MEGA/Doc/Func/osymm.R')

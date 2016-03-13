@@ -235,55 +235,6 @@ ChechSizeMatters$Plot <- Combine.Mx.Plot(Mx1 = t(mx.compare.log$RS$correlations)
  mat_data2 <- mat_data2 [order(eigen1matdata, decreasing = T), order(eigen1matdata, decreasing = T)]
  diag(mat_data2) <- sample.size.list
 
- 
-
-  
-  
-##################################
-#Função para plotar matrizes 
-#com respectivos valores seguindo 
-# palleta de padrao de cor
-###################################
-myPalette <- colorRampPalette(c("yellow", "white", "purple"))(n = 100)
-myPalette <- "RdBu"  
-plot.matrix<- function(mx = NULL, sample.size = NULL, brewer = myPalette, show.values = TRUE)
-{ require (plotrix)
-  library("RColorBrewer")
-  paleta.of.choice  <- rev(brewer.pal(11, brewer))
-  colfunc <- colorRampPalette(paleta.of.choice)
-  paleta  <- colfunc(90)
-  nCores  <- length(paleta)
-  intervalMarks  <- seq(from = 0.1, to = 1, length.out = nCores)
-  
-  mx.cor <- mx
-  mx.dimentions <- dim(mx.cor)[1]
-  
-  dados<- as.vector(mx.cor)
-  intervals  <- findInterval(dados , intervalMarks, rightmost.closed = T, all.inside = T)
-  cores  <- paleta[intervals]
-  
-  color2D.matplot(x = mx.cor, axes = F, cellcol = cores, show.values= 2, vcex= 0.6, xlab = "", ylab = "", xaxt = "n", yaxt = "n")
-  #title(main = paste(mx$mx.class, "Matrices compared by", mx$method, "method"))
-  title(main = "Matrix comparison via KRZ (lower) and RS (upper)")
-  axis(1, 1:mx.dimentions, paste("(n=", sample.size,")",1:length(rownames(mx.cor)), sep = " "), las = 2, cex.axis = 0.9, tick = FALSE, line = 0)
-  #axis(2, mx.dimentions:1, length(rownames(mx.cor)):1, las = 1, cex.axis = 1, tick = FALSE, line = 0)
-  axis(2, mx.dimentions:1, paste(rownames(mx.cor), 1:length(rownames(mx.cor))), las = 1, cex.axis = 0.9, tick = FALSE, line = 0)
-
-}
-par(mar = c(7,17,3,2))
-par(mfrow = c(3,1))
-  lapply(mx.compare, plot.matrix)
-  lapply(mx.compare.log, plot.matrix)
-  
-  
-  plot.matrix(mx = mat_data, sample.size = sample.size.list, show.values = TRUE)
-  #Calculando a similaridade média das matrizes.
-mean.sim<-function(x) {
-    x[upper.tri(x)]<-t(x)[upper.tri(x)]
-    diag(x)<-NA
-    x<-rowMeans(x,na.rm=TRUE)
-    return(x)
-}
 
 ##########Plotando os valores médios de comparaçao por metodo por matriz
 current.mx.list <- mx.compare
@@ -338,89 +289,6 @@ Mean.Mx.Plots <- mean.comp.values %>%
 Mean.Mx.Plots + geom_point(aes (x=method, y=mean, color = method, shape = method), data = method.mean, size = 6 )
 
 
-########################################################################################################################################
-########################################################################################################################################
-########################################################################################################################################
-current.data <- sp.main.data
-PCs1to4<- current.data[mask] %>% llply(function(x) as.data.frame(eigen(x$matrix$cov)$vectors[,1:4]) ) %>% llply(function(x) as.list(x) )
-PC1 <- current.data[mask] %>% ldply(function(x) eigen(x$matrix$cov)$vectors[,1])
-names.sp <-  PC1[,1]
-PC1<- as.matrix(PC1[,-1])
-dimnames(PC1)[[1]] <- names.sp
-# se estiver correlacionado negativamente com o vetor isometrico, multiplicar por -1
-ed.names <- names(current.data[mask][[1]]$ed)
-Iso.Compare <- function(x) {
-  isometrico<- rep( (1/sqrt(39)) , 39)
-  corr = rep(NA, length(x) )
-  re.oriented = x
-    for (i in 1:length(x)) {
-    corr[i]<- x[[i]] %*% isometrico
-      
-      if(corr[i] <0) {re.oriented[[i]] <- as.numeric(as.matrix(x[[i]]) %*% -1)}  else x[[i]]
-    }
-    
-  names (corr) <- paste ("PC", 1:length(x), sep = "")
-  names (re.oriented) <- paste ("PC", 1:length(x), sep = "") 
-  
-  return(results= list("corr" = corr, "re.oriented" = re.oriented)) }
-PCs1to4<- current.data[mask] %>% llply(function(x) as.data.frame(eigen(x$matrix$cov)$vectors[,1:4]) ) %>% llply(function(x) as.list(x) )
-PCs1to4.log<- current.data[mask] %>% llply(function(x) as.data.frame(eigen(x$matrix$cov.log)$vectors[,1:4]) ) %>% llply(function(x) as.list(x) )
-
-Iso.Compare.reoriented <- llply(PCs1to4.log, Iso.Compare) %>% ldply(function(x) as.data.frame(x$re.oriented)) 
-
-names(Iso.Compare.reoriented) <- c(".sp", "PC1", "PC2", "PC3", "PC4")
-Iso.Compare.reoriented$.ed <- ed.names
-Iso.Compare.reoriented %>% gather(key=".pcScore", value=value, 2:5 )
-Iso.Compare.reoriented$.sp <- factor(Iso.Compare.reoriented$.sp, levels = unique(Iso.Compare.reoriented$.sp)) 
-Iso.Compare.reoriented$.ed <- factor(Iso.Compare.reoriented$.ed, levels = rev(ed.names) ) 
-myPalette <- colorRampPalette(rev(brewer.pal(11, "Spectral")), space="Lab")
-Iso.Compare.reoriented %>% gather(key=".pcScore", value=value, 2:5 ) %>%
-  ggplot (.) +
-  geom_tile(aes(x = .pcScore, y = .ed, fill = value)) +
-  facet_wrap(~.sp) +
-  theme_bw() +
-  scale_fill_gradient(name = 'PC.Score', colours = myPalette(1000)) +
-  ylab ('PC.Scores') + xlab ('') + labs(title = "First 4 PC's scores") +
-  #scale_y_discrete(limits = levels(PCs1to4$.pcScore))) +
-  theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5),
-        axis.ticks = element_line(size = 0),
-        axis.text.y = element_text(size= 7),
-        strip.text= element_text(size=7)) +
-  coord_flip()
-
-Iso.Compare.cor.iso <- llply(PCs1to4, Iso.Compare) %>% ldply(function(x) x$corr) 
-names(Iso.Compare.cor.iso) <- c(".sp", "PC1", "PC2", "PC3", "PC4")
-Iso.Compare.cor.iso$.sp <- factor(Iso.Compare.cor.iso$.sp, levels = rev(unique(Iso.Compare.cor.iso$.sp))) 
-Iso.Compare.cor.iso %>% gather(key="Isometric.Correlation", value=value, 2:5 ) %>%
-  ggplot (.) +
-  geom_tile(aes(x = Isometric.Correlation, y = .sp, fill = abs(value) ) ) +
-  theme_bw() +
-  scale_fill_gradientn(name = 'Isometric.Correlation', colours = myPalette(1000)) +
-  ylab ('') + xlab ('') + labs(title = "Matrix of log values correlation with isometric vector") +
-  #scale_y_discrete(limits = levels(PCs1to4$.pcScore))) +
-  theme(axis.text.x = element_text(angle = 0, hjust = 0.5, vjust = 1, size = 10),
-        axis.text.x = element_text(size = 10),
-        axis.ticks = element_line(size = 0),
-        axis.text.y = element_text(size= 10)) +
-  theme(plot.title = element_text(lineheight=.8, face="bold"))
-
-PCs1to4<- current.data[mask] %>% ldply(function(x) as.data.frame(eigen(x$matrix$cov)$vectors[,1:4]) )  
-names(PCs1to4) <- c(".sp", "PC1", "PC2", "PC3", "PC4")
-PCs1to4$.ed <- ed.names
-PCs1to4 %>% gather(key=".pcScore", value=value, 2:5 )
-PCs1to4$.sp <- factor(PCs1to4$.sp, levels = unique(PCs1to4$.sp)) 
-PCs1to4$.ed <- factor(PCs1to4$.ed, levels = rev(ed.names) ) 
-myPalette <- colorRampPalette(rev(brewer.pal(11, "Spectral")), space="Lab")
-PCs1to4 %>% gather(key=".pcScore", value=value, 2:5 ) %>%
-  ggplot (.) +
-  geom_tile(aes(x = .sp, y = .ed, fill = value)) +
-  facet_wrap(~.pcScore) +
-  theme_bw() +
-  scale_fill_gradientn(name = 'PC.Score', colours = myPalette(1000)) +
-  ylab ('PC.Scores') + xlab ('') + labs(title = "First 4 PC's scores") +
-  #scale_y_discrete(limits = levels(PCs1to4$.pcScore))) +
-  theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5),
-        axis.ticks = element_line(size = 0))
 
 
 ################## Grafico que nao serve pra nada, nao sai nenum padrao
@@ -453,26 +321,3 @@ data.frame ('sd.gm' = sd.gm[2],  'gm' = gm.mean[,2], 'Sample' = n.size [mask, -1
 #######################################################################################################################################
 ########################################################################################################################################
 ########################################################################################################################################
-
-
-########### quantidade de variação espalhada nos primeiros 4 PC
-  PcPercent.1to4<- cov.mx[mask] %>% ldply(function(x) eigen(x)$values[1:4]/sum(eigen(x)$values) )
-  names(PcPercent.1to4) <- c(".sp", "PC1", "PC2", "PC3", "PC4")
-  PcPercent.1to4$.sp <- factor(PcPercent.1to4$.sp, levels = unique(PcPercent.1to4$.sp)) 
-  library(scales)
-  PcPercent.1to4 %>%
-  gather(key="Percent_var_PC", value=value, 2:5 ) %>%
-    ggplot( ., aes(x= Percent_var_PC, y = value, color = Percent_var_PC, label = .sp), varwidth = T) +
-    scale_y_continuous(labels=percent) +
-    geom_text(size = 2, vjust = 1, alpha = 0.4 )  +
-    theme_bw() +
-    geom_jitter() +
-    geom_violin(alpha = 0) +
-    ggtitle("% of variance on first 4 PC by specie") +
-    theme(plot.title = element_text(lineheight=.8, face="bold"), axis.title.x = element_blank()) +
-    theme(legend.position="none")
-
-
-  PhyloW(tree = tree.indridae, 
-         tip.data = cov.indridae, 
-         tip.sample.size = n.size.indridae )

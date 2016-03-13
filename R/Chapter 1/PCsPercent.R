@@ -81,6 +81,14 @@ MonteCarloPCPercent <- function (x, iterations = 1000, parallel = FALSE)
                              
                            }, .parallel = parallel)
          
+         flex.dists<- aaply (1:iterations, 1, 
+                            function (i)
+                            {
+                              mc.mx <- cov(rmvnorm (x$sample.size, mean= x$ed.means, sigma = x$matrix$cov, method = 'svd') )## gerando valores a partir duma distribuiçao com o jeitao da sua matriz e com média igual a da sp
+                              mean(Flexibility(mc.mx) )
+                              
+                            }, .parallel = parallel)
+         
           intervalo.mc.pc <- projec.B.A %>% adply(., 2, function (x) sort(x)[ c(3,97) ] )
           names(intervalo.mc.pc) <- c("PC", "min", "max")
           intervalo.mc.pc$observed <- PCpercent   
@@ -150,12 +158,13 @@ Plotao <- plot_grid( Plot.PC, Plot.gm, Plot.r2, labels = LETTERS[1:3], ncol = 3)
                       "Plot.PC" = Plot.PC,
                       "Plot.GM" = Plot.gm,
                       "icv.dist" = icv.dists,
-                      "r2.dist" = r2.dists) )
+                      "r2.dist" = r2.dists,
+                      "flex.dist" = flex.dists) )
 
 }
  
-temp <- MonteCarloPCPercent (x = sp.main.data$Microcebus_griseorufus, iterations = 100, parallel = TRUE)
-temp$Plotao
+temp <- MonteCarloPCPercent (x = sp.main.data$Microcebus_griseorufus, iterations = 100, parallel = TRUE )
+temp$Plotao 
 ############################ usando essa with o bagulho ta reciclando o objeto anterior! 
 Variae <- llply(.data = sp.main.data[mask], .fun =  MonteCarloPCPercent, .progress = "text", iterations = 100, parallel = TRUE )
 
@@ -201,6 +210,29 @@ VarR2<- Variae %>% ldply(function (x) x$intervalo.mc.r2)
 VarR2$.id %<>% gsub("_", ' ',.)
 VarR2$.id <- factor(VarR2$.id, levels = unique(VarR2$.id)[42:1])
 
+r2.stuff <- 
+  Variae %>% 
+  llply(function (x) x$r2.dist) %>% ldply(rbind) 
+r2.stuff$.id %<>% gsub("_", " ",.) 
+r2.stuff$.id <- factor(r2.stuff$.id, levels = unique(VarR2$.id)[42:1])
+
+r2.stuff <- r2.stuff %>% melt(variable.name = "iteration" ) %>% 
+  group_by(.id) %>%   
+  summarise(mean = mean(value), min = min(value), max= max(value) )  
+
+r2.stuff.plot <- r2.stuff%>% ggplot() + 
+  geom_linerange(aes(x = .id, ymin = min, ymax = max), size =4, alpha = 0.2) +
+  geom_point(aes(x = .id, y = mean)) +
+  scale_x_discrete()  +
+  #  scale_y_continuous(limits = c(0, 0.77), breaks = c(0.25, 0.5, 0.75) ) +
+  xlab("") + ylab("") + labs(title = "Mean squared correlation (r²)") + 
+  coord_flip() +
+  theme_bw() +
+  theme(plot.title = element_text(face = "bold", size = 12),
+        axis.text.y = element_text(face =  "italic", size =13),
+        axis.text.x = element_text(size =10),
+        axis.text.y = element_blank(), axis.ticks.y = element_line(size =0)) 
+
 
 r2.plot <- VarR2%>% ggplot() + 
   geom_linerange(aes(x = .id, ymin = min, ymax = max), size =4, alpha = 0.2) +
@@ -215,22 +247,22 @@ r2.plot <- VarR2%>% ggplot() +
        axis.text.x = element_text(size =10)) 
        #axis.text.y = element_blank(), axis.ticks.y = element_line(size =0)) 
 
-flex <- 
-  sp.main.data[mask] %>% 
-  llply(function (x) Flexibility( x$matrix$cov, iterations = 100) ) %>% ldply(rbind) 
-flex$.id %<>% gsub("_", " ",.) 
-flex$.id <- factor(flex$.id, levels = unique(VarR2$.id)[42:1])
+flex.stuf <- 
+  Variae %>% 
+  llply(function (x) x$flex.dist) %>% ldply(rbind) 
+flex.stuf$.id %<>% gsub("_", " ",.) 
+flex.stuf$.id <- factor(flex.stuf$.id, levels = unique(VarR2$.id)[42:1])
 
-flex <- flex %>% melt(variable.name = "iteration" ) %>% 
+flex.stuf <- flex.stuf %>% melt(variable.name = "iteration" ) %>% 
   group_by(.id) %>%   
   summarise(mean = mean(value), min = min(value), max= max(value) )  
 
-flex.plot <- flex%>% ggplot() + 
+flex.stuf.plot <- flex.stuf%>% ggplot() + 
   geom_linerange(aes(x = .id, ymin = min, ymax = max), size =4, alpha = 0.2) +
   geom_point(aes(x = .id, y = mean)) +
   scale_x_discrete()  +
   #  scale_y_continuous(limits = c(0, 0.77), breaks = c(0.25, 0.5, 0.75) ) +
-  xlab("") + ylab("") + labs(title = "Flexibility") + 
+  xlab("") + ylab("") + labs(title = "Mean Flexibility") + 
   coord_flip() +
   theme_bw() +
   theme(plot.title = element_text(face = "bold", size = 12),
@@ -262,8 +294,8 @@ icv.plot <- icv%>% ggplot() +
         axis.text.y = element_blank(), axis.ticks.y = element_line(size =0)) 
 
 plot_grid(pc.plot, 
-          flex.plot,
-          r2.plot, 
+          flex.stuf.plot,
+          r2.stuff.plot, 
           icv.plot, 
           ncol = 2, labels = LETTERS[c(1,3,2,4)] , 
           rel_widths = c(0.9, 0.5, 0.9, 0.5), 
