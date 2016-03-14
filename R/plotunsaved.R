@@ -34,7 +34,7 @@ hulls %<>% separate(.info, c('Familia', 'Genero', "Especie"), sep = "\\.")
 
 # levels(plot.W$Especie) <- as.factor(unique(resp.info$Especie))
 # levels(plot.W$Genero) <- as.factor(unique(resp.info$Genero))
- levels(plot.W$Familia) <- as.factor(unique(resp.info$Familia))
+ levels(plot.W$Familia) <- as.factor(c("Indridae", "Daubentoniidae", "Lemuridae", "Lepilemuridae", "Cheirogaleidae", "Palaeopropithecidae", "Megaladapidae", "Archaeolemuridae", "Lorisidae", "Galagidae", "Tarsiidae" ))
 # hulls$Genero <- factor (hulls$Genero, levels = hulls$Genero )
 hulls$Especie <- unique (hulls$Especie, levels = unique(as.factor(hulls$Especie) ) )
 pc_plot <- ggplot(plot.W, aes(PC1, PC2)) +
@@ -49,6 +49,9 @@ pc_plot
 hulls <- ddply(plot.W, .(.info), plyr::summarise, "hpc1"=PC1[chull(PC1,PC4)],
                "hpc2"=PC4[chull(PC1,PC4)])
 hulls %<>% separate(.info, c('Familia', 'Genero', "Especie"), sep = "\\.")
+hulls$Familia <- as.factor(hulls$Familia)
+levels(hulls$Familia) <- order(unique(hulls$Familia)) as.factor(c("Indridae", "Daubentoniidae", "Lemuridae", "Lepilemuridae", "Cheirogaleidae"))
+str(hulls)
 pc_plot <- ggplot(plot.W, aes(PC1, PC4))+
   geom_polygon(aes(-hpc1, -hpc2, fill = Familia, color = Familia, group= Especie ), data = hulls, alpha=.2) + 
   geom_point(data = ddply(plot.W, .(Tombo), numcolwise(mean)),
@@ -59,12 +62,13 @@ pc_plot <- ggplot(plot.W, aes(PC1, PC4))+
   #             aes(PC1, PC2, group= Genero), size = 3) +
   geom_text(data = ddply(plot.W, .(Genero), numcolwise(mean)),
             aes(-PC1, -PC4, label= Genero), size = 5) +
-  scale_y_continuous(limits = c(-40, 15)) +
-  scale_x_continuous(limits = c(30, 190)) +
+  #scale_y_continuous(limits = c(-40, 15)) +
+  #scale_x_continuous(limits = c(30, 190)) +
   theme_bw() + ggtitle("Cranial traits Within-group PC scores") +
   theme(plot.title = element_text(face = "bold", size = 14),
         axis.text = element_text(size = 12),
-        legend.position= c(0.1,0.87))
+        legend.position= c(0.37,0.17)) +
+    guides(fill = guide_legend(keywidth = 1, keyheight = 2))
         #legend.position= "bottom") 
 pc_plot
 
