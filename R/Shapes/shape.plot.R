@@ -133,18 +133,16 @@ WPCs[, 1] <- -WPCs[, 1]
 myPalette <- colorRampPalette(rev(brewer.pal(11, "Spectral")), space="Lab")
 shape.plot <- list()
 for (i in 1:39)
- #myBreaks <- c(round(min(WPCs[, i]), digits = 1), round(mean (WPCs[, i]),digits = 1 ), round(max(WPCs[, i]), digits = 1 ) ) 
   shape.plot [[i]] <-
   ggshape(hapa.sym,
           Aux $ tessel.39 [1:39, ],
           WPCs[, i],
-          rotation = c(1, -1, 1), culo = 0.01, thickness = 2) +
-#   scale_fill_continuous(limits = c(min(WPCs[, i]), max(WPCs[, i])), breaks= myBreaks,
-#                         guide = guide_colorbar(nbin=100, draw.ulim = T, draw.llim = T)) +
- ggtitle(paste("PC", i, sep = " ")) +
+          rotation = c(1, -1, 1.3), culo = 0.01, thickness = 2) +
+  ggtitle(paste("PC", i, sep = " ")) +
   theme(plot.title = element_text(face = "bold", size = 12),
         legend.position= c(0.3,0.1), legend.direction="horizontal") 
-  shape.plot [[1]]
+  
+  shape.plot [[4]]
 rm(i)
 shape.plot [[40]] <- plot_grid(plotlist = shape.plot, ncol = 4) + ggtitle("Trais scores on W\nusing Hapalemur frame")
 shape.plot [[41]] <- plot_grid(shape.plot[[1]], shape.plot[[2]],shape.plot[[3]], shape.plot[[4]], ncol = 4) + ggtitle("Trais scores on W\nusing Hapalemur frame")
