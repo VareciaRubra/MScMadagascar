@@ -16,7 +16,7 @@ rownames(current.data) <- rownames(lin_data)
 ancestral.mx <- PhyloW(tree = pruned.tree.with.mx, tip.data = mx.at.tree, tip.sample.size = n.size[mask,2][-41])
 plot(pruned.tree.with.mx, cex = 0.5)
 nodelabels()
-W.matrix <- ancestral.mx$'42'
+W.matrix <- ancestral.mx$'45'
 
 resp <- as.data.frame(as.matrix(na.omit(select(current.data, IS_PM:BA_OPI) ) ) %*% eigen(W.matrix)$vectors[,c(1:39)])
 resp %<>% mutate(., .id = rownames(resp) )
@@ -71,7 +71,7 @@ pc_plot <- ggplot(plot.W, aes(PC1, PC4))+
         legend.position= c(0.37,0.17)) +
     guides(fill = guide_legend(keywidth = 1, keyheight = 2))
         #legend.position= "bottom") 
-pc_plot
+pc_plot + theme(legend.position = "none")
 
 
 pc_plot <- ggplot(plot.W, aes(PC1, PC2)) +
