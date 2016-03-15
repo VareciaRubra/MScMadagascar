@@ -25,6 +25,7 @@ resp.info <- select(lin_data, c(.info,Arquivo:Data_dado) )
 resp.info$Tombo <- reorder.factor(resp.info$Tombo, new.order=resp$.id)
 resp.info <- resp.info %>% arrange(Tombo)
 resp.info <- resp.info[resp.info$Tombo %in% resp$.id, ]
+table(resp$.id == resp.info$Tombo)
 plot.W <- cbind(resp.info, resp)
 plot.W$.id == plot.W$Tombo
 rownames(plot.W) <- plot.W$Tombo
@@ -85,4 +86,28 @@ pc_plot <- ggplot(plot.W, aes(PC1, PC2)) +
             aes(PC1, PC2, label= Genero), size = 5) +
   theme_bw() + ggtitle("Cranial traits Within-group PC scores")
 pc_plot
+
+plot.W$PC1 <- -plot.W$PC1
+
+plot.W.ranges <- plot.W
+plot.W.ranges$Especie <- factor(plot.W.ranges$Especie, levels = unique(plot.W.ranges$Especie)[59:1] )
+
+plot.W.ranges %>% gather(key=.pc, value = value, c(PC1, PC2, PC4, PC3 )) %>%
+  ggplot( .,aes(y= Especie, x = value), varwidth = T) +
+  geom_boxplot(aes(color = .pc, fill = .pc), alpha = 0.5, varwidth = T) +
+  #geom_violin(aes(label = Tombo, color = .pc, fill = .pc), alpha = 0.5) +
+  #geom_text( aes(label = Tombo), size =2, vjust = 1, alpha = 0.4)  +
+  scale_colour_brewer(palette = "Spectral", direction = 1) +
+  scale_fill_brewer(palette = "Spectral", direction = 1) +
+  geom_jitter(aes(color = .pc), size = 0.3, shape = 8, alpha = 0.5) +
+  #scale_shape( guide = "none", name = "Mean value by method") +
+  ggtitle("Species scores on W's PCs") +
+  theme_bw() + xlab("") + ylab("") +
+  #coord_flip() +
+  facet_wrap(~ .pc, ncol = 4, nrow = 1, scales = "free") +
+  theme(legend.position="none",
+        plot.title = element_text(lineheight=.8, face="bold"),
+        axis.text.y = element_text(face =  "italic", size =13) 
+        #axis.text.y = element_blank()
+        )
 
