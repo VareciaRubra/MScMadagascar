@@ -69,6 +69,7 @@ tab.rep.mx.mix[,6] <- as.integer(tab.rep.mx.mix[,6])
 tab.rep.mx.mix$M <- as.integer(tab.rep.mx.mix$M)
 xtable(tab.rep.mx.mix, digits = 3, caption = "Matrix repetabilities calculated via Bootstrap and Monte Carlo using RS and KRZ methods of comparisson.")
 
+apply(tab.rep.mx.mix, 2, summary)
 
 
 MonteCarloCompleteRep <- function (cov.matrix, sample.size, ComparisonFunc, ..., iterations = 1000, 
