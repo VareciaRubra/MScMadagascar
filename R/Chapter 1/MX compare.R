@@ -101,8 +101,6 @@
     range.values<- range.values- c(0.01, -0.01)
     diag(mat_data) <- diag.info
     
-   
-    
     sig.mx <- prob >= 0.04
     sig.mx[upper.tri(sig.mx, diag = T)] <- FALSE 
     ############# se for plotar duas mx de RS coment essa linha de cima e gera essa mx mista por fora
@@ -148,7 +146,12 @@
   
   ########################## Montando os plots de combinação valores de comparação corrigidos, nao corrigidos e por método
 
-  Combine.Mx.Plot(Mx1 =   mx.compare.sizeless$RS$correlations, Mx2 = t(mx.compare.log$RS$correlations), prob =   mx.compare.sizeless$RS$probabilities, diag.info = sample.size.list[-c(43:44)], titulo = "Species matrices comparisons", method = "RS")
+  Combine.Mx.Plot(Mx1 =   mx.compare.sizeless$RS$correlations,
+                  Mx2 = t(mx.compare.log$RS$correlations),
+                  prob =   mx.compare.sizeless$RS$probabilities,
+                  diag.info = sample.size.list[-c(43:44)],
+                  titulo = "Species matrices comparisons",
+                  method = "RS")
 
   Steppan$Plot$BS.RS <- 
     Combine.Mx.Plot(Mx1 = t(mx.compare$BS.RS$correlations), 
@@ -181,6 +184,13 @@
 #                     diag.info = c(n.size[mask,2], 130, 12), 
 #                     method = "Random Skewers",
 #                     titulo = "Steppan's correction values of comparison via Krzanowski and") # tamanho salvo 15 x 12
+Steppan$Plot$Corrected.mc <-     
+    Combine.Mx.Plot(Mx1 = mx.compare$MC.RS$correlations, 
+                    Mx2 = mx.compare$MC.KRZ$correlations, 
+                    prob = mx.compare$MC.RS$probabilities,
+                    diag.info = c(n.size[mask,2], 130, 12),
+                    method = "Random Skewers",
+                    titulo = "Corrected repetabilities Species matrices comparisons via Krzanowski and" )
 
   log.cov.mx <- current.data %>% llply(function(x) x$matrix$cov.log)
   log.cor.mx <- llply(log.cov.mx[mask], cov2cor)
@@ -321,3 +331,21 @@ data.frame ('sd.gm' = sd.gm[2],  'gm' = gm.mean[,2], 'Sample' = n.size [mask, -1
 #######################################################################################################################################
 ########################################################################################################################################
 ########################################################################################################################################
+
+mask.n.size <- n.size[,2]>40
+cov.list.39 <- cov.mx[mask.n.size]
+cov.list.39$AncestrAll <-  W.matrix
+cov.list.39$Saguinus_P.cov <- Saguinus_P.cov
+# cov.list.39$Saguinus_G.cov <- Saguinus_G.cov
+
+eigenLemur <- EigenTensorDecomposition(cov.list.39 [1:19])
+dimnames(eigenLemur$projection)$X1 <-  names(cov.list.39)[-20]
+eigenLemur.Saguinus <- ProjectMatrix(Saguinus_P.cov,eigenLemur)
+
+eigenLS <- rbind (eigenLemur$projection, eigenLemur.Saguinus)
+plot(eigenLS[, 1], eigenLS[, 2] )
+text(eigenLS[, 1], eigenLS[, 2] , labels = rownames(eigenLS))
+
+plot(eigenLemur$projection[,1], eigenLemur$projection[,2])
+text(eigenLemur$projection[,1], eigenLemur$projection[,2], labels = names(cov.list.39)[-20])
+eigenLemur.Saguinus
