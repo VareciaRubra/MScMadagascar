@@ -53,15 +53,33 @@ MahalaLemur<- MultiMahalanobis(means =multi.means, cov.matrix = W.matrix)
 MahalaLemur %>%  dist %>% is.euclid
 
 #6# montando as PCOA de tudo essas coisa ae: ape:: pcoa
+
+mx.dissimilarity.all<-  mx.compare %>% llply(function(x) x$correlations) %>% llply( function (x) sqrt(1-x) )
+mx.pcoa.all <- mx.dissimilarity.all %>% llply(., .fun = dist) %>% llply(., rn = dimnames(mx.dissimilarity.all$BS.RS)[[1]], .fun = pcoa, .progress = "text") 
+
+
+plot(mx.pcoa.all$MC.RS$vectors[, 1], mx.pcoa.all$MC.RS$vectors[, 2])
+text(mx.pcoa.all$MC.RS$vectors[, 1], mx.pcoa.all$MC.RS$vectors[, 2], labels = names(mx.pcoa.all$MC.RS$vectors[, 1]) )
+
+
+
+
 mx.pcoa <- mx.dissimilarity %>% llply(., .fun = dist) %>% llply(., rn = dimnames(mx.all.at.tree)[[1]], .fun = pcoa, .progress = "text") 
 mx.pcoa$BS.RS$values
 mx.pcoa$Steppan.RS$values
 mx.pcoa$BS.KRZ$values
 
+phylomorphospace(tree = pruned.tree.with.mx, X = mx.pcoa$MC.RS$vectors[,c(1,2)], label = "horizontal")
+
 phylo.pcoa <- phylo.dist %>% dist %>% pcoa
 phylo.pcoa$values
 mahala.pcoa <- MahalaLemur %>% dist %>% pcoa
 mahala.pcoa$values
+
+phylomorphospace(tree = pruned.tree.with.mx, X = mahala.pcoa$vectors[,c(1,2)], label = "horizontal")
+phylomorphospace(tree = pruned.tree.with.mx, X = phylo.pcoa$vectors[,c(1,2)], label = "horizontal")
+
+
 # tentando jogar essas coisas no vegan
 varpart(mx.pcoa$BS.RS$vectors[1:10], phylo.pcoa$vectors[1:10], mahala.pcoa$vectors[1:10]  )
 rda(mx.pcoa$BS.RS$vectors[1:10], phylo.pcoa$vectors[1:10])
