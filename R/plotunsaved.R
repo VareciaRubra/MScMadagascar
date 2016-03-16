@@ -46,7 +46,7 @@ pc_plot <- ggplot(plot.W, aes(PC1, PC2)) +
   coord_fixed()
 pc_plot
 
-
+################################################################################
 hulls <- ddply(plot.W, .(.info), plyr::summarise, "hpc1"=PC1[chull(PC1,PC4)],
                "hpc2"=PC4[chull(PC1,PC4)])
 hulls %<>% separate(.info, c('Familia', 'Genero', "Especie"), sep = "\\.")
@@ -71,8 +71,8 @@ pc_plot <- ggplot(plot.W, aes(PC1, PC4))+
         legend.position= c(0.37,0.17)) +
     guides(fill = guide_legend(keywidth = 1, keyheight = 2))
         #legend.position= "bottom") 
-pc_plot + theme(legend.position = "none")
-
+pc_plot # + theme(legend.position = "none")
+################################################################################
 
 pc_plot <- ggplot(plot.W, aes(PC1, PC2)) +
   geom_polygon(aes(hpc1, hpc2, fill = Familia, color = Familia, group= Genero ), data = hulls, alpha=.2) + 
