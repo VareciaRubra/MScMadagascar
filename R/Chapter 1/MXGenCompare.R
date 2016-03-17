@@ -129,5 +129,3 @@ tiplabels(pch = 22, bg = co[as.numeric(gm.means[,2])], cex = 2, adj = 1)
 nodelabels(thermo = ace.gm$lik.anc, piecol = co, cex = 0.75)
 
 fastAnc(pruned.tree.with.mx,gm.means[,2], CI= T) 
-
-
