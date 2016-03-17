@@ -115,4 +115,19 @@ nodelabels(bg = NULL, frame = "none", node = 80, pch = NULL, col = "black", text
 nodelabels(bg = NULL, frame = "none", node = 78, pch = NULL, col = "black", text = "Lorisidae", adj = c(0.1, 0.5))
 
 
+gm.means[,1] == pruned.tree.with.mx$tip.label
+rownames(gm.means) <- gm.means[,1]
+
+ace(x = gm.means[,2], phy = pruned.tree.with.mx)
+ace(x = gm.means[,2], phy = pruned.tree.with.mx, method = "pic")
+
+ace.gm <- ace(x = gm.means[,2], phy = pruned.tree.with.mx, type = "continuous", CI = T, method = "GLS", use.eigen = T, corStruct = corBrownian(1,  pruned.tree.with.mx))
+rownames(gm.means) == pruned.tree.with.mx$tip.label
+plot(pruned.tree.with.mx, cex = 0.9, no.margin =T, edge.color = "darkgrey", edge.width = 2, x.lim = c(-20, 150) )
+co <- c("red", "blue")
+tiplabels(pch = 22, bg = co[as.numeric(gm.means[,2])], cex = 2, adj = 1)
+nodelabels(thermo = ace.gm$lik.anc, piecol = co, cex = 0.75)
+
+fastAnc(pruned.tree.with.mx,gm.means[,2], CI= T) 
+
 
