@@ -72,6 +72,40 @@ Iso.Compare.reoriented %>% gather(key="Isometric.Correlation", value=value, 2:5 
 
 
 
+size.matters <- sp.main.data[mask] %>% ldply(., function(x) x$rs.size.comparisson[[1]][lower.tri(x$rs.size.comparisson[[1]])] ) 
+colnames(size.matters) <- c(".sp", "rawXsizeless", "rawXlog", "sizelessXlog")
+size.matters <- cbind(size.matters, Iso.Compare.cor.iso)
+
+
+size.matters <- cbind(size.matters %>% melt(id.vars = 1, measure.vars = c(2:4), variable_name = "size.compare") , abs(rep(Iso.Compare.cor.iso[,2], 3) ) )
+colnames(size.matters)[4] <- "Pc.iso.cor"
+myPalette <- colorRampPalette(rev(brewer.pal(11, "Spectral")), space="Lab")
+
+size.matters %>% 
+  ggplot(  aes(x= variable, y = value) ) + 
+  geom_violin() + 
+  geom_text(aes(label = .sp, color = Pc.iso.cor )  ) +
+  scale_color_gradientn(name = 'Pc1 Correlation with \nIsometric vector', colours = myPalette(50)) 
+
+size.matters %>% 
+  ggplot(  aes(y= variable, x = value) ) + 
+  #geom_violin() + 
+  geom_text(aes(y= Pc.iso.cor, x = value, label = .sp )  ) +
+  #scale_color_gradientn(name = 'Pc1 Correlation with \nIsometric vector', colours = myPalette(50)) 
+  facet_wrap(~variable)
+  
+
+scale_color_gradient(name = 'PC1 Correlation with \nIsometric vector',low = myPalette[1], high = myPalette[50], mid = myPalette[25]) 
+
+size.matters %>%
+  geom_boxplot(x )
+
+
+
+sp.main.data[mask] %>% llply(., function(x) x$rs.size.comparisson[[1]] ) 
+
+
+
 
 
 PCs1to4<- current.data[mask] %>% ldply(function(x) as.data.frame(eigen(x$matrix$cov)$vectors[,1:4]) )  
