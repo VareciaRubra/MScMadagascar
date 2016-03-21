@@ -105,9 +105,6 @@ size.matters %>%
 sp.main.data[mask] %>% llply(., function(x) x$rs.size.comparisson[[1]] ) 
 
 
-
-
-
 PCs1to4<- current.data[mask] %>% ldply(function(x) as.data.frame(eigen(x$matrix$cov)$vectors[,1:4]) )  
 names(PCs1to4) <- c(".sp", "PC1", "PC2", "PC3", "PC4")
 PCs1to4$.ed <- ed.names
