@@ -74,3 +74,5 @@ corr.drift.test.tree$`42`$plots[3]
 TreeDriftTest(tree = pruned.tree.with.mx, mean.list = ed.means[mask][-41], cov.matrix.list = cov.list[-41], sample.sizes = sample.size[-c(41, 43, 44)])
 
 ed.means
+
+
