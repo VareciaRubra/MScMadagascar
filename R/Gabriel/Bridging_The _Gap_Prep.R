@@ -1,6 +1,5 @@
 #Preparando dados para o pedido Gabriel Bridging the gap:
 current.data <- sp.main.data
-current.data <- gen.main.data
 
 #pegando só os viventes:
 mask.extant <- ldply(current.data, function(x) unique(x$info$Status) == "Extant")[,2]
@@ -13,13 +12,13 @@ ed.means <- current.data %>% llply(function(x) x$ed.means)
 #Matrizes de genero a serem atribuidas por espécie
 names(cov.mx)[mask.is.na.cov]
 
-treefile = read.nexus(file = "~/ataches/fbd369agerange_gooddates.tre")
+#treefile = read.nexus(file = "~/ataches/fbd369agerange_gooddates.tre")
 treefile = read.nexus(file = "attaches/fbd421agerange_edited.tre")
 species <- treefile$tip.label[treefile$tip.label %in% names(sample.no.na)]
-drift.pruned.tree<-drop.tip(treefile,treefile$tip.label[-match(species, treefile$tip.label)])
+drift.pruned.tree <- drop.tip(treefile,treefile$tip.label[-match(species, treefile$tip.label)])
 plot(pruned.tree)
 nodelabels()
-plot(treefile, )
+plot(treefile)
 
 Ancestral.Matrices<- PhyloW(tree = pruned.tree, tip.data = cov.mx[mask.no.na.cov], tip.sample.size = n.size[mask.no.na.cov,2])
 
