@@ -31,7 +31,11 @@ sig.p.uni.norm <- p.uni.norm[,-1] >= 0.05
 Uni.Normal.Density.Test <- function (RawSpList){
   ## RawSpList =  Lista com o rawdata frame por especie
   eds <- dplyr::select(RawSpList, c(IS_PM:BA_OPI)) # pegando as ed de cada replica
+  gm <- apply(eds, 1, FUN = function(x) exp( mean( as.matrix(log (x)) ) )  ) 
+  eds$GM <- gm
   eds.log <- log(eds)
+  
+  
   uni.normal.c <- eds %>% apply(. , 2, FUN = function (x) round(lillie.test(x)$p.value, 4 ))
   uni.normal.l <- eds.log %>% apply(. , 2, FUN = function (x) round(lillie.test(x)$p.value, 4 ))
   uni.normal<- uni.normal.c<=0.05
@@ -44,8 +48,13 @@ Uni.Normal.Density.Test <- function (RawSpList){
   uni.normal.log[uni.normal.log == FALSE] <- "p > 0.05" 
   uni.normal.log <- as.character(as.data.frame(uni.normal.log)[,1])
   
+  RawSpList$GM <- apply(RawSpList[16:54], 1, FUN = function(x) exp( mean( as.matrix(log (x)) ) )  ) 
+  RawSpList$Sexo <-  as.character(RawSpList$Sexo)
+  RawSpList$Sexo[is.na(RawSpList$Sexo)] <- "U"
+  RawSpList$Sexo <-  as.factor(RawSpList$Sexo)
+  
   RawSpList$Planilha <- as.factor(RawSpList$Planilha)
-  Density <- RawSpList[,1:54]  %>% melt() 
+  Density <- RawSpList[,c(1:54, 63)]  %>% melt() 
   names(Density)[16] <- "Trait" 
   Density.log <- Density
   Density.log$Trait <- log(Density.log$value)
@@ -54,22 +63,24 @@ Uni.Normal.Density.Test <- function (RawSpList){
   Univariate_Normality.log<- rep(uni.normal.log, each =  dim(RawSpList)[1]) 
   
   specie <- as.character(unique(RawSpList$Especie))
-  
+
   Plot <- Density%>% 
     ggplot(.,aes(x = Sexo, y = value)) +
     geom_violin(aes(group = interaction(Trait, Sexo), fill =Univariate_Normality, color = Univariate_Normality) ,alpha= 0.1) +
     scale_fill_manual(values = c("red", "grey")) +
     scale_color_manual(values = c("red", "grey"))  +
+    geom_jitter(aes(group = interaction(Trait, Sexo), shape= Sexo), alpha = 0.3 ) +
     #geom_text(aes(group = "Trait", label = Specie)) +
     facet_wrap(~Trait, scale="free", ncol =5, nrow = 8) +
     theme_bw() +
-    theme(axis.text.x = element_text(size =8), 
+    theme(axis.text.x = element_blank(), 
           axis.text.y = element_text(size = 7),
           #axis.title.x = element_blank(),
           #axis.title.y = element_text(size=17),
           legend.text= element_text(size=10), 
           plot.title = element_text(lineheight=.8, face="bold", size = 8),
-          title = element_text(specie) ) + labs(title = specie)
+          title = element_text(specie),
+          legend.position = "bottom") + labs(title = paste(specie, "traits distribuition") )
   
   Plot.log <- Density.log%>% 
     ggplot(.,aes(value)) +
