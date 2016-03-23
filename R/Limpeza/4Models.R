@@ -166,14 +166,19 @@ getTable <- function (x, ...)
 quantos.sexo <- sp.main.data %>% ldply(function (x) table(x$info$Sexo, useNA = "always") ) 
 mask.sex <- quantos.sexo[,2] >=2 & quantos.sexo[,3] >= 2 
 sp.main.data[mask.sex] %>% llply(function(x) t.test(x$gm.ind[!is.na(x$info$Sexo)] ~ x$info$Sexo[!is.na(x$info$Sexo)]) ) %>% ldply( function (x) x$estimate  ) 
-sp.main.data[mask.sex] %>% llply(function(x) t.test(x$gm.ind[!is.na(x$info$Sexo)] ~ x$info$Sexo[!is.na(x$info$Sexo)]) ) %>% ldply( function (x) str(x)  ) 
 sp.main.data[mask.sex] %>% llply(function(x) t.test(x$gm.ind[!is.na(x$info$Sexo)] ~ x$info$Sexo[!is.na(x$info$Sexo)]) ) %>% llply( function (x) x$p.value ) %>% ldply (function (x) x >=0.05 ) %>% .[,2] %>% table
-sp.main.data %>% llply(function(x) x$gm.ind[!is.na(x$info$Sexo)])  
 
-gm.plot <-  sp.main.data[mask.sex] %>% ldply(function(x) cbind(as.character(x$info$Sexo), t(x$gm.ind) ) ) 
+
+gm.plot <-  sp.main.data[mask] %>% ldply(function(x) cbind(as.character(x$info$Sexo), t(x$gm.ind) ) ) 
 names(gm.plot) <- c(".sp", "sex", "gm")
 gm.plot$sex %<>% {gsub("M", "Male", .)} %>% {gsub("F", "Female", .)} 
 gm.plot$sex[is.na(gm.plot$sex)] <- "Undefined"
+gm.plot$gm <- as.character(gm.plot$gm)
+gm.plot$gm <- as.numeric(gm.plot$gm)
+gm.plot$gm.log <- log(gm.plot$gm)
+gm.plot$gm <- round(gm.plot$gm, digits = 2)
+gm.plot$.sp <- factor(gm.plot$.sp, levels = unique(gm.plot$.sp)[1:42])
+
 
 
 ggplot(gm.plot, aes(x = sex, y = gm, group = interaction(.sp, sex), fill = sex)) + 
@@ -184,6 +189,22 @@ ggplot(gm.plot, aes(x = sex, y = gm, group = interaction(.sp, sex), fill = sex))
 
 
 
+gm.plot %>% 
+  ggplot(.,aes(y = log(gm), x = sex  )) +
+  geom_violin(aes(group = sex, fill = sex, color = sex) ,alpha= 0.1) +
+  geom_jitter(aes(group = sex, fill = sex, color = sex)) +
+  #scale_fill_manual(values = c("red", "grey")) +
+  #scale_color_manual(values = c("red", "grey"))  +
+  #geom_text(aes(group = "Trait", label = Specie)) +
+  facet_wrap(~.sp, scale="free") +
+  theme_bw() +
+  theme(axis.text.x = element_blank(), 
+        axis.text.y = element_text(size = 7),
+        axis.title.x = element_blank(),
+        axis.title.y = element_text(size=17),
+        legend.text= element_text(size=10), 
+        plot.title = element_text(lineheight=.8, face="bold", size = 8)) + labs(title = "Cranial traits loged geometric mean")
+  
 
 
 
