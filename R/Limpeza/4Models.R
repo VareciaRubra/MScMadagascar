@@ -163,7 +163,43 @@ getTable <- function (x, ...)
 
 ################# Student t test pra sexo e GM das variaveis cranianas
 
-t.test.sex.gm <- sp.main.data %>% ldply(function (x) table(x$info$Sexo, useNA = "always") ) %>% llply()
-sp.main.data %>% llply(function(x) t.test(x$gm.ind[!is.na(x$info$Sexo)] ~ x$info$Sexo[!is.na(x$info$Sexo)]) ) 
+quantos.sexo <- sp.main.data %>% ldply(function (x) table(x$info$Sexo, useNA = "always") ) 
+mask.sex <- quantos.sexo[,2] >=2 & quantos.sexo[,3] >= 2 
+sp.main.data[mask.sex] %>% llply(function(x) t.test(x$gm.ind[!is.na(x$info$Sexo)] ~ x$info$Sexo[!is.na(x$info$Sexo)]) ) %>% ldply( function (x) x$estimate  ) 
+sp.main.data[mask.sex] %>% llply(function(x) t.test(x$gm.ind[!is.na(x$info$Sexo)] ~ x$info$Sexo[!is.na(x$info$Sexo)]) ) %>% ldply( function (x) str(x)  ) 
+sp.main.data[mask.sex] %>% llply(function(x) t.test(x$gm.ind[!is.na(x$info$Sexo)] ~ x$info$Sexo[!is.na(x$info$Sexo)]) ) %>% llply( function (x) x$p.value ) %>% ldply (function (x) x >=0.05 ) %>% .[,2] %>% table
+sp.main.data %>% llply(function(x) x$gm.ind[!is.na(x$info$Sexo)])  
 
+gm.plot <-  sp.main.data[mask.sex] %>% ldply(function(x) cbind(as.character(x$info$Sexo), t(x$gm.ind) ) ) 
+names(gm.plot) <- c(".sp", "sex", "gm")
+gm.plot$sex %<>% {gsub("M", "Male", .)} %>% {gsub("F", "Female", .)} 
+gm.plot$sex[is.na(gm.plot$sex)] <- "Undefined"
+
+
+ggplot(gm.plot, aes(x = sex, y = gm, group = interaction(.sp, sex), fill = sex)) + 
+  geom_violin() + 
+  facet_wrap(~.sp) + 
+ # background_grid(major = 'y', minor = "none") + 
+  labs(y = "Geometric mean of cranial traits", x = "geometric mean")
+
+
+
+
+
+
+
+cvs = data.frame(t(laply(sp.main.data[mask], function(x) sqrt(diag(x$matrix$cov))/ x$ed.means)))
+names(cvs) <- names(sp.main.data[mask])
+cvs$traits = factor(rownames(cvs), levels = rownames(cvs)[1:39])
+
+cv_plot = ggplot(melt(cvs), aes(traits, value, group = variable)) +
+  geom_point() + 
+  geom_line() + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) + 
+  labs(x = "Traits", y = "Coeficient of variation") + 
+  scale_color_discrete(name = "species") 
+
+  #scale_y_continuous(limits = c(0, 0.2)) + 
+  #background_grid(major = 'y', minor = "y") + 
+  #theme(legend.position = c(0.15, 0.8))
 
