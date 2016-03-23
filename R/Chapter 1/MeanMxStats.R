@@ -35,7 +35,7 @@ MMxStats %>% #.[, c(1:3,9)] %>%
   #scale_fill_brewer(palette="Spectral") +
   scale_colour_brewer(name = "Mean Matrix Statistics") + 
   facet_wrap(~.MMxStats) +
-   coord_flip() +
+  coord_flip() +
   theme(legend.position="none")
 
 
@@ -144,5 +144,3 @@ Plot.GM.EigenVal1 <- MMxStats.gm %>%
   ylab("PC1")
 
 summary(lm(Geometric.mean ~ EigVal1 , data = MMxStats.gm))
-
-
