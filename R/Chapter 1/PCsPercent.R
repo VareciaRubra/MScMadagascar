@@ -22,7 +22,7 @@ library(scales)
 PcPercent.1to4 %>%
   gather(key="Percent_var_PC", value=value, 2:5 ) %>%
   ggplot( ., aes(x= Percent_var_PC, y = value, color = Percent_var_PC, label = .sp), varwidth = T) +
-  scale_y_continuous(labels=percent) +
+  #scale_y_continuous(labels=percent) +
   geom_text(size = 2, vjust = 1, alpha = 0.4 )  +
   theme_bw() +
   geom_jitter() +
