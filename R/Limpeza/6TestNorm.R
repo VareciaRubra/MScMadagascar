@@ -56,20 +56,20 @@ Uni.Normal.Density.Test <- function (RawSpList){
   specie <- as.character(unique(RawSpList$Especie))
   
   Plot <- Density%>% 
-    ggplot(.,aes(value)) +
-    geom_density(aes(group = Trait, fill = Univariate_Normality, color = Univariate_Normality) ,alpha= 0.1) +
+    ggplot(.,aes(x = Sexo, y = value)) +
+    geom_violin(aes(group = interaction(Trait, Sexo), fill =Univariate_Normality, color = Univariate_Normality) ,alpha= 0.1) +
     scale_fill_manual(values = c("red", "grey")) +
     scale_color_manual(values = c("red", "grey"))  +
     #geom_text(aes(group = "Trait", label = Specie)) +
     facet_wrap(~Trait, scale="free", ncol =5, nrow = 8) +
     theme_bw() +
-    ggtitle(specie) +
     theme(axis.text.x = element_text(size =8), 
           axis.text.y = element_text(size = 7),
           #axis.title.x = element_blank(),
           #axis.title.y = element_text(size=17),
-          legend.text= element_text(size=10)) +
-    theme(plot.title = element_text(lineheight=.8, face="bold", size = 8)) 
+          legend.text= element_text(size=10), 
+          plot.title = element_text(lineheight=.8, face="bold", size = 8),
+          title = element_text(specie) ) + labs(title = specie)
   
   Plot.log <- Density.log%>% 
     ggplot(.,aes(value)) +
@@ -84,17 +84,22 @@ Uni.Normal.Density.Test <- function (RawSpList){
           axis.text.y = element_text(size = 7),
           #axis.title.x = element_blank(),
           #axis.title.y = element_text(size=17),
-          legend.text= element_text(size=10)) +
-    theme(plot.title = element_text(lineheight=.8, face="bold", size = 8)) 
+          legend.text= element_text(size=10), 
+          plot.title = element_text(lineheight=.8, face="bold", size = 8)) + 
+    labs(title = paste(specie, "log ed values") )
   
   return(list("Plot" = Plot,
               "UniTestLillie" = uni.normal.c,
               "Plot.log" = Plot.log ))
 }
 
-Uni.Normal.Density.Test(RawSpList = Sp.raw.main.data$Varecia_rubra)
-
+test <- Uni.Normal.Density.Test(RawSpList = Sp.raw.main.data$Varecia_rubra)
+test$Plot
+test$Plot.log
 Uni.Tests <- llply(Sp.raw.main.data[mask], .fun = Uni.Normal.Density.Test)
+Uni.Tests$Microcebus_griseorufus$Plot
+
+
 
 euoticus.uni.normal<- eds.sp$Euoticus_elegantulus %>% apply(. , 2, FUN = function (x) round(lillie.test(x)$p.value, 4 ))
 euoticus.uni.normal<- euoticus.uni.normal<=0.05
