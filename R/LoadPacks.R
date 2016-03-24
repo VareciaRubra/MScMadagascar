@@ -18,10 +18,12 @@ if(!require(cowplot)) {install.packages('cowplot'); library(cowplot)}
 if(!require(mvoutlier)) {install.packages('mvoutlier'); library(mvoutlier)}
 if(!require(MVN)) {install.packages('MVN'); library(MVN)}
 if(!require(mvtnorm)) {install.packages('mvtnorm'); library(mvtnorm)}
-if(!require(nortest)) {install.packages('nortest'); library(nortest)} # testar normalidade univariados por Kolmogorov-Smirnov usando a lillie.test {nortest}
+if(!require(nortest)) {install.packages('nortest'); library(nortest)} # testar normalidade univariados por Kolmogorov-Smirnov usando a lillie.test{nortest}
 if(!require(ade4)) {install.packages('ad4'); library(ad4)}
 if(!require(vegan)) {install.packages('vegan'); library(vegan)}
 if(!require(gdata)) {install.packages('gdata'); library(gdata)}
+if(!require(psych)) {install.packages('psych'); library(psych)} # pro Bartlet test cortest.bartlett {psych}
+
 
 
 #if(!require()) {install.packages(''); library()}
