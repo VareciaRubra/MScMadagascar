@@ -1,4 +1,4 @@
-#Preparando dados para o pedido Gabriel Bridging the gap:
+#Drift test dos dois jeitos, com 3 conjudos de dados  #vai porra!
 
 #pegando só os viventes:
 cov.mx<- sp.main.data %>% llply(function(x) x$matrix$cov) # todas as matrizes de cov
