@@ -42,4 +42,17 @@ mx.list.taxonomy$Saguinus.G <- Saguinus_G.cov
 SRD(cov.x = mx.list.taxonomy)
 
 
-srd.results.all <- SRD(cov.x = cov.mx[mask], parallel = TRUE)
+srd.results.all <- SRD(cov.x =mx.list.taxonomy, parallel = TRUE)
+
+eigenLemur <- EigenTensorDecomposition(mx.list.taxonomy [1:(length(mx.list.taxonomy) -1)])
+dimnames(eigenLemur$projection)$X1 <-  names(mx.list.taxonomy)[-length(mx.list.taxonomy)]
+eigenLemur.SaguinusP <- ProjectMatrix(Saguinus_P.cov,eigenLemur)
+eigenLemur.SaguinusG <- ProjectMatrix(Saguinus_G.cov,eigenLemur)
+
+eigenLS <- rbind (eigenLemur$projection, eigenLemur.SaguinusP, eigenLemur.SaguinusG)
+plot(eigenLS[, 1], eigenLS[, 2] )
+text(eigenLS[, 1], eigenLS[, 2] , labels = rownames(eigenLS))
+
+plot(eigenLemur$projection[,1], eigenLemur$projection[,2])
+text(eigenLemur$projection[,1], eigenLemur$projection[,2], labels = names(cov.list.39)[-20])
+eigenLemur.Saguinus
