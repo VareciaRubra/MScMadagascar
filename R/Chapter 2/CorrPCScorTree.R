@@ -34,8 +34,12 @@ function (means, cov.matrix, taxons = names(means), show.plots = FALSE)
       }
     }
   }
+  mx.to.bartlett <- mat.pcs.deriva
+  mx.to.bartlett[upper.tri(mx.to.bartlett)] <- t(mx.to.bartlett)[upper.tri(mx.to.bartlett)]
+  Bartlett.t <- psych::cortest.bartlett (R = mx.to.bartlett, n= n.taxon)
+  
   if (show.plots == TRUE) 
-    return(list(correlation_p.value = mat.pcs.deriva, plots = plots))
+    return(list(correlation_p.value = mat.pcs.deriva, Bartlett.test = Bartlett.t, plots = plots))
   else return(mat.pcs.deriva)
 }
 
@@ -66,13 +70,18 @@ getMeans <- function(mean.list, tree, node){
   means <- mean.list[na.omit(tree$tip.label[getDescendants(tree, node)])]
 }
 
+plot(pruned.tree.with.mx)
+node
+
 corr.drift.test <- PCScoreCorrelation(means = ed.means[mask], cov.matrix = W.matrix, taxons = names(ed.means[mask]), show.plots = T)
 
 corr.drift.test.tree <- TreeDriftTestPCScoresCorr (tree = pruned.tree.with.mx, mean.list = ed.means[mask][-41], cov.matrix.list = cov.list[-41], sample.sizes = sample.size[-c(41, 43, 44)])
-corr.drift.test.tree$`42`$plots[3]
+corr.drift.test.tree$`42`$plots[4]
 
 TreeDriftTest(tree = pruned.tree.with.mx, mean.list = ed.means[mask][-41], cov.matrix.list = cov.list[-41], sample.sizes = sample.size[-c(41, 43, 44)])
 
-ed.means
+
+
+corr.drift.test.tree %>% llply(function(x) x$Bartlett.test$p.value)
 
 
