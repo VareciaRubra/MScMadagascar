@@ -82,6 +82,16 @@ TreeDriftTest(tree = pruned.tree.with.mx, mean.list = ed.means[mask][-41], cov.m
 
 
 
-corr.drift.test.tree %>% llply(function(x) x$Bartlett.test$p.value)
+Drift.rejected <- corr.drift.test.tree %>% ldply(function(x) x$Bartlett.test$p.value) %>% .[,2] < 0.05
+tested.nodes <- corr.drift.test.tree %>% ldply(function(x) x$Bartlett.test$p.value) %>% .[,1] %>% as.numeric
+str(Drift.rejected)
+Drift.rejected$.id <- as.numeric(Drift.rejected$.id)
+
+
+plot.phylo(pruned.tree.with.mx, font = 3, no.margin = T)
+nodelabels(node = tested.nodes , pch = 19, bg = "transparent", col = (as.numeric(Drift.rejected)+1), frame = "n")
+#nodelabels()
+ned.tree.with.mx$
+
 
 
