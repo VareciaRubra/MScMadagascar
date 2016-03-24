@@ -96,6 +96,10 @@ SexCompare <- function (current.data, sex.sig.list){
 }
 
 tabele.quantos.sexo <- sp.main.data %>% ldply(function (x) table(x$info$Sexo, useNA = "always") ) 
+tabele.quantos.sexo[,1] %<>% gsub("_", " ", .)
+rownames(tabele.quantos.sexo) <-tabele.quantos.sexo[,1]
+tabele.quantos.sexo[,-1] %>% xtable
+
 mask.sex.sample.size <- tabele.quantos.sexo[,2] != 0 & tabele.quantos.sexo[,3] != 0
 
 sex.MX.compare <- SexCompare(sp.main.data[[34]], sex.sig[[34]])
