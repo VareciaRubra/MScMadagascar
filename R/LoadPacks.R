@@ -23,6 +23,7 @@ if(!require(ade4)) {install.packages('ad4'); library(ad4)}
 if(!require(vegan)) {install.packages('vegan'); library(vegan)}
 if(!require(gdata)) {install.packages('gdata'); library(gdata)}
 if(!require(psych)) {install.packages('psych'); library(psych)} # pro Bartlet test cortest.bartlett {psych}
+if(!require(xtable)) {install.packages('xtable'); library(xtable)}
 
 
 
