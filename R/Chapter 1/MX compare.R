@@ -223,7 +223,7 @@ Sizeless.cov.mx <- sp.main.data[mask] %>% llply(function(x) x$matrix$cov.sizeles
 ChechSizeMatters <- sp.main.data[mask] %>% 
   llply(function(x) x$rs.size.comparisson$correlations ) %>% 
   ldply (function(x) x[lower.tri(x, diag= F)] ) 
-names (ChechSizeMatters) <- c(".id", "GM x ED", "ED x log(ED)", "GM x log(ED)")
+names (ChechSizeMatters) <- c(".id", "ED x GM", "ED x log(ED)", "GM x log(ED)")
 
 ChechSizeMatters<- list("comparison" = ChechSizeMatters, 
                         "Plot" = "Plot missing")

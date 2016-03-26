@@ -1,6 +1,5 @@
 #Drift test dos dois jeitos, com 3 conjudos de dados  #vai porra!
 
-#pegando só os viventes:
 cov.mx<- sp.main.data %>% llply(function(x) x$matrix$cov) # todas as matrizes de cov
 mask.extant <- ldply(sp.main.data, function(x) unique(x$info$Status) == "Extant")[,2] #mascara para os vventes
 mask.is.na.cov <- ldply(cov.mx, function(x) is.na(x[1]))[,2] # mascara dos sem matriz
