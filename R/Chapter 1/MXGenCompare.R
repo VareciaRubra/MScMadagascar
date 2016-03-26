@@ -81,7 +81,7 @@ Gen.cov.list$Saguinus.G <- Saguinus_G.cov
 
 ComparaSagui <- list ("G" = RandomSkewers(ancestral.mx[c(1:41, 45, 77,63, 56, 53, 48, 43)], Saguinus_G.cov),
                       "P" =  RandomSkewers(ancestral.mx[c(1:41, 45, 77,63, 56, 53, 48, 43)], Saguinus_P.cov) ) 
-ComparaSagui %>% ldply(., function(x) summary(x$correlation[1:41]) )
+ComparaSagui %>% ldply(., function(x) summary(x$correlation[1:41]) ) %>% xtable(caption )
 
 #names(gen.cov.list) %<>% gsub("_", ' ', .)
 
