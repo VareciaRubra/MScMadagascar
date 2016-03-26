@@ -220,8 +220,10 @@ combined.prob [upper.tri(combined.prob, diag = F)] <- t(mx.compare.sizeless$RS$p
 Log.cov.mx <- sp.main.data[mask] %>% llply(function(x) x$matrix$cov.log )
 Sizeless.cov.mx <- sp.main.data[mask] %>% llply(function(x) x$matrix$cov.sizeless )
 
-ChechSizeMatters <- sp.main.data[mask] %>% llply(function(x) x$rs.size.comparisson$correlations ) %>% ldply (function(x) x[lower.tri(x, diag= F)] ) 
-names (ChechSizeMatters) <- c(".id", "gmXreg", "regXlog", "gmXlog")
+ChechSizeMatters <- sp.main.data[mask] %>% 
+  llply(function(x) x$rs.size.comparisson$correlations ) %>% 
+  ldply (function(x) x[lower.tri(x, diag= F)] ) 
+names (ChechSizeMatters) <- c(".id", "GM x ED", "ED x log(ED)", "GM x log(ED)")
 
 ChechSizeMatters<- list("comparison" = ChechSizeMatters, 
                         "Plot" = "Plot missing")
@@ -229,9 +231,27 @@ ChechSizeMatters<- list("comparison" = ChechSizeMatters,
 ChechSizeMatters$Plot <- Combine.Mx.Plot(Mx1 = t(mx.compare.log$RS$correlations), 
                 Mx2 = t(mx.compare.sizeless$RS$correlations), 
                 prob = t(combined.prob) , 
-                diag.info = ChechSizeMatters$comparison$gmXlog, 
+                diag.info = ChechSizeMatters$comparison[[2]], 
                 method = "Random Skewers",
                 titulo = "ed/GM and Log(ed) Matrices comparisons via " )
+
+ChechSizeMatters$comparison$.id %<>% gsub("_", " ", .)
+ChechSizeMatters$comparison$.id <- factor(ChechSizeMatters$comparison$.id, unique (ChechSizeMatters$comparison$.id)[42:1])
+
+colore <- c("#FF9326",  "#9999FF", "#D92121", "#21D921", "#FFFF4D", "#2121D9")
+
+ChechSizeMatters$comparison %>% melt %>%
+  ggplot(aes(y = value, x = .id, color = variable)) + 
+  geom_linerange(aes(ymin =0.35, ymax = value), size = 4, alpha = 0.8) +
+  #scale_colour_brewer(palette = "Set1", direction = 1) +
+  scale_colour_manual (values=colore) +
+  theme_bw() +
+  coord_flip() +
+  facet_wrap(~variable) + xlab("") + ylab("") +
+  theme(legend.title=element_blank(),
+        axis.text.y = element_text(face =  "italic", size =10),
+        axis.text.x = element_text(size =13),
+        legend.position = "none")
 
 
  mat_data2 <- array (0, dim (mat_data))
