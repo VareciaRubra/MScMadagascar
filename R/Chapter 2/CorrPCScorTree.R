@@ -94,4 +94,34 @@ nodelabels(node = tested.nodes , pch = 19, bg = "transparent", col = (as.numeric
 ned.tree.with.mx$
 
 
+  TreeDriftTestAll <- function (tree, mean.list, cov.matrix.list, sample.sizes = NULL) 
+  {
+    if (!all(tree$tip.label %in% names(mean.list))) 
+      stop("All tip labels must be in names(mean.list).")
+    if (!all(tree$tip.label %in% names(cov.matrix.list))) 
+      stop("All tip labels must be in names(cov.matrix.list).")
+    cov.matrices <- PhyloW(tree, cov.matrix.list, sample.sizes)
+    nodes <- names(cov.matrices)
+    node.mask <- laply(nodes, function(x) length(getMeans(mean.list, 
+                                                          tree, x))) > 3
+    
+    if (!any(node.mask)) 
+      stop("At least one node must have more than 4 descendents in mean.list")
+    test.list.cor <- llply(nodes[node.mask], function(node) PCScoreCorr(means = getMeans(mean.list, 
+                                                                                     tree, node), 
+                                                                    taxons = names(nodes), 
+                                                                    cov.matrix =  cov.matrices[[node]], 
+                                                                    show.plots = TRUE))
+    
+    names(test.list.cor) <- nodes[node.mask]
+    test.list <- llply(nodes[node.mask], function(node) DriftTest(getMeans(mean.list, 
+                                                                           tree, node), cov.matrices[[node]], FALSE))
+    names(test.list) <- nodes[node.mask]
+    
+    test.list.reg <- llply(nodes[node.mask], function(node) DriftTest(getMeans(mean.list, 
+                                                                           tree, node), cov.matrices[[node]], FALSE))
+    
+    return(list ("Correlation.test" = test.list.cor,
+                 "Regression.test" = test.list.reg)
+  }
 
