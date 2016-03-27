@@ -5,8 +5,24 @@ mask.extant <- ldply(sp.main.data, function(x) unique(x$info$Status) == "Extant"
 mask.is.na.cov <- ldply(cov.mx, function(x) is.na(x[1]))[,2] # mascara dos sem matriz
 mask.no.na.cov <- ldply(cov.mx, function(x) !is.na(x[1]))[,2] #mascara dos com matriz, mesmo que seja tosca
 n.size <- sp.main.data %>% ldply(function(x) x$sample.size) %>% .[,2] #tamanho amostral de todos
-mask.n.size <- table(n.size[,2] > 30) # mascara de tamanho amostral >30
+mask.n.size <- n.size> 30 # mascara de tamanho amostral >30
 ed.means <- sp.main.data %>% llply(function(x) x$ed.means) #médias de todos
+
+B.var <- sp.main.data[mask.no.na.cov] %>% ldply(function(x) x$ed.means) %>% .[, -1] %>% var
+
+B.all <- sp.main.data[mask.no.na.cov] %>% ldply(function(x) x$ed)
+
+B.all.lm <- lm(as.matrix(B.all[,-1]) ~ B.all[, 1])
+B.all.lm.1 <- lm(as.matrix(B.all[,-1]) ~ 1)
+
+sumsqr.W <- t(B.all.lm$residuals) %*% B.all.lm$residuals 
+W.lm <- CalculateMatrix(B.all.lm)
+W.lm - Ancestral.Matrices$`42`
+sumsqr.W.t <- t(B.all.lm.1$residuals) %*% B.all.lm.1$residuals 
+
+B.sumsqr <- (sumsqr.W.t - sumsqr.W)
+
+MatrixCompare(B.sumsqr, Ancestral.Matrices$`42`)
 
 #Matrizes de genero a serem atribuidas por espécie
 names(cov.mx)[mask.is.na.cov]
