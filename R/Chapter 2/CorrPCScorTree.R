@@ -125,3 +125,15 @@ ned.tree.with.mx$
                  "Regression.test" = test.list.reg)
   }
 
+contrasts<- ldply(ed.means[mask][-41], function(x) x) 
+rownames(contrasts) <- contrasts[,1]
+contrasts <- contrasts[,-1]
+
+contrasts <- apply(contrasts, 2, FUN = function (x) ape::pic(x, pruned.tree.with.mx) ) 
+
+B.var <- sp.main.data[mask][-41] %>% ldply(function(x) x$ed.means) %>% .[, -1] %>% var
+
+
+MatrixCompare(var(contrasts), Ancestral.Matrices$`42`)
+
+apply (ape::pic()
