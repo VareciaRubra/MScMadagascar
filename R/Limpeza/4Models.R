@@ -215,14 +215,25 @@ gm.plot %>%
 
 cvs = data.frame(t(laply(sp.main.data[mask], function(x) sqrt(diag(x$matrix$cov))/ x$ed.means)))
 names(cvs) <- names(sp.main.data[mask])
+names(cvs) %<>% gsub("_", " ", . )
 cvs$traits = factor(rownames(cvs), levels = rownames(cvs)[1:39])
+cvs %<>% melt 
+cvs$variable <- factor(cvs$variable, levels = unique(cvs$variable))
+cvs$cagated <- cvs$value < 0.21
 
-cv_plot = ggplot(melt(cvs), aes(traits, value, group = variable)) +
-  geom_point() + 
-  geom_line() + 
-  theme(axis.text.x = element_text(angle = 45, hjust = 1)) + 
-  labs(x = "Traits", y = "Coeficient of variation") + 
-  scale_color_discrete(name = "species") 
+colore <- c("#FF9326",  "#9999FF", "#D92121", "#21D921", "#FFFF4D", "#2121D9", "#000000")
+
+cvs %>%  
+  ggplot(aes(x = traits, y = value)) +
+  geom_text(aes(label = variable, alpha = value - 0.1), color = "darkgray") +
+  geom_point(aes( color = factor(cagated) ) ) + 
+  scale_colour_manual (values= colore[c(3,7)] ) +
+  theme_bw() + 
+  #facet_wrap(~variable, nrow = 10, ncol = 4) +
+  theme(legend.position = "none", 
+        axis.text.x = element_text(angle = 90, hjust = 1)) + 
+  labs(x = "", y = "Coeficient of variation") 
+  
 
   #scale_y_continuous(limits = c(0, 0.2)) + 
   #background_grid(major = 'y', minor = "y") + 
