@@ -63,13 +63,14 @@ simulateGP<-function(method, m, tNe, pop, n, sim.n, G="NULL", P="NULL")
     }
     #generate samples from pop populations with n obs each. the ancestral vector is composed of m zeros.
     M <-mvrnorm(pop, rep(0, ncol(G)), tNe*G)
-    group <- factor(rep(seq(1:pop),each=n))
+    group <- factor( rep( seq(1:pop), each = n))
     data <- matrix(0, pop*n, ncol(P) )
-    for (j in 1: (n*pop) )
-    {
-      data[j,] <- mvrnorm(1, M[group[j],], P)
-    }
+    #for (j in 1: (n*pop) )
+    #{
+    #  data[j,] <- mvrnorm(1, M[group[j],], P)
+    #}
     
+    data<-adply(1: (n*pop), 1, function(j) mvrnorm(1, M[group[j],], P))[,-1]
     #calculate matrix of mean vectors from simulations
     
     zmeans <- matrix(unlist(by(data, group, colMeans)),  nrow=pop, ncol = ncol(G), byrow=T)
@@ -93,16 +94,17 @@ simulateGP<-function(method, m, tNe, pop, n, sim.n, G="NULL", P="NULL")
     beta[i] <- model$coefficients[2,1]
   }
   #Calculate 95% confidence limits
-  Beta <- vector("list", 3)
-  Beta$UL<-mean(beta)+1.96*sd(beta)
-  Beta$LL<-mean(beta)-1.96*sd(beta)
-  Beta$mean.beta <- mean(beta)
+  Beta <- data.frame(Lower = NA, Upper = NA, Mean = NA)
+  Beta$Upper<-mean(beta)+1.96*sd(beta)
+  Beta$Lower<-mean(beta)-1.96*sd(beta)
+  Beta$Mean <- mean(beta)
     
   tIe <- mean(prob < 0.05)
   
   return(list("TypeIerror" = tIe,
-              "Probabilities" = prob),
-              "Beta" = Beta)
+              "Probabilities" = prob,
+              "Beta.ic" = Beta,
+              "betas.dist" = beta) )
 }
 
 
@@ -117,9 +119,7 @@ simulateGPBeta<-function(method, m, tNe, pop, n, sim.n, G="NULL", P="NULL",smax)
   {
     if (method=="sim1")
     {
-      if (G=="NULL") 
-      {
-        stop("you need to provide a valid G matrix!\n") 
+      if (G=="NULL") { stop("you need to provide a valid G matrix!\n") 
       }
       if (P=="NULL") {stop("you need to provide a valid P matrix!\n") 
       }
@@ -153,26 +153,26 @@ simulateGPBeta<-function(method, m, tNe, pop, n, sim.n, G="NULL", P="NULL",smax)
     }
     
     #generate samples from pop populations with n obs each. the ancestral vector is composed of m zeros.
-    M<-mvrnorm(pop,rep(0,ncol(G)),tNe*G)
-    group<-factor(rep(seq(1:pop),each=n))
-    data <- matrix(0,pop*n,ncol(P))
-    for (j in 1:(n*pop)){data[j,]<-mvrnorm(1,M[group[j],],P)}
+    M <- mvrnorm(pop, rep(0, ncol(G)), tNe*G)
+    group<-factor(rep( seq(1:pop), each=n))
+    data <- matrix(0, pop*n, ncol(P))
+    for (j in 1:(n*pop)) {data[j,] <- mvrnorm(1, M[group[j],], P)}
     
     #calculate matrix of mean vectors from simulations
     
-    zmeans<-matrix(unlist(by(data,group,colMeans)),nrow=pop,ncol=ncol(G),byrow=T)
+    zmeans <- matrix(unlist(by(data,group,colMeans)),nrow=pop,ncol=ncol(G),byrow=T)
     
     #calculate within-group phenotypic covariance and extract eigenvalues
     
-    eigW<-eigen(cov(data-zmeans[rep(1:nrow(zmeans),each=n),]))
+    eigW <- eigen(cov(data-zmeans[rep(1:nrow(zmeans),each=n),]))
     
     #Project mean vectors for the 15 pops on within group eigenvectors
     
-    zm.proj<-zmeans%*%eigW$vectors
+    zm.proj <- zmeans %*% eigW$vectors
     
     #calculate among-group variance
     
-    v<-diag(cov(zm.proj))
+    v <- diag(cov(zm.proj))
     
     #calculate slope of Ackermann and Cheverud test
     
