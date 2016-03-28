@@ -22,7 +22,7 @@ sumsqr.W.t <- t(B.all.lm.1$residuals) %*% B.all.lm.1$residuals
 
 B.sumsqr <- (sumsqr.W.t - sumsqr.W)
 
-MatrixCompare(B.sumsqr, Ancestral.Matrices$`42`)
+MatrixCompare(B.sumsqr, Ancestral.Matrices$`45`)
 
 #Matrizes de genero a serem atribuidas por espécie
 names(cov.mx)[mask.is.na.cov]
