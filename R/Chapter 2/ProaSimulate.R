@@ -24,51 +24,56 @@ sumsqr.W.t <- t(B.all.lm.1$residuals) %*% B.all.lm.1$residuals
 
 sp.main.data[mask.madagascar & mask.no.na.cov] %>% ldply(function(x) x$ed) %>% dim
 
-B.sumsqr <- (sumsqr.W.t - sumsqr.W) / 1318
+B.sumsqr <- (sumsqr.W.t - sumsqr.W) / (1318 -1)
 MatrixCompare(B.sumsqr, B.var)
+all.equal(B.sumsqr, B.var)
 MatrixCompare(B.sumsqr, Ancestral.Matrices$`42`)
+registerDoParallel(cores = 2)
+Proa <- vector("list", 5)
 
-Proa.1.GP <- simulateGP(method = "sim1", 
+Proa$Sim1 <- 
+  temp <- simulateGP(method = "sim1", 
                         m = dim(cov.mx[[1]])[1], 
                         tNe = 0.001, 
-                        pop = length(n.size[mask]),
-                        n = 40,
-                        sim.n = 1000,
-                        G = B.sumsqr, 
-                        P = Ancestral.Matrices$`45`)
-
-Proa.2.GP <- simulateGP(method = "sim2", 
-                        m = dim(cov.mx[[1]])[1], 
-                        tNe = 0.001, 
-                        pop = length(n.size[mask]),
+                        pop = length(n.size[mask.madagascar & mask.no.na.cov]),
                         n = 40,
                         sim.n = 1000,
                         G = B.sumsqr, 
                         P = Ancestral.Matrices$`45`)
 
-Proa.3.GP <- simulateGP(method = "sim3", 
+Proa$Sim2 <- simulateGP(method = "sim2", 
                         m = dim(cov.mx[[1]])[1], 
                         tNe = 0.001, 
-                        pop = length(n.size[mask]),
-                        n = 40,
-                        sim.n = 1000,
-                        G = B.sumsqr, 
-                        P = Ancestral.Matrices$`45`)
-Proa.4.GP <- simulateGP(method = "sim4", 
-                        m = dim(cov.mx[[1]])[1], 
-                        tNe = 0.001, 
-                        pop = length(n.size[mask]),
-                        n = 40,
-                        sim.n = 1000,
-                        G = B.sumsqr, 
-                        P = Ancestral.Matrices$`45`)
-Proa.5.GP <- simulateGP(method = "sim5", 
-                        m = dim(cov.mx[[1]])[1], 
-                        tNe = 0.001, 
-                        pop = length(n.size[mask]),
+                        pop = length(n.size[mask.madagascar & mask.no.na.cov]),
                         n = 40,
                         sim.n = 1000,
                         G = B.sumsqr, 
                         P = Ancestral.Matrices$`45`)
 
-Proa.1.Beta <- simulateGPBeta(method = "sim1", m = dim(cov.mx[[1]])[1], tNe = 60000, pop = length(cov.mx[mask]) , n = n.size[mask], sim.n = 1000, G = B.sumsqr, P = Ancestral.Matrices$`42`)
+Proa$Sim3 <- simulateGP(method = "sim3", 
+                        m = dim(cov.mx[[1]])[1], 
+                        tNe = 0.001, 
+                        pop = length(n.size[mask.madagascar & mask.no.na.cov]),
+                        n = 40,
+                        sim.n = 1000,
+                        G = B.sumsqr, 
+                        P = Ancestral.Matrices$`45`)
+Proa$Sim4 <- simulateGP(method = "sim4", 
+                        m = dim(cov.mx[[1]])[1], 
+                        tNe = 0.001, 
+                        pop = length(n.size[mask.madagascar & mask.no.na.cov]),
+                        n = 40,
+                        sim.n = 1000,
+                        G = B.sumsqr, 
+                        P = Ancestral.Matrices$`45`)
+Proa$Sim5 <- simulateGP(method = "sim5", 
+                        m = dim(cov.mx[[1]])[1], 
+                        tNe = 0.001, 
+                        pop = length(n.size[mask.madagascar & mask.no.na.cov]),
+                        n = 40,
+                        sim.n = 1000,
+                        G = B.sumsqr, 
+                        P = Ancestral.Matrices$`45`)
+
+save.image("~/MScMadagascar/.RData")
+
