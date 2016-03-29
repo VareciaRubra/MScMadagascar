@@ -28,6 +28,7 @@ names(cov.mx)[mask.is.na.cov]
 #treefile = read.nexus(file = "~/ataches/fbd369agerange_gooddates.tre")
 treefile = read.nexus(file = "attaches/fbd421agerange_edited.tre")
 plot(treefile, cex = 0.5)
+nodelabels()
 all.my.species <- treefile$tip.label[treefile$tip.label %in% names(ed.means)]
 species.extants <- treefile$tip.label[treefile$tip.label %in% names(ed.means[mask.extant])]
 species.with.mx <- treefile$tip.label[treefile$tip.label %in% names(ed.means[mask.no.na.cov])]
@@ -36,10 +37,13 @@ Trees <- vector("list", 3)
 
 Trees$all.my.sp.tree <- drop.tip(treefile,treefile$tip.label[-match(all.my.species, treefile$tip.label)]) # árvore com todo mundo
 plot.phylo(Trees$all.my.sp.tree, no.margin = T, cex = 0.5)
+nodelabels()
 Trees$extant.sp.tree <- drop.tip(treefile,treefile$tip.label[-match(species.extants, treefile$tip.label)]) # árvore com todo mundo
 plot.phylo(Trees$extant.sp.tree, no.margin = T)
+nodelabels()
 Trees$with.mx.sp.tree <- drop.tip(treefile,treefile$tip.label[-match(species.with.mx, treefile$tip.label)]) # árvore com todo mundo
 plot.phylo(Trees$with.mx.sp.tree, no.margin = T)
+nodelabels()
 
 
 W.geral <- vector("list", 3)

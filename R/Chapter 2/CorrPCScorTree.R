@@ -21,8 +21,8 @@ function (means, cov.matrix, taxons = names(means), show.plots = FALSE)
     for (j in 1:i) {
       if (j != i) {
         test = cor.test(proj.med[, i], proj.med[, j])
-        mat.pcs.deriva[i, j] <- test$estimate
-        mat.pcs.deriva[j, i] <- test$p.value
+        mat.pcs.deriva[i, j] <- test$estimate # Lower triangle of outputput 
+        mat.pcs.deriva[j, i] <- test$p.value # Upper triangle are p.values
         if (show.plots == TRUE) {
           plots[[current.plot]] <- 
             ggplot(data.frame(x = proj.med[, i], y = proj.med[, j], taxons = taxons), aes_string("x", "y")) + 
@@ -44,20 +44,31 @@ function (means, cov.matrix, taxons = names(means), show.plots = FALSE)
   mx.to.bonferroni[lower.tri(mx.to.bonferroni)] <- t(mx.to.bonferroni)[lower.tri(mx.to.bonferroni)]
   colnames(mx.to.bonferroni) <- paste0("PC", 1:ncol(mx.to.bonferroni))
   rownames(mx.to.bonferroni) <- paste0("PC", 1:nrow(mx.to.bonferroni))
-    Correction.p.value <- corr.p(r = mx.to.bonferroni, n = length(taxons), adjust = "bonferroni") 
-    significance.p <- Correction.p.value$p
-    significance.p %<>% melt
-   significance.p$colors <- significance.p$value > 0.05 
-   significance.p$value %<>% round(2)
-   significance.p$colors[significance.p$colors ==TRUE] <- ">0.05"
-   significance.p$colors[significance.p$colors ==FALSE] <- "<0.05"
-   
-  p.value.plot <- significance.p %>%
+  n.veiz <- ( nrow(mx.to.bonferroni)^2 - nrow(mx.to.bonferroni) )/2
+  
+  #Correction.p.bonferroni <- corr.p(r = mx.to.bonferroni, n = n.veiz, adjust = "bonferroni") 
+
+  mx.bonferroni <- mx.to.bonferroni
+  mx.bonferroni[lower.tri(mx.bonferroni)] <- mx.bonferroni[lower.tri(mx.bonferroni)] > 0.05
+  mx.bonferroni[upper.tri(mx.bonferroni)] <- mx.bonferroni[upper.tri(mx.bonferroni)] > 0.05/n.veiz
+  Correction.p.bonferroni <- mx.bonferroni 
+  Correction.p.bonferroni <- as.logical(Correction.p.bonferroni)
+  Correction.p.bonferroni <- matrix(Correction.p.bonferroni, nrow = nrow(mx.to.bonferroni), ncol = ncol(mx.to.bonferroni))
+  rownames(Correction.p.bonferroni) <- paste0('PC', 1:nrow(mx.to.bonferroni))
+  colnames(Correction.p.bonferroni) <- paste0('PC', 1:ncol(mx.to.bonferroni))
+  Correction.p.bonferroni[upper.tri(Correction.p.bonferroni)] <- NA
+  
+  rejected.drift<- which(!Correction.p.bonferroni, arr.ind = T)
+  mx.bonferroni[mx.bonferroni == TRUE] <- "Not significant"
+  mx.bonferroni[mx.bonferroni == 0] <- "Significative"
+  mx.bonferroni %<>% melt 
+  
+  p.value.plot <- mx.bonferroni %>% 
     ggplot () +
-      geom_tile(aes(x = Var2, y = Var1, fill = as.factor(colors) ), alpha = 0.6, color = "darkgrey") +
-      scale_y_discrete(limits = rev(levels(significance.p$Var1))) +
+      geom_tile(aes(x = Var2, y = Var1, fill = as.factor(value) ), alpha = 0.6, color = "darkgrey") +
+      scale_y_discrete(limits = rev(levels(mx.bonferroni$Var1))) +
       #geom_text(aes(x = Var2, y = Var1, label = value), size = 4) +
-      scale_fill_manual(values = c("red", "lightgrey")) + labs(fill = "p.value") +
+      scale_fill_manual(values = c("lightgrey", "red")) + labs(fill = "p.value") +
       ylab ('') + xlab ('') + labs(title = "Original and Bonferroni correction" ) + 
       theme_minimal() +  
       theme(plot.title = element_text(face = "bold", size = 20),
@@ -68,19 +79,20 @@ function (means, cov.matrix, taxons = names(means), show.plots = FALSE)
             rect = element_blank(), 
             line = element_blank())
   if (show.plots == TRUE) 
-    return(list("correlation_p.value" = mat.pcs.deriva, 
-                "Bartlett.test" = Bartlett.t, 
-                "Bonferroni.correction" = Correction.p.value,
+    return(list("Correlation.p.value" = mat.pcs.deriva, 
+                "Bartlett" = Bartlett.t, 
+                "Bonferroni" = Correction.p.bonferroni,
                 "P.value.plot" = p.value.plot,
+                "Resume.table" = rejected.drift,
                 "plots" = plots))
   
-  else return(list("correlation_p.value" = mat.pcs.deriva, 
-              "Bartlett.test" = Bartlett.t, 
-              "Bonferroni.correction" = Correction.p.value,
+  else return(list("Correlation.p.value" = mat.pcs.deriva, 
+              "Bartlett" = Bartlett.t, 
+              "Bonferroni" = Correction.p.bonferroni,
+              "Resume.table" = rejected.drift,
               "P.value.plot" = p.value.plot
               ) )
 }
-
 
 TreeDriftTestPCScoresCorr <- function (tree, mean.list, cov.matrix.list, sample.sizes = NULL) 
 {
@@ -125,9 +137,6 @@ corr.drift.test.t <- TreeDriftTestPCScoresCorr (tree = pruned.tree.with.mx,
                                                      mean.list = ed.means[mask][-41],
                                                      cov.matrix.list = cov.list[-41],
                                                      sample.sizes = sample.size[-c(41, 43, 44)])
-corr.drift.test.tree$`42`$plots[4]
-
-TreeDriftTest(tree = pruned.tree.with.mx, mean.list = ed.means[mask][-41], cov.matrix.list = cov.list[-41], sample.sizes = sample.size[-c(41, 43, 44)])
 
 Drift.rejected <- corr.drift.test.tree %>% ldply(function(x) x$Bartlett.test$p.value) %>% .[,2] < 0.05
 tested.nodes <- corr.drift.test.tree %>% ldply(function(x) x$Bartlett.test$p.value) %>% .[,1] %>% as.numeric
@@ -188,10 +197,25 @@ nodelabels(node = tested.nodes , pch = 19, bg = "transparent", col = (as.numeric
     }
 
 Drift.alltests.tree <- TreeDriftTestAll (tree = pruned.tree.with.mx, mean.list = ed.means[mask][-41], cov.matrix.list = cov.list[-41], sample.sizes = sample.size[-c(41, 43, 44)])
-Drift.alltests.tree
+
+drift.vai.porra <- cbind(Drift.alltests.tree$Correlation.test.Regular %>% ldply(function(x) dim(x$Resume.table)[[1]] >1 ),
+Drift.alltests.tree$Correlation.test.Contrasts %>% ldply(function(x) dim(x$Resume.table)[[1]] >1 ) %>% .[,2],
+Drift.alltests.tree$Regression.test %>% ldply(function(x) x$drift_rejected ) %>% .[,2],
+Drift.alltests.tree$Regression.test %>% ldply(function(x) x$drift_rejected )  %>% .[,2])
+
+colnames(drift.vai.porra) <- c("node", "cor", "cor.ci", "reg", "reg.ci")
+str(drift.vai.porra)
+drift.vai.porra$node <- as.numeric(drift.vai.porra$node)
+
+par(mfrow = c(1,2))
+plot.phylo(pruned.tree.with.mx, font = 3, no.margin = T)
+nodelabels(node = drift.vai.porra$node , pch = 8, bg = "transparent", col = (as.numeric(drift.vai.porra$cor)+1), frame = "n")
+nodelabels(node = drift.vai.porra$node , pch = 17, bg = "transparent", col = (as.numeric(drift.vai.porra$reg)+3), frame = "n")
 
 
-
+plot.phylo(pruned.tree.with.mx, font = 3, no.margin = T)
+nodelabels(node = drift.vai.porra$node , pch = 8, bg = "transparent", col = (as.numeric(drift.vai.porra$cor.ci)+1), frame = "n")
+nodelabels(node = drift.vai.porra$node , pch = 17, bg = "transparent", col = (as.numeric(drift.vai.porra$reg.ci)+3), frame = "n")
 
 contrasts<- ldply(ed.means[mask][-41], function(x) x) 
 rownames(contrasts) <- contrasts[,1]
