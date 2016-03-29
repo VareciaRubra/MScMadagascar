@@ -2,6 +2,7 @@
 *.Rproj
 *.Rhistory
 *.RData
+*.RDstaTmp
 *.csv
 *.pdf
 *.nex
