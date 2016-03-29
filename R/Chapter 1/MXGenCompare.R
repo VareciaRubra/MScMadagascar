@@ -2,7 +2,7 @@ current.data <- gen.main.data
 
 #4# Gerando a matriz ancestral
 mx.at.tree <- cov.mx[mask][-41]
-ancestral.mx <- PhyloW(tree = pruned.tree.with.mx, tip.data = mx.at.tree, tip.sample.size = n.size[mask,2][-41])
+ancestral.mx <- PhyloW(tree = pruned.tree.with.mx, tip.data = mx.at.tree, tip.sample.size = n.size[mask][-41])
 plot(pruned.tree.with.mx, cex = 0.5)
 nodelabels()
 W.matrix <- ancestral.mx$'42'
@@ -22,27 +22,27 @@ str(gen.cov.list)
 names(gen.cov.list)
 
 # Comparando as matrizes estimadas pelo Phylow com as matrizes estimadas com os residuos do efeito de especie####
-RandomSkewers(gen.cov.list$Tarsius, ancestral.mx$'43')
-RandomSkewers(gen.cov.list$Microcebus, ancestral.mx$'51')
-RandomSkewers(gen.cov.list$Mirza, ancestral.mx$Mirza_coquereli)
-RandomSkewers(gen.cov.list$Cheirogaleus, ancestral.mx$'52')
-RandomSkewers(gen.cov.list$Phaner, ancestral.mx$Phaner_furcifer)
-RandomSkewers(gen.cov.list$Lepilemur, ancestral.mx$'53')
-RandomSkewers(gen.cov.list$Avahi, ancestral.mx$'58')
-RandomSkewers(gen.cov.list$Propithecus, ancestral.mx$'59')
-RandomSkewers(gen.cov.list$Indri, ancestral.mx$Indri_indri)
-RandomSkewers(gen.cov.list$Eulemur, ancestral.mx$'65')
-RandomSkewers(gen.cov.list$Hapalemur, ancestral.mx$Hapalemur_griseus)
-RandomSkewers(gen.cov.list$Prolemur, ancestral.mx$Prolemur_simus)
-RandomSkewers(gen.cov.list$Lemur, ancestral.mx$Lemur_catta)
-RandomSkewers(gen.cov.list$Varecia, ancestral.mx$'76')
-RandomSkewers(gen.cov.list$Daubentonia, ancestral.mx$'45')
-RandomSkewers(gen.cov.list$Perodicticus, ancestral.mx$'79')
-RandomSkewers(gen.cov.list$Loris, ancestral.mx$'79')
-RandomSkewers(gen.cov.list$Nycticebus, ancestral.mx$'79')
-RandomSkewers(gen.cov.list$Euoticus, ancestral.mx$'80')
-RandomSkewers(gen.cov.list$Otolemur, ancestral.mx$'81')
-RandomSkewers(gen.cov.list$Galago, ancestral.mx$'81')
+MatrixCompare(gen.cov.list$Tarsius, ancestral.mx$'43')
+MatrixCompare(gen.cov.list$Microcebus, ancestral.mx$'51')
+MatrixCompare(gen.cov.list$Mirza, ancestral.mx$Mirza_coquereli)
+MatrixCompare(gen.cov.list$Cheirogaleus, ancestral.mx$'52')
+MatrixCompare(gen.cov.list$Phaner, ancestral.mx$Phaner_furcifer)
+MatrixCompare(gen.cov.list$Lepilemur, ancestral.mx$'53')
+MatrixCompare(gen.cov.list$Avahi, ancestral.mx$'58')
+MatrixCompare(gen.cov.list$Propithecus, ancestral.mx$'59')
+MatrixCompare(gen.cov.list$Indri, ancestral.mx$Indri_indri)
+MatrixCompare(gen.cov.list$Eulemur, ancestral.mx$'65')
+MatrixCompare(gen.cov.list$Hapalemur, ancestral.mx$Hapalemur_griseus)
+MatrixCompare(gen.cov.list$Prolemur, ancestral.mx$Prolemur_simus)
+MatrixCompare(gen.cov.list$Lemur, ancestral.mx$Lemur_catta)
+MatrixCompare(gen.cov.list$Varecia, ancestral.mx$'76')
+MatrixCompare(gen.cov.list$Daubentonia, ancestral.mx$'45')
+MatrixCompare(gen.cov.list$Perodicticus, ancestral.mx$'79')
+MatrixCompare(gen.cov.list$Loris, ancestral.mx$'79')
+MatrixCompare(gen.cov.list$Nycticebus, ancestral.mx$'79')
+MatrixCompare(gen.cov.list$Euoticus, ancestral.mx$'80')
+MatrixCompare(gen.cov.list$Otolemur, ancestral.mx$'81')
+MatrixCompare(gen.cov.list$Galago, ancestral.mx$'81')
 
 Gen.cov.list <- list()
 Gen.cov.list$Tarsius <- ancestral.mx$'43'
@@ -81,7 +81,7 @@ Gen.cov.list$Saguinus.G <- Saguinus_G.cov
 
 ComparaSagui <- list ("G" = RandomSkewers(ancestral.mx[c(1:41, 45, 77,63, 56, 53, 48, 43)], Saguinus_G.cov),
                       "P" =  RandomSkewers(ancestral.mx[c(1:41, 45, 77,63, 56, 53, 48, 43)], Saguinus_P.cov) ) 
-ComparaSagui %>% ldply(., function(x) summary(x$correlation[1:41]) ) %>% xtable(caption )
+ComparaSagui %>% ldply(., function(x) summary(x$correlation[1:41]) ) %>% xtable
 
 #names(gen.cov.list) %<>% gsub("_", ' ', .)
 

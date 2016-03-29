@@ -6,12 +6,13 @@ function (means, cov.matrix, taxons = names(means), show.plots = FALSE)
   if (is.list(means)) mean.array <- laply(means, identity) else  mean.array <- means
   if (is.null(taxons)) taxons <- names(means) 
   n.taxon <- length(taxons) - 1
-  if (n.taxon >= dim(cov.matrix)[1]) n.taxon <- dim(cov.matrix)[1]
+  #if (n.taxon >= dim(cov.matrix)[1]) n.taxon <- dim(cov.matrix)[1]
   
+  n.taxon <-dim(cov.matrix)[1]
   W.pc <- eigen(cov.matrix)
   proj.med <- as.matrix(mean.array) %*% W.pc$vectors
   colnames(proj.med) <- paste0("PC", 1:ncol(proj.med))
-  mat.pcs.deriva <- matrix(1, ncol = n.taxon, nrow = n.taxon)
+  mat.pcs.deriva <- matrix(NA, ncol = n.taxon, nrow = n.taxon)
   if (show.plots) {
     plots <- vector("list", (n.taxon^2 - n.taxon)/2)
     current.plot <- 1
@@ -27,7 +28,8 @@ function (means, cov.matrix, taxons = names(means), show.plots = FALSE)
             ggplot(data.frame(x = proj.med[, i], y = proj.med[, j], taxons = taxons), aes_string("x", "y")) + 
             geom_text(aes_string(label = "taxons")) + 
             geom_smooth(method = "lm", color = "black") + 
-            labs(x = paste0("PC", i), y = paste0("PC", j)) + theme_bw() + 
+            labs(x = paste0("PC", i), y = paste0("PC", j)) + 
+            theme_bw() + 
             ggtitle(paste (taxons, "\ncorr=",round(mat.pcs.deriva[i, j], 2), "p=",round(mat.pcs.deriva[j, i], 4), sep =  " " ))
           current.plot <- current.plot + 1
         }
@@ -36,11 +38,47 @@ function (means, cov.matrix, taxons = names(means), show.plots = FALSE)
   }
   mx.to.bartlett <- mat.pcs.deriva
   mx.to.bartlett[upper.tri(mx.to.bartlett)] <- t(mx.to.bartlett)[upper.tri(mx.to.bartlett)]
-  Bartlett.t <- psych::cortest.bartlett (R = mx.to.bartlett, n= n.taxon)
-  
+  diag(mx.to.bartlett) <- 1
+  Bartlett.t <- psych::cortest.bartlett (R = mx.to.bartlett, n= length(taxons))
+  mx.to.bonferroni <- mat.pcs.deriva
+  mx.to.bonferroni[lower.tri(mx.to.bonferroni)] <- t(mx.to.bonferroni)[lower.tri(mx.to.bonferroni)]
+  colnames(mx.to.bonferroni) <- paste0("PC", 1:ncol(mx.to.bonferroni))
+  rownames(mx.to.bonferroni) <- paste0("PC", 1:nrow(mx.to.bonferroni))
+    Correction.p.value <- corr.p(r = mx.to.bonferroni, n = length(taxons), adjust = "bonferroni") 
+    significance.p <- Correction.p.value$p
+    significance.p %<>% melt
+   significance.p$colors <- significance.p$value > 0.05 
+   significance.p$value %<>% round(2)
+   significance.p$colors[significance.p$colors ==TRUE] <- ">0.05"
+   significance.p$colors[significance.p$colors ==FALSE] <- "<0.05"
+   
+  p.value.plot <- significance.p %>%
+    ggplot () +
+      geom_tile(aes(x = Var2, y = Var1, fill = as.factor(colors) ), alpha = 0.6, color = "darkgrey") +
+      scale_y_discrete(limits = rev(levels(significance.p$Var1))) +
+      #geom_text(aes(x = Var2, y = Var1, label = value), size = 4) +
+      scale_fill_manual(values = c("red", "lightgrey")) + labs(fill = "p.value") +
+      ylab ('') + xlab ('') + labs(title = "Original and Bonferroni correction" ) + 
+      theme_minimal() +  
+      theme(plot.title = element_text(face = "bold", size = 20),
+            axis.text.x = element_text(angle = 270, hjust = 0, size =9),
+            axis.ticks = element_line(size = 0),
+            legend.title = element_text(size = 15),
+            legend.text = element_text(size = 10) ,
+            rect = element_blank(), 
+            line = element_blank())
   if (show.plots == TRUE) 
-    return(list(correlation_p.value = mat.pcs.deriva, Bartlett.test = Bartlett.t, plots = plots))
-  else return(mat.pcs.deriva)
+    return(list("correlation_p.value" = mat.pcs.deriva, 
+                "Bartlett.test" = Bartlett.t, 
+                "Bonferroni.correction" = Correction.p.value,
+                "P.value.plot" = p.value.plot,
+                "plots" = plots))
+  
+  else return(list("correlation_p.value" = mat.pcs.deriva, 
+              "Bartlett.test" = Bartlett.t, 
+              "Bonferroni.correction" = Correction.p.value,
+              "P.value.plot" = p.value.plot
+              ) )
 }
 
 
@@ -52,11 +90,10 @@ TreeDriftTestPCScoresCorr <- function (tree, mean.list, cov.matrix.list, sample.
     stop("All tip labels must be in names(cov.matrix.list).")
   cov.matrices <- PhyloW(tree, cov.matrix.list, sample.sizes)
   nodes <- names(cov.matrices)
-  node.mask <- laply(nodes, function(x) length(getMeans(mean.list, 
-                                                        tree, x))) > 3
+  node.mask <- laply(nodes, function(x) length(getMeans(mean.list, tree, x))) > 3
   
   if (!any(node.mask)) 
-    stop("At least one node must have more than 4 descendents in mean.list")
+   stop("At least one node must have more than 4 descendents in mean.list")
   test.list <- llply(nodes[node.mask], function(node) PCScoreCorr(means = getMeans(mean.list, 
                                                                          tree, node), 
                                                                   taxons = names(nodes), 
@@ -67,20 +104,30 @@ TreeDriftTestPCScoresCorr <- function (tree, mean.list, cov.matrix.list, sample.
 }
 
 getMeans <- function(mean.list, tree, node){
-  means <- mean.list[na.omit(tree$tip.label[getDescendants(tree, node)])]
+  mean.list[na.omit(tree$tip.label[getDescendants(tree, node)])]
 }
 
-plot(pruned.tree.with.mx)
-node
+getContrasts <- function(contr, tree, node){
+  contr[unlist(dimnames(contr)[1]) %in% as.character(getDescendants(tree = tree, node = node, curr = node) ),  ]
+}
 
-corr.drift.test <- PCScoreCorrelation(means = ed.means[mask], cov.matrix = W.matrix, taxons = names(ed.means[mask]), show.plots = T)
+corr.drift.test <- PCScoreCorr(means = ed.means[mask], 
+                               cov.matrix = W.matrix, 
+                               taxons = names(ed.means[mask]), 
+                               show.plots = F)
 
-corr.drift.test.tree <- TreeDriftTestPCScoresCorr (tree = pruned.tree.with.mx, mean.list = ed.means[mask][-41], cov.matrix.list = cov.list[-41], sample.sizes = sample.size[-c(41, 43, 44)])
+corr.drift.test.contrasts <- PCScoreCorr(means = contrasts, 
+                                         cov.matrix = W.matrix, 
+                                         taxons = rownames(contrasts), 
+                                         show.plots = F)
+
+corr.drift.test.t <- TreeDriftTestPCScoresCorr (tree = pruned.tree.with.mx,
+                                                     mean.list = ed.means[mask][-41],
+                                                     cov.matrix.list = cov.list[-41],
+                                                     sample.sizes = sample.size[-c(41, 43, 44)])
 corr.drift.test.tree$`42`$plots[4]
 
 TreeDriftTest(tree = pruned.tree.with.mx, mean.list = ed.means[mask][-41], cov.matrix.list = cov.list[-41], sample.sizes = sample.size[-c(41, 43, 44)])
-
-
 
 Drift.rejected <- corr.drift.test.tree %>% ldply(function(x) x$Bartlett.test$p.value) %>% .[,2] < 0.05
 tested.nodes <- corr.drift.test.tree %>% ldply(function(x) x$Bartlett.test$p.value) %>% .[,1] %>% as.numeric
@@ -91,7 +138,7 @@ Drift.rejected$.id <- as.numeric(Drift.rejected$.id)
 plot.phylo(pruned.tree.with.mx, font = 3, no.margin = T)
 nodelabels(node = tested.nodes , pch = 19, bg = "transparent", col = (as.numeric(Drift.rejected)+1), frame = "n")
 #nodelabels()
-ned.tree.with.mx$
+
 
 
   TreeDriftTestAll <- function (tree, mean.list, cov.matrix.list, sample.sizes = NULL) 
@@ -102,28 +149,49 @@ ned.tree.with.mx$
       stop("All tip labels must be in names(cov.matrix.list).")
     cov.matrices <- PhyloW(tree, cov.matrix.list, sample.sizes)
     nodes <- names(cov.matrices)
-    node.mask <- laply(nodes, function(x) length(getMeans(mean.list, 
-                                                          tree, x))) > 3
-    
+    node.mask <- laply(nodes, function(x) length(getMeans(mean.list, tree, x))) > 3
     if (!any(node.mask)) 
-      stop("At least one node must have more than 4 descendents in mean.list")
-    test.list.cor <- llply(nodes[node.mask], function(node) PCScoreCorr(means = getMeans(mean.list, 
-                                                                                     tree, node), 
-                                                                    taxons = names(nodes), 
-                                                                    cov.matrix =  cov.matrices[[node]], 
-                                                                    show.plots = TRUE))
+      stop("For the regression test:/nAt least one node must have more than 4 descendents in mean.list")
     
+    ind.cont<- ldply(mean.list, function(x) x) 
+    rownames(ind.cont) <- ind.cont[,1]
+    ind.cont <- ind.cont[,-1]
+    ind.cont <- apply(ind.cont, 2, FUN = function (x) ape::pic(x, tree) ) 
+    
+    
+    test.list.cor <- llply(nodes[node.mask], function(node) PCScoreCorr(means = getMeans(mean.list, tree, node), 
+                                                              taxons = names(nodes), 
+                                                              cov.matrix =  cov.matrices[[node]], 
+                                                              show.plots = FALSE))
     names(test.list.cor) <- nodes[node.mask]
-    test.list <- llply(nodes[node.mask], function(node) DriftTest(getMeans(mean.list, 
-                                                                           tree, node), cov.matrices[[node]], FALSE))
-    names(test.list) <- nodes[node.mask]
     
-    test.list.reg <- llply(nodes[node.mask], function(node) DriftTest(getMeans(mean.list, 
-                                                                           tree, node), cov.matrices[[node]], FALSE))
+    test.list.cor.contrasts <- llply(nodes[node.mask], function(node) PCScoreCorr(means = getContrasts(ind.cont, tree, node), 
+                                                             taxons = rownames(getContrasts(ind.cont, tree, node)), 
+                                                             cov.matrix =  cov.matrices[[node]], 
+                                                             show.plots = FALSE))
     
-    return(list ("Correlation.test" = test.list.cor,
-                 "Regression.test" = test.list.reg)
-  }
+    names(test.list.cor.contrasts) <-  nodes[node.mask]
+    test.list.reg <- llply(nodes[node.mask], function(node) DriftTest(means = getMeans(mean.list, tree, node), 
+                                                                      cov.matrix = cov.matrices[[node]], 
+                                                                      show.plot = FALSE))
+    names(test.list.reg) <- nodes[node.mask]
+    
+    test.list.reg.contrasts <- llply(nodes[node.mask], function(node) DriftTest(means = getContrasts(ind.cont, tree, node), 
+                                                                      cov.matrix = cov.matrices[[node]], 
+                                                                      show.plot = FALSE))
+    names(test.list.reg.contrasts) <- nodes[node.mask]
+    
+    return(list ("Correlation.test.Regular" = test.list.cor,
+                 "Correlation.test.Contrasts" = test.list.cor.contrasts, 
+                 "Regression.test" = test.list.reg,
+                 "Regression.test.Contrasts" = test.list.reg.contrasts) )
+    }
+
+Drift.alltests.tree <- TreeDriftTestAll (tree = pruned.tree.with.mx, mean.list = ed.means[mask][-41], cov.matrix.list = cov.list[-41], sample.sizes = sample.size[-c(41, 43, 44)])
+Drift.alltests.tree
+
+
+
 
 contrasts<- ldply(ed.means[mask][-41], function(x) x) 
 rownames(contrasts) <- contrasts[,1]

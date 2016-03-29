@@ -221,12 +221,12 @@ cvs %<>% melt
 cvs$variable <- factor(cvs$variable, levels = unique(cvs$variable))
 cvs$cagated <- cvs$value < 0.21
 
-colore <- c("#FF9326",  "#9999FF", "#D92121", "#21D921", "#FFFF4D", "#2121D9", "#000000")
+colore <- c("#FF9326",  "#9999FF", "#D92121", "#21D921", "#FFFF4D", "#2121D9", "white")
 
 cvs %>%  
   ggplot(aes(x = traits, y = value)) +
-  geom_text(aes(label = variable, alpha = value - 0.1), color = "darkgray") +
-  geom_point(aes( color = factor(cagated) ) ) + 
+  geom_text(aes(label = variable, alpha = value - 0.1, colour = factor(cagated) )) +
+  geom_point() + 
   scale_colour_manual (values= colore[c(3,7)] ) +
   theme_bw() + 
   #facet_wrap(~variable, nrow = 10, ncol = 4) +

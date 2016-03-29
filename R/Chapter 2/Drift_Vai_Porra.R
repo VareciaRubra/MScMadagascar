@@ -9,9 +9,7 @@ mask.n.size <- n.size> 30 # mascara de tamanho amostral >30
 ed.means <- sp.main.data %>% llply(function(x) x$ed.means) #médias de todos
 
 B.var <- sp.main.data[mask.no.na.cov] %>% ldply(function(x) x$ed.means) %>% .[, -1] %>% var
-
 B.all <- sp.main.data[mask.no.na.cov] %>% ldply(function(x) x$ed)
-
 B.all.lm <- lm(as.matrix(B.all[,-1]) ~ B.all[, 1])
 B.all.lm.1 <- lm(as.matrix(B.all[,-1]) ~ 1)
 
@@ -34,11 +32,10 @@ all.my.species <- treefile$tip.label[treefile$tip.label %in% names(ed.means)]
 species.extants <- treefile$tip.label[treefile$tip.label %in% names(ed.means[mask.extant])]
 species.with.mx <- treefile$tip.label[treefile$tip.label %in% names(ed.means[mask.no.na.cov])]
 
-
 Trees <- vector("list", 3)
 
 Trees$all.my.sp.tree <- drop.tip(treefile,treefile$tip.label[-match(all.my.species, treefile$tip.label)]) # árvore com todo mundo
-plot.phylo(Trees$all.my.sp.tree, no.margin = T)
+plot.phylo(Trees$all.my.sp.tree, no.margin = T, cex = 0.5)
 Trees$extant.sp.tree <- drop.tip(treefile,treefile$tip.label[-match(species.extants, treefile$tip.label)]) # árvore com todo mundo
 plot.phylo(Trees$extant.sp.tree, no.margin = T)
 Trees$with.mx.sp.tree <- drop.tip(treefile,treefile$tip.label[-match(species.with.mx, treefile$tip.label)]) # árvore com todo mundo
