@@ -198,10 +198,11 @@ nodelabels(node = tested.nodes , pch = 19, bg = "transparent", col = (as.numeric
 
 Drift.alltests.tree <- TreeDriftTestAll (tree = pruned.tree.with.mx, mean.list = ed.means[mask][-41], cov.matrix.list = cov.list[-41], sample.sizes = sample.size[-c(41, 43, 44)])
 
-drift.vai.porra <- cbind(Drift.alltests.tree$Correlation.test.Regular %>% ldply(function(x) dim(x$Resume.table)[[1]] >1 ),
-Drift.alltests.tree$Correlation.test.Contrasts %>% ldply(function(x) dim(x$Resume.table)[[1]] >1 ) %>% .[,2],
-Drift.alltests.tree$Regression.test %>% ldply(function(x) x$drift_rejected ) %>% .[,2],
-Drift.alltests.tree$Regression.test %>% ldply(function(x) x$drift_rejected )  %>% .[,2])
+drift.vai.porra <- 
+  cbind(Drift.alltests.tree$Correlation.test.Regular %>% ldply(function(x) dim(x$Resume.table)[[1]] >1 ),
+        Drift.alltests.tree$Correlation.test.Contrasts %>% ldply(function(x) dim(x$Resume.table)[[1]] >1 ) %>% .[,2],
+        Drift.alltests.tree$Regression.test %>% ldply(function(x) x$drift_rejected ) %>% .[,2],
+        Drift.alltests.tree$Regression.test.Contrasts %>% ldply(function(x) x$drift_rejected )  %>% .[,2])
 
 colnames(drift.vai.porra) <- c("node", "cor", "cor.ci", "reg", "reg.ci")
 str(drift.vai.porra)
