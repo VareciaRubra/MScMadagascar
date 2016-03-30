@@ -106,10 +106,9 @@ TreeDriftTestPCScoresCorr <- function (tree, mean.list, cov.matrix.list, sample.
   
   if (!any(node.mask)) 
    stop("At least one node must have more than 4 descendents in mean.list")
-  test.list <- llply(nodes[node.mask], function(node) PCScoreCorr(means = getMeans(mean.list, 
-                                                                         tree, node), 
+  test.list <- llply(nodes[node.mask], function(node) PCScoreCorr(means = getMeans(mean.list, tree, node), 
                                                                   taxons = names(nodes), 
-                                                                  cov.matrix =  cov.matrices[[node]], 
+                                                                          cov.matrix =  cov.matrices[[node]], 
                                                                   show.plots = TRUE))
   names(test.list) <- nodes[node.mask]
   return(test.list)
@@ -123,34 +122,8 @@ getContrasts <- function(contr, tree, node){
   contr[unlist(dimnames(contr)[1]) %in% as.character(getDescendants(tree = tree, node = node, curr = node) ),  ]
 }
 
-corr.drift.test <- PCScoreCorr(means = ed.means[mask], 
-                               cov.matrix = W.matrix, 
-                               taxons = names(ed.means[mask]), 
-                               show.plots = F)
 
-corr.drift.test.contrasts <- PCScoreCorr(means = contrasts, 
-                                         cov.matrix = W.matrix, 
-                                         taxons = rownames(contrasts), 
-                                         show.plots = F)
-
-corr.drift.test.t <- TreeDriftTestPCScoresCorr (tree = pruned.tree.with.mx,
-                                                     mean.list = ed.means[mask][-41],
-                                                     cov.matrix.list = cov.list[-41],
-                                                     sample.sizes = sample.size[-c(41, 43, 44)])
-
-Drift.rejected <- corr.drift.test.tree %>% ldply(function(x) x$Bartlett.test$p.value) %>% .[,2] < 0.05
-tested.nodes <- corr.drift.test.tree %>% ldply(function(x) x$Bartlett.test$p.value) %>% .[,1] %>% as.numeric
-str(Drift.rejected)
-Drift.rejected$.id <- as.numeric(Drift.rejected$.id)
-
-
-plot.phylo(pruned.tree.with.mx, font = 3, no.margin = T)
-nodelabels(node = tested.nodes , pch = 19, bg = "transparent", col = (as.numeric(Drift.rejected)+1), frame = "n")
-#nodelabels()
-
-
-
-  TreeDriftTestAll <- function (tree, mean.list, cov.matrix.list, sample.sizes = NULL) 
+TreeDriftTestAll <- function (tree, mean.list, cov.matrix.list, sample.sizes = NULL) 
   {
     if (!all(tree$tip.label %in% names(mean.list))) 
       stop("All tip labels must be in names(mean.list).")
@@ -167,7 +140,11 @@ nodelabels(node = tested.nodes , pch = 19, bg = "transparent", col = (as.numeric
     ind.cont <- ind.cont[,-1]
     ind.cont <- apply(ind.cont, 2, FUN = function (x) ape::pic(x, tree) ) 
     
-    
+    BW.compare <- llply(nodes[node.mask], function(node) DumBW.compare(means = getMeans(mean.list, tree, node), 
+                                                         contrasts = getContrasts(ind.cont, tree, node), 
+                                                         W.mx = cov.matrices[[node]])
+                                                          )
+    names(BW.compare) <- nodes[node.mask]
     test.list.cor <- llply(nodes[node.mask], function(node) PCScoreCorr(means = getMeans(mean.list, tree, node), 
                                                               taxons = names(nodes), 
                                                               cov.matrix =  cov.matrices[[node]], 
@@ -193,40 +170,66 @@ nodelabels(node = tested.nodes , pch = 19, bg = "transparent", col = (as.numeric
     return(list ("Correlation.test.Regular" = test.list.cor,
                  "Correlation.test.Contrasts" = test.list.cor.contrasts, 
                  "Regression.test" = test.list.reg,
-                 "Regression.test.Contrasts" = test.list.reg.contrasts) )
+                 "Regression.test.Contrasts" = test.list.reg.contrasts,
+                 "BW.compare" = BW.compare) )
     }
 
-Drift.alltests.tree <- TreeDriftTestAll (tree = pruned.tree.with.mx, mean.list = ed.means[mask][-41], cov.matrix.list = cov.list[-41], sample.sizes = sample.size[-c(41, 43, 44)])
+  Drift.results <- vector("list", 3)
+  
+  Drift.results$with.mx <- TreeDriftTestAll (tree = pruned.tree.with.mx, 
+                                             mean.list = ed.means[mask][-41], 
+                                             cov.matrix.list = cov.list[-41], 
+                                             sample.sizes = sample.size[-c(41, 43, 44)])
+  
+  
 
-drift.vai.porra <- 
+drift.vai.porra <- vector("list", 5)
+
+drift.vai.porra$drift.T.F.vectors <- 
   cbind(Drift.alltests.tree$Correlation.test.Regular %>% ldply(function(x) dim(x$Resume.table)[[1]] >1 ),
         Drift.alltests.tree$Correlation.test.Contrasts %>% ldply(function(x) dim(x$Resume.table)[[1]] >1 ) %>% .[,2],
         Drift.alltests.tree$Regression.test %>% ldply(function(x) x$drift_rejected ) %>% .[,2],
         Drift.alltests.tree$Regression.test.Contrasts %>% ldply(function(x) x$drift_rejected )  %>% .[,2])
 
-colnames(drift.vai.porra) <- c("node", "cor", "cor.ci", "reg", "reg.ci")
-str(drift.vai.porra)
-drift.vai.porra$node <- as.numeric(drift.vai.porra$node)
+colnames(drift.vai.porra$drift.T.F.vectors) <- c("node", "cor", "cor.ci", "reg", "reg.ci")
+str(drift.vai.porra$drift.T.F.vectors)
+drift.vai.porra$drift.T.F.vectors$node <- as.numeric(drift.vai.porra$drift.T.F.vectors$node)
 
-par(mfrow = c(1,2))
+par(mfrow = c(1,1))
 plot.phylo(pruned.tree.with.mx, font = 3, no.margin = T)
-nodelabels(node = drift.vai.porra$node , pch = 8, bg = "transparent", col = (as.numeric(drift.vai.porra$cor)+1), frame = "n")
-nodelabels(node = drift.vai.porra$node , pch = 17, bg = "transparent", col = (as.numeric(drift.vai.porra$reg)+3), frame = "n")
-
+nodelabels(node = drift.vai.porra$drift.T.F.vectors$node , pch = 8, bg = "transparent", col = (as.numeric(drift.vai.porra$drift.T.F.vectors$cor)+1), frame = "n")
+nodelabels(node = drift.vai.porra$drift.T.F.vectors$node , pch = 17, bg = "transparent", col = (as.numeric(drift.vai.porra$drift.T.F.vectors$reg)+3), frame = "n")
 
 plot.phylo(pruned.tree.with.mx, font = 3, no.margin = T)
-nodelabels(node = drift.vai.porra$node , pch = 8, bg = "transparent", col = (as.numeric(drift.vai.porra$cor.ci)+1), frame = "n")
-nodelabels(node = drift.vai.porra$node , pch = 17, bg = "transparent", col = (as.numeric(drift.vai.porra$reg.ci)+3), frame = "n")
+nodelabels(node = drift.vai.porra$drift.T.F.vectors$node , pch = 8, bg = "transparent", col = (as.numeric(drift.vai.porra$drift.T.F.vectors$cor.ci)+1), frame = "n")
+nodelabels(node = drift.vai.porra$drift.T.F.vectors$node , pch = 17, bg = "transparent", col = (as.numeric(drift.vai.porra$drift.T.F.vectors$reg.ci)+3), frame = "n")
 
-contrasts<- ldply(ed.means[mask][-41], function(x) x) 
-rownames(contrasts) <- contrasts[,1]
-contrasts <- contrasts[,-1]
+drift.vai.porra$sum.abs.values <- Drift.alltests.tree$Correlation.test.Regular %>% llply(function (x) x$Correlation.p.value[1:39,1:39]) %>% llply(abs) %>% laply( function (x) x[lower.tri(x)]) %>% colSums 
+temp <- matrix(NA, 39, 39, byrow = F)
+temp[lower.tri(temp)] <- drift.vai.porra$sum.abs.values
+drift.vai.porra$mean.abs.values <- temp / length(Drift.alltests.tree$Correlation.test.Regular)
+
+
 
 contrasts <- apply(contrasts, 2, FUN = function (x) ape::pic(x, pruned.tree.with.mx) ) 
-
 B.var <- sp.main.data[mask][-41] %>% ldply(function(x) x$ed.means) %>% .[, -1] %>% var
-
-
 MatrixCompare(var(contrasts), Ancestral.Matrices$`42`)
 
-apply (ape::pic()
+
+DumBW.compare <- function (means, contrasts, W.mx) {
+  B.ed <- var(laply(means, identity) ) 
+  B.ic <- var(as.matrix(contrasts)  ) 
+  BW.compare <- data.frame (BedBic = MatrixCompare(B.ed, B.ic)$correlation,
+                           BedW = MatrixCompare(B.ed, W.mx)$correlation,
+                           BicW = MatrixCompare(B.ic, W.mx)$correlation , 
+                           method = c("RS", "Mantel", "KRZ", "PCA"), 
+                           row.names = c("RS", "Mantel", "KRZ", "PCA") )
+  
+  return (list ("BW.compare" = BW.compare,
+                "B.ed" = B.ed,
+                "B.ic" = B.ic,
+                "W" = W.mx) )
+  
+}
+
+DumBW.compare(means = ed.means.with.mx[-41], contrasts = contrasts, W.mx = ancestral.mx$`45`)

@@ -1,6 +1,6 @@
 #Drift test dos dois jeitos, com 3 conjudos de dados  #vai porra!
 
-cov.mx<- sp.main.data %>% llply(function(x) x$matrix$cov) # todas as matrizes de cov
+cov.mx <- sp.main.data %>% llply(function(x) x) # todas as matrizes de cov
 mask.extant <- ldply(sp.main.data, function(x) unique(x$info$Status) == "Extant")[,2] #mascara para os vventes
 mask.is.na.cov <- ldply(cov.mx, function(x) is.na(x[1]))[,2] # mascara dos sem matriz
 mask.no.na.cov <- ldply(cov.mx, function(x) !is.na(x[1]))[,2] #mascara dos com matriz, mesmo que seja tosca
@@ -26,127 +26,134 @@ MatrixCompare(B.sumsqr, Ancestral.Matrices$`45`)
 names(cov.mx)[mask.is.na.cov]
 
 #treefile = read.nexus(file = "~/ataches/fbd369agerange_gooddates.tre")
-treefile = read.nexus(file = "attaches/fbd421agerange_edited.tre")
-plot(treefile, cex = 0.5)
+TREEFILE = read.nexus(file = "attaches/fbd421agerange_edited.tre")
+plot(TREEFILE, cex = 0.5)
 nodelabels()
-all.my.species <- treefile$tip.label[treefile$tip.label %in% names(ed.means)]
-species.extants <- treefile$tip.label[treefile$tip.label %in% names(ed.means[mask.extant])]
-species.with.mx <- treefile$tip.label[treefile$tip.label %in% names(ed.means[mask.no.na.cov])]
+Species <- vector("list", 3)
+Species$all.my.species <- treefile$tip.label[treefile$tip.label %in% names(ed.means)]
+Species$species.extants <- treefile$tip.label[treefile$tip.label %in% names(ed.means[mask.extant])]
+Species$species.with.mx <- treefile$tip.label[treefile$tip.label %in% names(ed.means[mask.no.na.cov])]
 
-Trees <- vector("list", 3)
-
-Trees$all.my.sp.tree <- drop.tip(treefile,treefile$tip.label[-match(all.my.species, treefile$tip.label)]) # árvore com todo mundo
+Trees <- vector("list")
+Trees$all.my.sp.tree <- drop.tip(treefile,treefile$tip.label[-match(Species$all.my.species, treefile$tip.label)]) # árvore com todo mundo
 plot.phylo(Trees$all.my.sp.tree, no.margin = T, cex = 0.5)
 nodelabels()
-Trees$extant.sp.tree <- drop.tip(treefile,treefile$tip.label[-match(species.extants, treefile$tip.label)]) # árvore com todo mundo
+Trees$extant.sp.tree <- drop.tip(treefile,treefile$tip.label[-match(Species$species.extants, treefile$tip.label)]) # árvore com todo mundo
 plot.phylo(Trees$extant.sp.tree, no.margin = T)
 nodelabels()
-Trees$with.mx.sp.tree <- drop.tip(treefile,treefile$tip.label[-match(species.with.mx, treefile$tip.label)]) # árvore com todo mundo
+Trees$with.mx.sp.tree <- drop.tip(treefile,treefile$tip.label[-match(Species$species.with.mx, treefile$tip.label)]) # árvore com todo mundo
 plot.phylo(Trees$with.mx.sp.tree, no.margin = T)
 nodelabels()
 
-
-W.geral <- vector("list", 3)
-
-Ancestral.Matrices <- PhyloW(tree = pruned.tree, tip.data = cov.mx[mask.no.na.cov], tip.sample.size = n.size[mask.no.na.cov,2])
-
+ancestral.mx <- PhyloW(tree = pruned.tree.with.mx, tip.data = mx.at.tree, tip.sample.size = n.size[mask][-41])
+plot.phylo(Trees$with.mx.sp.tree, no.margin = T) # os numeros dos nós desta arvore é que são os nomes das matrizes ancestrais calculadas desse jeito
+nodelabels()
 
 #Passo 1: verificar quais sao as especies que tem tamanho amostral muito pequeno para ter matriz
-trimed.sp.main.data <- sp.main.data
-trimed.sp.main.data$Microcebus_berthae$matrix$cov <- gen.main.data$Microcebus$matrix$cov
-trimed.sp.main.data$Microcebus_myoxinus$matrix$cov <- gen.main.data$Microcebus$matrix$cov
-trimed.sp.main.data$Microcebus_rufus$matrix$cov <- gen.main.data$Microcebus$matrix$cov
-trimed.sp.main.data$Microcebus_tanosi$matrix$cov <- gen.main.data$Microcebus$matrix$cov
+All.sp.data <- vector("list")
 
-trimed.sp.main.data$Cheirogaleus_crossleyi$matrix$cov <- gen.main.data$Cheirogaleus$matrix$cov
+All.sp.data$cov.mx <- sp.main.data %>% llply(function(x) x$matrix$cov) # todas as matrizes de cov
+All.sp.data$ed <- sp.main.data %>% llply(function(x) x$ed) # todas as distancias médias de cada indivíduo
+All.sp.data$means <- sp.main.data %>% llply(function(x) x$ed.means ) #todos os vetores de médias
+All.sp.data$gm <- sp.main.data %>% llply(function(x) x$gm.mean) #todos os vetores de médias
+All.sp.data$n.sizes <- sp.main.data %>% ldply(function(x) x$sample.size )  %>% .[,2] 
 
-trimed.sp.main.data$Phaner_pallescens$matrix$cov <- gen.main.data$Phaner$matrix$cov
+# Cheirogaleidae family ####
+All.sp.data$cov.mx$Allocebus_trichotis <- ancestral.mx$`50` # ancestral de microcebus e mirza
 
-trimed.sp.main.data$Lepilemur_tymerlachsonorum$matrix$cov <- gen.main.data$Lepilemur$matrix$cov
-trimed.sp.main.data$Lepilemur_dorsalis$matrix$cov <- gen.main.data$Lepilemur$matrix$cov
-trimed.sp.main.data$Lepilemur_ahmansonorum$matrix$cov <- gen.main.data$Lepilemur$matrix$cov
-trimed.sp.main.data$Lepilemur_edwardsi$matrix$cov <- gen.main.data$Lepilemur$matrix$cov
-trimed.sp.main.data$Lepilemur_randrianasoloi$matrix$cov <- gen.main.data$Lepilemur$matrix$cov
-trimed.sp.main.data$Lepilemur_petteri$matrix$cov <- gen.main.data$Lepilemur$matrix$cov
-trimed.sp.main.data$Lepilemur_betsileo$matrix$cov <- gen.main.data$Lepilemur$matrix$cov
-trimed.sp.main.data$Lepilemur_jamesorum$matrix$cov <- gen.main.data$Lepilemur$matrix$cov
-trimed.sp.main.data$Lepilemur_microdon$matrix$cov <- gen.main.data$Lepilemur$matrix$cov
+All.sp.data$cov.mx$Microcebus_berthae <- Gen.cov.list$Microcebus
+All.sp.data$cov.mx$Microcebus_myoxinus <- Gen.cov.list$Microcebus
+All.sp.data$cov.mx$Microcebus_rufus <- Gen.cov.list$Microcebus
+All.sp.data$cov.mx$Microcebus_tanosi <- Gen.cov.list$Microcebus
 
+All.sp.data$cov.mx$Cheirogaleus_crossleyi <- Gen.cov.list$Cheirogaleus
 
-trimed.sp.main.data$Avahi_meridionalis$matrix$cov <- gen.main.data$Avahi$matrix$cov
-trimed.sp.main.data$Avahi_occidentalis$matrix$cov <- gen.main.data$Avahi$matrix$cov
-
-trimed.sp.main.data$Propithecus_candidus$matrix$cov <- gen.main.data$Propithecus$matrix$cov
-trimed.sp.main.data$Propithecus_coquereli$matrix$cov <- gen.main.data$Propithecus$matrix$cov
-trimed.sp.main.data$Propithecus_tattersalli$matrix$cov <- gen.main.data$Propithecus$matrix$cov
+All.sp.data$cov.mx$Phaner_pallescens <- Gen.cov.list$Phaner
+All.sp.data$cov.mx$Phaner_furcifer<- Gen.cov.list$Phaner
 
 
-trimed.sp.main.data$Eulemur_sanfordi$matrix$cov <- gen.main.data$Eulemur$matrix$cov
-trimed.sp.main.data$Eulemur_flavifrons$matrix$cov <- gen.main.data$Eulemur$matrix$cov
+# Lepilemuridae family ####
+All.sp.data$cov.mx$Lepilemur_tymerlachsonorum <- Gen.cov.list$Lepilemur
+All.sp.data$cov.mx$Lepilemur_dorsalis <- Gen.cov.list$Lepilemur
+All.sp.data$cov.mx$Lepilemur_ahmansonorum <- Gen.cov.list$Lepilemur
+All.sp.data$cov.mx$Lepilemur_edwardsi <- Gen.cov.list$Lepilemur
+All.sp.data$cov.mx$Lepilemur_randrianasoloi <- Gen.cov.list$Lepilemur
+All.sp.data$cov.mx$Lepilemur_petteri <- Gen.cov.list$Lepilemur
+All.sp.data$cov.mx$Lepilemur_betsileo <- Gen.cov.list$Lepilemur
+All.sp.data$cov.mx$Lepilemur_jamesorum <- Gen.cov.list$Lepilemur
+All.sp.data$cov.mx$Lepilemur_microdon <- Gen.cov.list$Lepilemur
 
-trimed.sp.main.data$Hapalemur_aureus$matrix$cov <- gen.main.data$Hapalemur$matrix$cov
-trimed.sp.main.data$Hapalemur_occidentalis$matrix$cov <- gen.main.data$Hapalemur$matrix$cov
-trimed.sp.main.data$Hapalemur_alaotrensis$matrix$cov <- gen.main.data$Hapalemur$matrix$cov
+# Indridae family ####
+All.sp.data$cov.mx$Avahi_meridionalis <- Gen.cov.list$Avahi
+All.sp.data$cov.mx$Avahi_occidentalis <- Gen.cov.list$Avahi
 
+All.sp.data$cov.mx$Propithecus_candidus <- Gen.cov.list$Propithecus
+All.sp.data$cov.mx$Propithecus_coquereli <- Gen.cov.list$Propithecus
+All.sp.data$cov.mx$Propithecus_tattersalli <- Gen.cov.list$Propithecus
 
-trimed.sp.main.data$Perodicticus_edwardsi$matrix$cov <- gen.main.data$Perodicticus$matrix$cov
-trimed.sp.main.data$Perodicticus_ibeanus$matrix$cov <- gen.main.data$Perodicticus$matrix$cov
+# Lemuridae family ####
+All.sp.data$cov.mx$Eulemur_sanfordi <- Gen.cov.list$Eulemur
+All.sp.data$cov.mx$Eulemur_flavifrons <- Gen.cov.list$Eulemur
 
-trimed.sp.main.data$Allocebus_trichotis$matrix$cov <- ((gen.main.data$Mirza$matrix$cov/gen.main.data$Mirza$sample.size) + (gen.main.data$Microcebus$matrix$cov/gen.main.data$Microcebus$sample.size) )
+All.sp.data$cov.mx$Hapalemur_aureus <- Gen.cov.list$Hapalemur
+All.sp.data$cov.mx$Hapalemur_occidentalis <- Gen.cov.list$Hapalemur
+All.sp.data$cov.mx$Hapalemur_alaotrensis <- Gen.cov.list$Hapalemur
 
-trimed.sp.main.data$Tarsius_bancanus<- gen.main.data$Tarsius
-trimed.sp.main.data$Loris_tardigradus <- gen.main.data$Loris
-trimed.sp.main.data$Galago_senegalensis <- gen.main.data$Galago
-trimed.sp.main.data$Nycticebus_coucang <- gen.main.data$Nycticebus
-trimed.sp.main.data$Arctocebus_calabarensis$matrix$cov <- gen.main.data$Perodicticus$matrix$cov
-trimed.sp.main.data$Otolemur_crassicaudatus <- gen.main.data$Otolemur
-trimed.sp.main.data$Perodicticus_potto<- gen.main.data$Perodicticus
-trimed.sp.main.data$Phaner_furcifer<- gen.main.data$Phaner
-
-trimed.main.data<- trimed.sp.main.data[mask.extant]
-trimed.main.data <- trimed.main.data[-c(2, 15, 18, 64, 65, 66, 68, 69, 70, 72, 73, 76)]
-
-
-current.data <- trimed.main.data
-#Separar:
-#média geométrica por espécie:
-gm.mean <- current.data  %>% ldply(function(x) x$gm.mean) 
-#médias dos caracteres por especie
-ed.means <- current.data  %>% llply(function(x) x$ed.means) 
-#Tamanho amostral:
-n.size <- current.data  %>% ldply(function(x) x$sample.size) 
+All.sp.data$cov.mx$Perodicticus_edwardsi <- Gen.cov.list$Perodicticus
+All.sp.data$cov.mx$Perodicticus_ibeanus <- Gen.cov.list$Perodicticus
 
 
+All.sp.data$cov.mx$Tarsius_bancanus<- Gen.cov.list$Tarsius
+All.sp.data$cov.mx$Loris_tardigradus <- Gen.cov.list$Loris
+All.sp.data$cov.mx$Galago_senegalensis <- Gen.cov.list$Galago
+All.sp.data$cov.mx$Nycticebus_bengalensis <- Gen.cov.list$Nycticebus
+All.sp.data$cov.mx$Nycticebus_menagensis<- Gen.cov.list$Nycticebus
+All.sp.data$cov.mx$Nycticebus_javanicus<- Gen.cov.list$Nycticebus
+All.sp.data$cov.mx$Nycticebus_coucang <- Gen.cov.list$Nycticebus
+All.sp.data$cov.mx$Arctocebus_calabarensis <- Gen.cov.list$Perodicticus
+All.sp.data$cov.mx$Otolemur_crassicaudatus <- Gen.cov.list$Otolemur
+All.sp.data$cov.mx$Perodicticus_potto<- Gen.cov.list$Perodicticus
 
-# PC1 ao PC4 por espécie
-PCs1<- current.data %>% ldply(function(x) eigen(x$matrix$cov)$vectors[,1]) 
-PCs2<- current.data %>% ldply(function(x) eigen(x$matrix$cov)$vectors[,2]) 
-PCs3<- current.data %>% ldply(function(x) eigen(x$matrix$cov)$vectors[,3]) 
-PCs4<- current.data %>% ldply(function(x) eigen(x$matrix$cov)$vectors[,4]) 
+ # Extintos ####
+All.sp.data$cov.mx$Hadropithecus_stenognathus <- ancestral.mx$`55` # recebe o ancestral da família  Indroideia sem Indri
+All.sp.data$cov.mx$Archaeolemur_majori <- ancestral.mx$`55` # recebe o ancestral da família  Indroideia sem Indri
+All.sp.data$cov.mx$Archaeolemur_edwardsi <- ancestral.mx$`55` # recebe o ancestral da família  Indroideia sem Indri
+All.sp.data$cov.mx$Mesopropithecus_pithecoides <- Gen.cov.list$W.Indrida
+All.sp.data$cov.mx$Mesopropithecus_dolichobrachion <- Gen.cov.list$W.Indrida
+All.sp.data$cov.mx$Palaeopropithecus_ingens <- Gen.cov.list$W.Indrida
+All.sp.data$cov.mx$Babakotia_radafolia <- Gen.cov.list$W.Indrida
 
-cov.mx <- current.data %>% llply(function(x) x$matrix$cov)
+All.sp.data$cov.mx$Megaladapis_edwardsi <- ancestral.mx$`46` # recebe o ancestral de madagascar sem Daubentonia
+All.sp.data$cov.mx$Megaladapis_madagascariensis <- ancestral.mx$`46` # recebe o ancestral de madagascar sem Daubentonia
+All.sp.data$cov.mx$Megaladapis_edwardsi <- ancestral.mx$`46` # recebe o ancestral de madagascar sem Daubentonia
 
-write.csv(gm.mean, "gm_mean_Strepsirrhini.csv")
-write.csv(ed.means, "ed_means_Strepsirrhini.csv")
-write.csv(n.size, "n_size_Strepsirrhini.csv")
-write.csv(PCs1, "PCs1_Strepsirrhini.csv")
-write.csv(PCs2, "PCs2_Strepsirrhini.csv")
-write.csv(PCs3, "PCs3_Strepsirrhini.csv")
-write.csv(PCs4, "PCs4_Strepsirrhini.csv")
+All.sp.data$cov.mx[mask.extant & mask.at.tree] %>% ldply( function(x) is.na(x)[1]) %>% .[,2] %>% table # conferindo se todos receberam uma matriz
 
+mask.at.tree <- names(sp.main.data) %in% Trees$all.my.sp.tree$tip.label
+Trees$extant.sp.tree <- drop.tip(treefile,treefile$tip.label[-match(Species$species.extants, treefile$tip.label)]) # árvore com todo mundo
+plot.phylo(Trees$extant.sp.tree, no.margin = T, cex = 0.6)
+nodelabels(cex = 0.4)
+Drift.results$extant.sp <- TreeDriftTestAll (tree = Trees$extant.sp.tree  , 
+                                          mean.list = All.sp.data$means[mask.extant & mask.at.tree], 
+                                          cov.matrix.list = All.sp.data$cov.mx[mask.extant & mask.at.tree], 
+                                          sample.sizes = n.size[mask.extant & mask.at.tree])
 
-tree.best.edited = read.nexus(file = "~/ataches/fbd421agerange_edited.tre")
-pruned.tree.edited<-drop.tip(tree.best.edited,tree.best.edited$tip.label[-match(names(trimed.main.data), tree.best.edited$tip.label)])
-pruned.tree.edited$tip.label
-writeNexus(pruned.tree.edited, "Strep_Tree_trim.nex")
-
-
-
-tree.drift.test<- TreeDriftTest(tree = pruned.tree.edited, mean.list = ed.means , cov.matrix.list = cov.mx, sample.sizes = n.size[,2])
-results <- llply(tree.drift.test, function(x) x$drift_rejected)
-PlotTreeDriftTest(test.list = tree.drift.test, tree = pruned.tree.edited)
+# alguns dos fósseis nao tem informação de algumas medidas: quem sao eles?
+All.sp.data$means[mask.at.tree]%>% llply( function(x) !is.na(x) ) %>% ldply( function(x) sum(x) <39 ) # conferindo se todos receberam uma matriz
+missing.ed <- All.sp.data$means[mask.at.tree]%>% ldply( function(x) !is.na(x) ) 
+row.names(missing.ed) <- missing.ed$.id
+missing.ed <- missing.ed[,-1]
+colSums(missing.ed) == 82 
+rowSums(missing.ed) 
+Trees$all.my.sp.tree <- drop.tip(treefile,treefile$tip.label[-match(Species$all.my.species, treefile$tip.label)]) # árvore com todo mundo
+plot.phylo(Trees$all.my.sp.tree, no.margin = T, cex = 0.5)
 nodelabels()
-tree.drift.test$`45`
+Drift.results$all.sp <- TreeDriftTestAll (tree = Trees$all.my.sp.tree  , 
+                                          mean.list = All.sp.data$means[mask.at.tree], 
+                                          cov.matrix.list = All.sp.data$cov.mx[mask.at.tree], 
+                                          sample.sizes = n.size[mask.at.tree])
+
+
 
 ######### changing plot 
 tested.nodes <- as.numeric(names(tree.drift.test))

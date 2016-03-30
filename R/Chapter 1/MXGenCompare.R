@@ -1,12 +1,11 @@
 current.data <- gen.main.data
 
-#4# Gerando a matriz ancestral
+# Gerando a matriz ancestral ####
 mx.at.tree <- cov.mx[mask][-41]
 ancestral.mx <- PhyloW(tree = pruned.tree.with.mx, tip.data = mx.at.tree, tip.sample.size = n.size[mask][-41])
 plot(pruned.tree.with.mx, cex = 0.5)
 nodelabels()
 W.matrix <- ancestral.mx$'42'
-
 
 gen.cov.mx <- current.data %>% llply(function(x) x$matrix$cov)
 str(gen.cov.mx)
@@ -21,7 +20,7 @@ gen.cov.list$Saguinus_G.cov <- Saguinus_G.cov
 str(gen.cov.list)
 names(gen.cov.list)
 
-# Comparando as matrizes estimadas pelo Phylow com as matrizes estimadas com os residuos do efeito de especie####
+# Comparando as matrizes estimadas pelo Phylow com as matrizes estimadas com os residuos do efeito de especie ####
 MatrixCompare(gen.cov.list$Tarsius, ancestral.mx$'43')
 MatrixCompare(gen.cov.list$Microcebus, ancestral.mx$'51')
 MatrixCompare(gen.cov.list$Mirza, ancestral.mx$Mirza_coquereli)
