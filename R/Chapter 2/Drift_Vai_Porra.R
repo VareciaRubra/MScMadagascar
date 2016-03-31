@@ -141,7 +141,7 @@ Drift.results$extant.sp <- TreeDriftTestAll (tree = Trees$extant.sp.tree  ,
                                           mean.list = All.sp.data$means[mask.extant & mask.at.tree], 
                                           cov.matrix.list = All.sp.data$cov.mx[mask.extant & mask.at.tree], 
                                           sample.sizes = All.sp.data$n.sizes[mask.extant & mask.at.tree])
-
+Drift.results$extant.sp$Correlation.test.Regular$`71`$P.value.plot
 # alguns dos fósseis nao tem informação de algumas medidas: quem sao eles?
 All.sp.data$means[mask.at.tree]%>% llply( function(x) !is.na(x) ) %>% ldply( function(x) sum(x) <39 ) # conferindo se todos receberam uma matriz
 missing.ed <- All.sp.data$means[mask.at.tree]%>% ldply( function(x) !is.na(x) ) 
@@ -160,10 +160,23 @@ Trees$all.with.ed<- drop.tip(treefile,treefile$tip.label[-match(names(All.sp.dat
 
 table(names(tree.no.megaladapis$tip.label %in% All.sp.data$means[mask.at.tree][rowSums(missing.ed) == 39]) )
 
+Drift.results <- vector("list")
+
+Drift.results$with.mx <- TreeDriftTestAll (tree = pruned.tree.with.mx, 
+                                           mean.list = ed.means[mask][-41], 
+                                           cov.matrix.list = cov.list[-41], 
+                                          sample.sizes = sample.size[-c(41, 43, 44)])
+par(mfrow= c(1,1))
+plot.phylo(Trees$all.with.ed, no.margin = T, cex = 0.5)
+nodelabels()
+
 Drift.results$all.sp <- TreeDriftTestAll (tree = Trees$all.with.ed, 
                                           mean.list = All.sp.data$means[mask.at.tree][rowSums(missing.ed) == 39], 
                                           cov.matrix.list = All.sp.data$cov.mx[mask.at.tree][rowSums(missing.ed) == 39], 
                                           sample.sizes = All.sp.data$n.sizes[mask.at.tree][rowSums(missing.ed) == 39] )
+
+Drift.results$with.mx$BW.compare %>% llply(function (x) x$BW.compare) 
+
 drift.vai.porra <- vector("list", 5)
 
 drift.vai.porra$drift.T.F.vectors <- 
@@ -240,4 +253,3 @@ nodelabels(node = tested.nodes, i.c.5$max, adj = 1.2, bg = "transparent", col = 
 nodelabels(node = tested.nodes, pch = (as.numeric(non.drift.nodes)+17), cex=1.4, col = (as.numeric(non.drift.nodes)+9) )
 tiplabels(pch = 19, cex = gm.mean.no.na/10, adj = -2.5)
 
-PCScoreCorrelation(means = ed.means, cov.matrix = cov.mx, show.plots = T)

@@ -1,5 +1,5 @@
 PCScoreCorr <- 
-function (means, cov.matrix, taxons = names(means), show.plots = FALSE) 
+function (means, cov.matrix, taxons = names(means), show.plots = FALSE, title.plot = "Correlation Dtift Test") 
 {
   if (is.data.frame(means) | (!is.array(means) & !is.list(means))) stop("means must be in a list or an array.")
   if (!isSymmetric(cov.matrix)) stop("covariance matrix must be symmetric.")
@@ -38,6 +38,9 @@ function (means, cov.matrix, taxons = names(means), show.plots = FALSE)
   }
   mx.to.bartlett <- mat.pcs.deriva
   mx.to.bartlett[upper.tri(mx.to.bartlett)] <- t(mx.to.bartlett)[upper.tri(mx.to.bartlett)]
+  signal.cor <- mx.to.bartlett
+  signal.cor[lower.tri(signal.cor)] <- signal.cor[lower.tri(signal.cor)] < 0
+  signal.cor[upper.tri(signal.cor)] <- signal.cor[upper.tri(signal.cor)] < 0
   diag(mx.to.bartlett) <- 1
   Bartlett.t <- psych::cortest.bartlett (R = mx.to.bartlett, n= length(taxons))
   mx.to.bonferroni <- mat.pcs.deriva
@@ -48,31 +51,32 @@ function (means, cov.matrix, taxons = names(means), show.plots = FALSE)
   
   #Correction.p.bonferroni <- corr.p(r = mx.to.bonferroni, n = n.veiz, adjust = "bonferroni") 
 
-  mx.bonferroni <- mx.to.bonferroni
+  mx.bonferroni <- mx.to.bonferroni[1:10,1:10]
   mx.bonferroni[lower.tri(mx.bonferroni)] <- mx.bonferroni[lower.tri(mx.bonferroni)] > 0.05
   mx.bonferroni[upper.tri(mx.bonferroni)] <- mx.bonferroni[upper.tri(mx.bonferroni)] > 0.05/n.veiz
   Correction.p.bonferroni <- mx.bonferroni 
   Correction.p.bonferroni <- as.logical(Correction.p.bonferroni)
-  Correction.p.bonferroni <- matrix(Correction.p.bonferroni, nrow = nrow(mx.to.bonferroni), ncol = ncol(mx.to.bonferroni))
-  rownames(Correction.p.bonferroni) <- paste0('PC', 1:nrow(mx.to.bonferroni))
-  colnames(Correction.p.bonferroni) <- paste0('PC', 1:ncol(mx.to.bonferroni))
+  Correction.p.bonferroni <- matrix(Correction.p.bonferroni, nrow = nrow(mx.bonferroni), ncol = ncol(mx.bonferroni))
+  rownames(Correction.p.bonferroni) <- paste0('PC', 1:nrow(mx.bonferroni))
+  colnames(Correction.p.bonferroni) <- paste0('PC', 1:ncol(mx.bonferroni))
   Correction.p.bonferroni[upper.tri(Correction.p.bonferroni)] <- NA
-  
+  signal.cor <- signal.cor[1:10,1:10]
   rejected.drift<- which(!Correction.p.bonferroni, arr.ind = T)
-  mx.bonferroni[mx.bonferroni == TRUE] <- "Not significant"
-  mx.bonferroni[mx.bonferroni == 0] <- "Significative"
+  mx.bonferroni[mx.bonferroni == 1] <- "Not significant"
+  mx.bonferroni[mx.bonferroni == 0 & signal.cor == 0] <- "Significative (+)"
+  mx.bonferroni[mx.bonferroni == 0 & signal.cor == 1] <- "Significative (-)"
   mx.bonferroni %<>% melt 
   
   p.value.plot <- mx.bonferroni %>% 
     ggplot () +
-      geom_tile(aes(x = Var2, y = Var1, fill = as.factor(value) ), alpha = 0.6, color = "darkgrey") +
+      geom_tile(aes(x = Var2, y = Var1, fill = value ), alpha = 0.6, color = "darkgrey") +
       scale_y_discrete(limits = rev(levels(mx.bonferroni$Var1))) +
       #geom_text(aes(x = Var2, y = Var1, label = value), size = 4) +
-      scale_fill_manual(values = c("lightgrey", "red")) + labs(fill = "p.value") +
-      ylab ('') + xlab ('') + labs(title = "Original and Bonferroni correction" ) + 
+      scale_fill_manual(values = c("#f5f5f5", "#5ab4ac", "#f1a340")) + labs(fill = "p.value") +
+      ylab ('') + xlab ('') + labs(title = paste("Node:", title.plot) ) + 
       theme_minimal() +  
-      theme(plot.title = element_text(face = "bold", size = 20),
-            axis.text.x = element_text(angle = 270, hjust = 0, size =9),
+      theme(plot.title = element_text(face = "bold", size = 17),
+            axis.text.x = element_text(angle = 270, hjust = 0),
             axis.ticks = element_line(size = 0),
             legend.title = element_text(size = 15),
             legend.text = element_text(size = 10) ,
@@ -93,6 +97,8 @@ function (means, cov.matrix, taxons = names(means), show.plots = FALSE)
               "P.value.plot" = p.value.plot
               ) )
 }
+
+PCScoreCorr(means = All.sp.data$means, cov.matrix = ancestral.mx$`42`, show.plots = F)
 
 TreeDriftTestPCScoresCorr <- function (tree, mean.list, cov.matrix.list, sample.sizes = NULL) 
 {
@@ -146,15 +152,17 @@ TreeDriftTestAll <- function (tree, mean.list, cov.matrix.list, sample.sizes = N
                                                           )
     names(BW.compare) <- nodes[node.mask]
     test.list.cor <- llply(nodes[node.mask], function(node) PCScoreCorr(means = getMeans(mean.list, tree, node), 
-                                                              taxons = names(nodes), 
+                                                              taxons = names(getMeans(mean.list, tree, node)), 
                                                               cov.matrix =  cov.matrices[[node]], 
-                                                              show.plots = FALSE))
+                                                              show.plots = FALSE,
+                                                              title.plot =  node) )
     names(test.list.cor) <- nodes[node.mask]
     
     test.list.cor.contrasts <- llply(nodes[node.mask], function(node) PCScoreCorr(means = getContrasts(ind.cont, tree, node), 
                                                              taxons = rownames(getContrasts(ind.cont, tree, node)), 
                                                              cov.matrix =  cov.matrices[[node]], 
-                                                             show.plots = FALSE))
+                                                             show.plots = FALSE,
+                                                             title.plot =  node) )
     
     names(test.list.cor.contrasts) <-  nodes[node.mask]
     test.list.reg <- llply(nodes[node.mask], function(node) DriftTest(means = getMeans(mean.list, tree, node), 
@@ -174,13 +182,13 @@ TreeDriftTestAll <- function (tree, mean.list, cov.matrix.list, sample.sizes = N
                  "BW.compare" = BW.compare) )
     }
 
-  Drift.results <- vector("list", 3)
+  Drift.results <- vector("list")
   
   Drift.results$with.mx <- TreeDriftTestAll (tree = pruned.tree.with.mx, 
                                              mean.list = ed.means[mask][-41], 
                                              cov.matrix.list = cov.list[-41], 
                                              sample.sizes = sample.size[-c(41, 43, 44)])
-  
+  Drift.results$with.mx$Correlation.test.Regular$`42`$P.value.plot
   
 
 drift.vai.porra <- vector("list", 5)
