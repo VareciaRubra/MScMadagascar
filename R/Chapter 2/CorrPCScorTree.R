@@ -62,7 +62,7 @@ function (means, cov.matrix, taxons = names(means), show.plots = FALSE, title.pl
   Correction.p.bonferroni[upper.tri(Correction.p.bonferroni)] <- NA
   signal.cor <- signal.cor[1:10,1:10]
   rejected.drift<- which(!Correction.p.bonferroni, arr.ind = T)
-  mx.bonferroni[mx.bonferroni == 1] <- "Not significant"
+  mx.bonferroni[mx.bonferroni == 1] <- "Not Significative"
   mx.bonferroni[mx.bonferroni == 0 & signal.cor == 0] <- "Significative (+)"
   mx.bonferroni[mx.bonferroni == 0 & signal.cor == 1] <- "Significative (-)"
   mx.bonferroni %<>% melt 

@@ -177,26 +177,55 @@ Drift.results$all.sp <- TreeDriftTestAll (tree = Trees$all.with.ed,
 
 Drift.results$with.mx$BW.compare %>% llply(function (x) x$BW.compare) 
 
-drift.vai.porra <- vector("list", 5)
+Drift.results.Toplot <- vector("list")
+Drift.results.Toplot$All.sp <- vector("list")
+Drift.results.Toplot$All.sp$Results <- vector("list")
+Drift.results.Toplot$Extants <- vector("list")
+Drift.results.Toplot$Extants$Results <- vector("list")
 
-drift.vai.porra$drift.T.F.vectors <- 
-  cbind(Drift.alltests.tree$Correlation.test.Regular %>% ldply(function(x) dim(x$Resume.table)[[1]] >1 ),
-        Drift.alltests.tree$Correlation.test.Contrasts %>% ldply(function(x) dim(x$Resume.table)[[1]] >1 ) %>% .[,2],
-        Drift.alltests.tree$Regression.test %>% ldply(function(x) x$drift_rejected ) %>% .[,2],
-        Drift.alltests.tree$Regression.test.Contrasts %>% ldply(function(x) x$drift_rejected )  %>% .[,2])
+Drift.results.Toplot$All.sp$Plots$Corr.Contrasts  <- Drift.results$all.sp$Correlation.test.Contrasts %>% llply(function (x) x$P.value.plot) %>% llply(function(x) x + theme(legend.position = "none") ) %>% cowplot::plot_grid(plotlist = .) 
+Drift.results.Toplot$All.sp$Plots$Corr.Ed         <- Drift.results$all.sp$Correlation.test.Regular %>% llply(function (x) x$P.value.plot) %>% llply(function(x) x + theme(legend.position = "none")) %>% cowplot::plot_grid(plotlist = .)
+Drift.results.Toplot$Extants$Plots$Corr.Contrasts <- Drift.results$extant.sp$Correlation.test.Contrasts %>% llply(function (x) x$P.value.plot) %>% llply(function(x) x + theme(legend.position = "none")) %>% cowplot::plot_grid(plotlist = .)
+Drift.results.Toplot$Extants$Plots$Corr.Ed        <- Drift.results$extant.sp$Correlation.test.Regular %>% llply(function (x) x$P.value.plot) %>% llply(function(x) x + theme(legend.position = "none")) %>% cowplot::plot_grid(plotlist = .)
 
-colnames(drift.vai.porra$drift.T.F.vectors) <- c("node", "cor", "cor.ci", "reg", "reg.ci")
-str(drift.vai.porra$drift.T.F.vectors)
-drift.vai.porra$drift.T.F.vectors$node <- as.numeric(drift.vai.porra$drift.T.F.vectors$node)
+Drift.results.Toplot$All.sp$Results$Node.ref <- Drift.results$all.sp$Correlation.test.Regular %>% ldply(function(x) dim(x$Resume.table)[[1]] >1 ) %>% .[,1]
+Drift.results.Toplot$All.sp$Results$Corr.Ed.1 <- Drift.results$all.sp$Correlation.test.Regular %>% ldply(function(x) dim(x$Resume.table)[[1]] >1 ) %>% .[,2]
+Drift.results.Toplot$All.sp$Results$Corr.Contrasts.1 <- Drift.results$all.sp$Correlation.test.Contrasts  %>% ldply(function(x) dim(x$Resume.table)[[1]] >1 ) %>% .[,2]
+Drift.results.Toplot$All.sp$Results$Regression.Ed <- Drift.results$all.sp$Regression.test %>% ldply(function(x) x$drift_rejected )  %>% .[,2]
+Drift.results.Toplot$All.sp$Results$Regression.Contrasts <- Drift.results$all.sp$Regression.test.Contrasts %>% ldply(function(x) x$drift_rejected )  %>% .[,2]
 
-par(mfrow = c(1,2))
-plot.phylo(pruned.tree.with.mx, font = 3, no.margin = T)
-nodelabels(node = drift.vai.porra$drift.T.F.vectors$node , pch = 8, bg = "transparent", col = (as.numeric(drift.vai.porra$drift.T.F.vectors$cor)+1), frame = "n")
-nodelabels(node = drift.vai.porra$drift.T.F.vectors$node , pch = 17, bg = "transparent", col = (as.numeric(drift.vai.porra$drift.T.F.vectors$reg)+3), frame = "n")
+Drift.results.Toplot$Extants$Results$Node.ref <- Drift.results$extant.sp$Correlation.test.Regular %>% ldply(function(x) dim(x$Resume.table)[[1]] >1 ) %>% .[,1]
+Drift.results.Toplot$Extants$Results$Corr.Ed.1 <- Drift.results$extant.sp$Correlation.test.Regular %>% ldply(function(x) dim(x$Resume.table)[[1]] >1 ) %>% .[,2]
+Drift.results.Toplot$Extants$Results$Corr.Contrasts.1 <- Drift.results$extant.sp$Correlation.test.Contrasts %>% ldply(function(x) dim(x$Resume.table)[[1]] >1) %>% .[,2]
+Drift.results.Toplot$Extants$Results$Regression.Ed <- Drift.results$extant.sp$Regression.test %>% ldply(function(x) x$drift_rejected )  %>% .[,2]
+Drift.results.Toplot$Extants$Results$Regression.Contrasts <- Drift.results$extant.sp$Regression.test.Contrasts %>% ldply(function(x) x$drift_rejected )  %>% .[,2]
 
-plot.phylo(pruned.tree.with.mx, font = 3, no.margin = T)
-nodelabels(node = drift.vai.porra$drift.T.F.vectors$node , pch = 8, bg = "transparent", col = (as.numeric(drift.vai.porra$drift.T.F.vectors$cor.ci)+1), frame = "n")
-nodelabels(node = drift.vai.porra$drift.T.F.vectors$node , pch = 17, bg = "transparent", col = (as.numeric(drift.vai.porra$drift.T.F.vectors$reg.ci)+3), frame = "n")
+Plot.Drift.Results <- function (tree, node.ref, info, font.size = 0.4) {
+  node.ref <- as.numeric(info$Node.ref)
+  cor.ed <- as.numeric(info$Corr.Ed.1) * 2 
+  cor.ci <- as.numeric(info$Corr.Contrasts.1) * 2
+  reg.ed <- as.numeric(info$Regression.Ed) * 3 
+  reg.ci <- as.numeric(info$Regression.Contrasts) * 3 
+  
+  results.ed <- cor.ed  + reg.ed + 1
+  results.ci <- cor.ci  + reg.ci + 1
+  
+  par(mfrow = c(1,2))
+  plot.phylo(tree, font = 3, no.margin = TRUE,  cex = font.size, edge.color = "darkgrey", edge.width = 3)
+  nodelabels(node = node.ref, pch = 19, col = results.ed)
+  nodelabels(node = node.ref, bg = "transparent", frame = "n",cex = 0.6)
+  plot.phylo(tree, font = 3, no.margin = TRUE,  cex = font.size, edge.color = "darkgrey", edge.width = 3)
+  nodelabels(node = node.ref , pch = 19, col = results.ci)
+  nodelabels(node = node.ref, bg = "transparent", frame = "n",cex = 0.6)
+  
+    par(mfrow = c(1,1))
+    return(data.frame("node" = node.ref,
+           "ed" = results.ed,
+           "ic" = results.ci) )
+}
+Drift.results.Toplot$All.sp$Plots$Tree <- Plot.Drift.Results(tree = Trees$all.with.ed, info = Drift.results.Toplot$All.sp$Results, font.size = 0.4)
+Drift.results.Toplot$Extants$Plots$Tree <- Plot.Drift.Results(tree = Trees$extant.sp.tree, info = Drift.results.Toplot$Extants$Results, font.size = 0.4)
+
 
 drift.vai.porra$sum.abs.values <- Drift.alltests.tree$Correlation.test.Regular %>% llply(function (x) x$Correlation.p.value[1:39,1:39]) %>% llply(abs) %>% laply( function (x) x[lower.tri(x)]) %>% colSums 
 temp <- matrix(NA, 39, 39, byrow = F)

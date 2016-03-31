@@ -135,7 +135,9 @@ ed.means.with.mx[na.omit(tree.with.mx$tip.label[getDescendants(tree.with.mx, 19)
 ###################### Porque diabos o nó do genero Propithecus estaria mudando?
 RandomSkewers(cov.x = Ancestral.Matrices.indridae$"15",cov.y = Ancestral.Matrices.indridroidea$"27", num.vectors = 1000 )
 par(mfrow=c(2,1))
-plot_grid(labels = c("node 19: drift rejected IC 95%= 1.02  1.36 ", "node 31: drift accepted IC 95%= 0.82 1.26"), drift.test.indroidea.with.mx$`19`$plot, drift.test.indroidea.subistitute.mx$`31`$plot)
+plot_grid(labels = c("node 19: drift rejected IC 95%= 1.02  1.36 ", "node 31: drift accepted IC 95%= 0.82 1.26"), 
+          drift.test.indroidea.with.mx$`19`$plot, 
+          drift.test.indroidea.subistitute.mx$`31`$plot)
 Propithecus.list<- list("Propithecus Genus" = cov.mx.genus$Propithecus,
                         "P.edwardsi" = cov.mx.all$Propithecus_edwardsi,
                         "P.diadema" = cov.mx.all$Propithecus_diadema,
@@ -228,10 +230,5 @@ nodelabels(bg = NULL, frame = "none", adj = -0.4 )
 Ancestral.Matrices.indridroidea<- PhyloW(tree = pruned.tree.indroidea, 
                                      tip.data = cov.indroidea, 
                                      tip.sample.size = n.size.indroidea )
-
-
-
-
-
 
 RandomSkewers(Ancestral.indroidea.with.mx$"14", Ancestral.Matrices.indridae$"14", num.vectors = 1000)
