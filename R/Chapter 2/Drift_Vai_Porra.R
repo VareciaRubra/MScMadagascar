@@ -54,7 +54,7 @@ All.sp.data <- vector("list")
 
 All.sp.data$cov.mx <- sp.main.data %>% llply(function(x) x$matrix$cov) # todas as matrizes de cov
 All.sp.data$ed <- sp.main.data %>% llply(function(x) x$ed) # todas as distancias médias de cada indivíduo
-All.sp.data$means <- sp.main.data %>% llply(function(x) x$ed.means ) #todos os vetores de médias
+All.sp.data$means <- sp.main.data %>% llply(function(x) colMeans(x$ed, na.rm = T) ) #todos os vetores de médias
 All.sp.data$gm <- sp.main.data %>% llply(function(x) x$gm.mean) #todos os vetores de médias
 All.sp.data$n.sizes <- sp.main.data %>% ldply(function(x) x$sample.size )  %>% .[,2] 
 
@@ -121,13 +121,17 @@ All.sp.data$cov.mx$Archaeolemur_edwardsi <- ancestral.mx$`55` # recebe o ancestr
 All.sp.data$cov.mx$Mesopropithecus_pithecoides <- Gen.cov.list$W.Indrida
 All.sp.data$cov.mx$Mesopropithecus_dolichobrachion <- Gen.cov.list$W.Indrida
 All.sp.data$cov.mx$Palaeopropithecus_ingens <- Gen.cov.list$W.Indrida
+All.sp.data$cov.mx$Palaeopropithecus_maximus <- Gen.cov.list$W.Indrida
 All.sp.data$cov.mx$Babakotia_radafolia <- Gen.cov.list$W.Indrida
+
+All.sp.data$cov.mx$Pachylemur_jullyi <- Gen.cov.list$Varecia
+
 
 All.sp.data$cov.mx$Megaladapis_edwardsi <- ancestral.mx$`46` # recebe o ancestral de madagascar sem Daubentonia
 All.sp.data$cov.mx$Megaladapis_madagascariensis <- ancestral.mx$`46` # recebe o ancestral de madagascar sem Daubentonia
 All.sp.data$cov.mx$Megaladapis_edwardsi <- ancestral.mx$`46` # recebe o ancestral de madagascar sem Daubentonia
-
-All.sp.data$cov.mx[mask.extant & mask.at.tree] %>% ldply( function(x) is.na(x)[1]) %>% .[,2] %>% table # conferindo se todos receberam uma matriz
+All.sp.data$cov.mx$Megaladapis_grandidieri <- ancestral.mx$`46`
+All.sp.data$cov.mx[mask.at.tree] %>% ldply( function(x) is.na(x)[1]) %>% .[,2] %>% table # conferindo se todos receberam uma matriz
 
 mask.at.tree <- names(sp.main.data) %in% Trees$all.my.sp.tree$tip.label
 Trees$extant.sp.tree <- drop.tip(treefile,treefile$tip.label[-match(Species$species.extants, treefile$tip.label)]) # árvore com todo mundo
@@ -136,22 +140,55 @@ nodelabels(cex = 0.4)
 Drift.results$extant.sp <- TreeDriftTestAll (tree = Trees$extant.sp.tree  , 
                                           mean.list = All.sp.data$means[mask.extant & mask.at.tree], 
                                           cov.matrix.list = All.sp.data$cov.mx[mask.extant & mask.at.tree], 
-                                          sample.sizes = n.size[mask.extant & mask.at.tree])
+                                          sample.sizes = All.sp.data$n.sizes[mask.extant & mask.at.tree])
 
 # alguns dos fósseis nao tem informação de algumas medidas: quem sao eles?
 All.sp.data$means[mask.at.tree]%>% llply( function(x) !is.na(x) ) %>% ldply( function(x) sum(x) <39 ) # conferindo se todos receberam uma matriz
 missing.ed <- All.sp.data$means[mask.at.tree]%>% ldply( function(x) !is.na(x) ) 
 row.names(missing.ed) <- missing.ed$.id
 missing.ed <- missing.ed[,-1]
-colSums(missing.ed) == 82 
-rowSums(missing.ed) 
+table(colSums(missing.ed) == 82 )
+table(rowSums(missing.ed) )
+which(rowSums(missing.ed) < 39)
+
+
 Trees$all.my.sp.tree <- drop.tip(treefile,treefile$tip.label[-match(Species$all.my.species, treefile$tip.label)]) # árvore com todo mundo
 plot.phylo(Trees$all.my.sp.tree, no.margin = T, cex = 0.5)
 nodelabels()
-Drift.results$all.sp <- TreeDriftTestAll (tree = Trees$all.my.sp.tree  , 
-                                          mean.list = All.sp.data$means[mask.at.tree], 
-                                          cov.matrix.list = All.sp.data$cov.mx[mask.at.tree], 
-                                          sample.sizes = n.size[mask.at.tree])
+
+Trees$all.with.ed<- drop.tip(treefile,treefile$tip.label[-match(names(All.sp.data$means[mask.at.tree][rowSums(missing.ed) == 39]), treefile$tip.label)])
+
+table(names(tree.no.megaladapis$tip.label %in% All.sp.data$means[mask.at.tree][rowSums(missing.ed) == 39]) )
+
+Drift.results$all.sp <- TreeDriftTestAll (tree = Trees$all.with.ed, 
+                                          mean.list = All.sp.data$means[mask.at.tree][rowSums(missing.ed) == 39], 
+                                          cov.matrix.list = All.sp.data$cov.mx[mask.at.tree][rowSums(missing.ed) == 39], 
+                                          sample.sizes = All.sp.data$n.sizes[mask.at.tree][rowSums(missing.ed) == 39] )
+drift.vai.porra <- vector("list", 5)
+
+drift.vai.porra$drift.T.F.vectors <- 
+  cbind(Drift.alltests.tree$Correlation.test.Regular %>% ldply(function(x) dim(x$Resume.table)[[1]] >1 ),
+        Drift.alltests.tree$Correlation.test.Contrasts %>% ldply(function(x) dim(x$Resume.table)[[1]] >1 ) %>% .[,2],
+        Drift.alltests.tree$Regression.test %>% ldply(function(x) x$drift_rejected ) %>% .[,2],
+        Drift.alltests.tree$Regression.test.Contrasts %>% ldply(function(x) x$drift_rejected )  %>% .[,2])
+
+colnames(drift.vai.porra$drift.T.F.vectors) <- c("node", "cor", "cor.ci", "reg", "reg.ci")
+str(drift.vai.porra$drift.T.F.vectors)
+drift.vai.porra$drift.T.F.vectors$node <- as.numeric(drift.vai.porra$drift.T.F.vectors$node)
+
+par(mfrow = c(1,2))
+plot.phylo(pruned.tree.with.mx, font = 3, no.margin = T)
+nodelabels(node = drift.vai.porra$drift.T.F.vectors$node , pch = 8, bg = "transparent", col = (as.numeric(drift.vai.porra$drift.T.F.vectors$cor)+1), frame = "n")
+nodelabels(node = drift.vai.porra$drift.T.F.vectors$node , pch = 17, bg = "transparent", col = (as.numeric(drift.vai.porra$drift.T.F.vectors$reg)+3), frame = "n")
+
+plot.phylo(pruned.tree.with.mx, font = 3, no.margin = T)
+nodelabels(node = drift.vai.porra$drift.T.F.vectors$node , pch = 8, bg = "transparent", col = (as.numeric(drift.vai.porra$drift.T.F.vectors$cor.ci)+1), frame = "n")
+nodelabels(node = drift.vai.porra$drift.T.F.vectors$node , pch = 17, bg = "transparent", col = (as.numeric(drift.vai.porra$drift.T.F.vectors$reg.ci)+3), frame = "n")
+
+drift.vai.porra$sum.abs.values <- Drift.alltests.tree$Correlation.test.Regular %>% llply(function (x) x$Correlation.p.value[1:39,1:39]) %>% llply(abs) %>% laply( function (x) x[lower.tri(x)]) %>% colSums 
+temp <- matrix(NA, 39, 39, byrow = F)
+temp[lower.tri(temp)] <- drift.vai.porra$sum.abs.values
+drift.vai.porra$mean.abs.values <- temp / length(Drift.alltests.tree$Correlation.test.Regular)
 
 
 
