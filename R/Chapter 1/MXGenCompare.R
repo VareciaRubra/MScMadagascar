@@ -1,16 +1,18 @@
 current.data <- gen.main.data
 
 # Gerando a matriz ancestral ####
+cov.mx <- sp.main.data %>% llply(function(x) x$matrix$cov)
+mask <- ldply(cov.mx, function(x) !is.na(x[1]))[,2]
 mx.at.tree <- cov.mx[mask][-41]
 ancestral.mx <- PhyloW(tree = pruned.tree.with.mx, tip.data = mx.at.tree, tip.sample.size = n.size[mask][-41])
 plot(pruned.tree.with.mx, cex = 0.5)
 nodelabels()
 W.matrix <- ancestral.mx$'42'
 
-gen.cov.mx <- current.data %>% llply(function(x) x$matrix$cov)
+gen.cov.mx <- gen.main.data %>% llply(function(x) x$matrix$cov)
 str(gen.cov.mx)
-gen.mx.rep <- current.data %>% ldply(function(x) x$Mx.Rep$BootsRep) 
-gen.n.size <- current.data %>% ldply(function(x) x$sample.size) 
+gen.mx.rep <- gen.main.data %>% ldply(function(x) x$Mx.Rep$BootsRep) 
+gen.n.size <- gen.main.data %>% ldply(function(x) x$sample.size) 
 
 gen.mask <- ldply(gen.cov.mx, function(x) !is.na(x[1]))[,2]
 
