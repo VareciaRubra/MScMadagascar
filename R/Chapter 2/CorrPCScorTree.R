@@ -157,9 +157,14 @@ function (means, cov.matrix, show.plot = TRUE)
                                     FALSE)
   test <- !containsOne(confint(regression)[2, ])
   names(test) <- "5 %"
-  objeto <- list(regression = regression, coefficient_CI_95 = confint(regression), 
-                 log.between_group_variance = log.B_variance, log.W_eVals = log.W_eVals, 
-                 drift_rejected = test, plot = reg.plot)
+  objeto <- list(regression = regression, 
+                 coefficient_CI_95 = confint(regression), 
+                 log.between_group_variance = log.B_variance, 
+                 log.W_eVals = log.W_eVals, 
+                 drift_rejected = test, 
+                 plot = reg.plot,
+                 means = means,
+                 W.mx = cov.matrix)
   return(objeto)
 }
 
@@ -210,12 +215,19 @@ TreeDriftTestAll <- function (tree, mean.list, cov.matrix.list, sample.sizes = N
                                                                       show.plot = FALSE))
     names(test.list.reg.contrasts) <- nodes[node.mask]
     
+    test.list.reg.contrasts.W.fixed <- llply(nodes[node.mask], function(node) DriftTest0(means = getContrasts(ind.cont, tree, node), 
+                                                                                 cov.matrix = cov.matrices[[node]], 
+                                                                                 show.plot = FALSE))
+    names(test.list.reg.contrasts) <- nodes[node.mask]
+    
+    
     return(list ("Correlation.test.Regular" = test.list.cor,
                  "Correlation.test.Contrasts" = test.list.cor.contrasts, 
                  "Regression.test" = test.list.reg,
                  "Regression.test.Contrasts" = test.list.reg.contrasts,
                  "BW.compare" = BW.compare) )
-    }
+}
+
 
   Drift.results <- vector("list")
   
@@ -226,28 +238,10 @@ TreeDriftTestAll <- function (tree, mean.list, cov.matrix.list, sample.sizes = N
   Drift.results$with.mx$Correlation.test.Regular$`42`$P.value.plot
   
 
-drift.vai.porra <- vector("list", 5)
-
-drift.vai.porra$drift.T.F.vectors <- 
-  cbind(Drift.alltests.tree$Correlation.test.Regular %>% ldply(function(x) dim(x$Resume.table)[[1]] >1 ),
-        Drift.alltests.tree$Correlation.test.Contrasts %>% ldply(function(x) dim(x$Resume.table)[[1]] >1 ) %>% .[,2],
-        Drift.alltests.tree$Regression.test %>% ldply(function(x) x$drift_rejected ) %>% .[,2],
-        Drift.alltests.tree$Regression.test.Contrasts %>% ldply(function(x) x$drift_rejected )  %>% .[,2])
-
-colnames(drift.vai.porra$drift.T.F.vectors) <- c("node", "cor", "cor.ci", "reg", "reg.ci")
-str(drift.vai.porra$drift.T.F.vectors)
-drift.vai.porra$drift.T.F.vectors$node <- as.numeric(drift.vai.porra$drift.T.F.vectors$node)
-
-par(mfrow = c(1,1))
-plot.phylo(pruned.tree.with.mx, font = 3, no.margin = T)
-nodelabels(node = drift.vai.porra$drift.T.F.vectors$node , pch = 8, bg = "transparent", col = (as.numeric(drift.vai.porra$drift.T.F.vectors$cor)+1), frame = "n")
-nodelabels(node = drift.vai.porra$drift.T.F.vectors$node , pch = 17, bg = "transparent", col = (as.numeric(drift.vai.porra$drift.T.F.vectors$reg)+3), frame = "n")
-
-plot.phylo(pruned.tree.with.mx, font = 3, no.margin = T)
-nodelabels(node = drift.vai.porra$drift.T.F.vectors$node , pch = 8, bg = "transparent", col = (as.numeric(drift.vai.porra$drift.T.F.vectors$cor.ci)+1), frame = "n")
-nodelabels(node = drift.vai.porra$drift.T.F.vectors$node , pch = 17, bg = "transparent", col = (as.numeric(drift.vai.porra$drift.T.F.vectors$reg.ci)+3), frame = "n")
-
-drift.vai.porra$sum.abs.values <- Drift.alltests.tree$Correlation.test.Regular %>% llply(function (x) x$Correlation.p.value[1:39,1:39]) %>% llply(abs) %>% laply( function (x) x[lower.tri(x)]) %>% colSums 
+drift.vai.porra$sum.abs.values <- 
+  Drift.results$with.mx$Correlation.test.Regular %>% 
+  llply(function (x) x$Correlation.p.value[1:39,1:39]) %>% 
+  llply(abs) %>% laply( function (x) x[lower.tri(x)]) %>% colSums 
 temp <- matrix(NA, 39, 39, byrow = F)
 temp[lower.tri(temp)] <- drift.vai.porra$sum.abs.values
 drift.vai.porra$mean.abs.values <- temp / length(Drift.alltests.tree$Correlation.test.Regular)
@@ -274,5 +268,4 @@ DumBW.compare <- function (means, contrasts, W.mx) {
                 "W" = W.mx) )
   
 }
-
 DumBW.compare(means = ed.means.with.mx[-41], contrasts = contrasts, W.mx = ancestral.mx$`45`)

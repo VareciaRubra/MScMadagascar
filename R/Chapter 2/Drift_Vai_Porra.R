@@ -177,17 +177,19 @@ Drift.results$all.sp <- TreeDriftTestAll (tree = Trees$all.with.ed,
                                           cov.matrix.list = All.sp.data$cov.mx[mask.at.tree][rowSums(missing.ed) == 39], 
                                           sample.sizes = All.sp.data$n.sizes[mask.at.tree][rowSums(missing.ed) == 39] )
 
+
+
 Drift.results$with.mx$BW.compare %>% llply(function (x) x$BW.compare) 
 Drift.results$all.sp$BW.compare %>% llply(function (x) x$BW.compare) 
 Drift.results$extant.sp$BW.compare %>% llply(function (x) x$BW.compare) 
-
-
 
 Drift.results.Toplot <- vector("list")
 Drift.results.Toplot$All.sp <- vector("list")
 Drift.results.Toplot$All.sp$Results <- vector("list")
 Drift.results.Toplot$Extants <- vector("list")
 Drift.results.Toplot$Extants$Results <- vector("list")
+
+
 
 # graficos dos valores de correlaçao
 Drift.results.Toplot$All.sp$Plots$Corr.Contrasts  <- Drift.results$all.sp$Correlation.test.Contrasts %>% llply(function (x) x$P.value.plot) %>% llply(function(x) x + theme(legend.position = "none") ) %>% cowplot::plot_grid(plotlist = .) 
