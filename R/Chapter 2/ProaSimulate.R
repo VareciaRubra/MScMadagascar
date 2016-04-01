@@ -32,14 +32,14 @@ registerDoParallel(cores = 2)
 Proa <- vector("list", 5)
 
 Proa$Sim1 <- 
-  temp <- simulateGP(method = "sim1", 
+          simulateGP(method = "sim1", 
                         m = dim(cov.mx[[1]])[1], 
                         tNe = 0.001, 
                         pop = length(n.size[mask.madagascar & mask.no.na.cov]),
                         n = 40,
                         sim.n = 1000,
                         G = B.sumsqr, 
-                        P = Ancestral.Matrices$`45`)
+                        P = ancestral.mx$`42`)
 
 Proa$Sim2 <- simulateGP(method = "sim2", 
                         m = dim(cov.mx[[1]])[1], 
