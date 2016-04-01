@@ -21,7 +21,7 @@ function (means, cov.matrix, taxons = names(means), show.plots = FALSE, title.pl
     for (j in 1:i) {
       if (j != i) {
         test = cor.test(proj.med[, i], proj.med[, j])
-        mat.pcs.deriva[i, j] <- test$estimate # Lower triangle of outputput 
+        mat.pcs.deriva[i, j] <- test$estimate # Lower triangle of outputput : vai receber os valores de correlaçao
         mat.pcs.deriva[j, i] <- test$p.value # Upper triangle are p.values
         if (show.plots == TRUE) {
           plots[[current.plot]] <- 
@@ -36,11 +36,11 @@ function (means, cov.matrix, taxons = names(means), show.plots = FALSE, title.pl
       }
     }
   }
-  mx.to.bartlett <- mat.pcs.deriva
-  mx.to.bartlett[upper.tri(mx.to.bartlett)] <- t(mx.to.bartlett)[upper.tri(mx.to.bartlett)]
-  signal.cor <- mx.to.bartlett
-  signal.cor[lower.tri(signal.cor)] <- signal.cor[lower.tri(signal.cor)] < 0
-  signal.cor[upper.tri(signal.cor)] <- signal.cor[upper.tri(signal.cor)] < 0
+  mx.to.bartlett <- mat.pcs.deriva # matriz que tem no triangulo superior os p.values das correlaçoes e no de baixo os valores observados de correlaçao
+  mx.to.bartlett[upper.tri(mx.to.bartlett)] <- t(mx.to.bartlett)[upper.tri(mx.to.bartlett)] # transformando numa matriz toda de correla,coes
+  signal.cor <- mx.to.bartlett # pegando o sinal da correlaçao
+  signal.cor[lower.tri(signal.cor)] <- signal.cor[lower.tri(signal.cor)] > 0 # perguntando se a correla,cão é negativa
+  signal.cor[upper.tri(signal.cor)] <- signal.cor[upper.tri(signal.cor)] > 0 # perguntando se a correla,cão é negativa
   diag(mx.to.bartlett) <- 1
   Bartlett.t <- psych::cortest.bartlett (R = mx.to.bartlett, n= length(taxons))
   mx.to.bonferroni <- mat.pcs.deriva
@@ -52,14 +52,14 @@ function (means, cov.matrix, taxons = names(means), show.plots = FALSE, title.pl
   #Correction.p.bonferroni <- corr.p(r = mx.to.bonferroni, n = n.veiz, adjust = "bonferroni") 
 
   mx.bonferroni <- mx.to.bonferroni[1:10,1:10]
-  mx.bonferroni[lower.tri(mx.bonferroni)] <- mx.bonferroni[lower.tri(mx.bonferroni)] > 0.05
-  mx.bonferroni[upper.tri(mx.bonferroni)] <- mx.bonferroni[upper.tri(mx.bonferroni)] > 0.05/n.veiz
+  mx.bonferroni[lower.tri(mx.bonferroni)] <- mx.bonferroni[lower.tri(mx.bonferroni)] < 0.05 # perguntando se o p.value é menor que 0.05 
+  mx.bonferroni[upper.tri(mx.bonferroni)] <- mx.bonferroni[upper.tri(mx.bonferroni)] < 0.05/n.veiz # correçao de bonferroni 
   Correction.p.bonferroni <- mx.bonferroni 
   Correction.p.bonferroni <- as.logical(Correction.p.bonferroni)
   Correction.p.bonferroni <- matrix(Correction.p.bonferroni, nrow = nrow(mx.bonferroni), ncol = ncol(mx.bonferroni))
   rownames(Correction.p.bonferroni) <- paste0('PC', 1:nrow(mx.bonferroni))
   colnames(Correction.p.bonferroni) <- paste0('PC', 1:ncol(mx.bonferroni))
-  Correction.p.bonferroni[upper.tri(Correction.p.bonferroni)] <- NA
+  Correction.p.bonferroni[lower.tri(Correction.p.bonferroni)] <- NA
   signal.cor <- signal.cor[1:10,1:10]
   rejected.drift<- which(!Correction.p.bonferroni, arr.ind = T)
   mx.bonferroni[mx.bonferroni == 1] <- "Not Significative"
@@ -128,6 +128,41 @@ getContrasts <- function(contr, tree, node){
   contr[unlist(dimnames(contr)[1]) %in% as.character(getDescendants(tree = tree, node = node, curr = node) ),  ]
 }
 
+DriftTest0 <- 
+function (means, cov.matrix, show.plot = TRUE) 
+{
+  if (is.data.frame(means) | (!is.array(means) & !is.list(means))) 
+    stop("means must be in a list or an array.")
+  if (!isSymmetric(cov.matrix)) 
+    stop("covariance matrix must be symmetric.")
+  if (is.list(means)) {
+    mean.array <- laply(means, identity)
+  }
+  else {
+    mean.array <- means
+  }
+  W.pc <- eigen(cov.matrix)
+  projection.Wpc <- as.matrix(mean.array) %*% W.pc$vectors
+  log.B_variance <- log(apply(projection.Wpc, 2, var))
+  log.W_eVals <- log(abs(W.pc$values))
+  regression <- lm(log.B_variance ~ log.W_eVals)
+  reg.plot <- ggplot(data.frame(log.B_variance, log.W_eVals, 
+                                names = 1:(dim(mean.array)[2])), aes_string("log.W_eVals", 
+                                                                            "log.B_variance")) + geom_text(aes_string(label = "names")) + 
+    geom_smooth(method = "lm", color = "black") + labs(x = "log(W Eigenvalues)", 
+                                                       y = "log(B variances)") + theme_bw()
+  if (show.plot) 
+    print(reg.plot)
+  containsOne <- function(x) ifelse(x[1] < 1 & x[2] > 1, TRUE, 
+                                    FALSE)
+  test <- !containsOne(confint(regression)[2, ])
+  names(test) <- "5 %"
+  objeto <- list(regression = regression, coefficient_CI_95 = confint(regression), 
+                 log.between_group_variance = log.B_variance, log.W_eVals = log.W_eVals, 
+                 drift_rejected = test, plot = reg.plot)
+  return(objeto)
+}
+
 
 TreeDriftTestAll <- function (tree, mean.list, cov.matrix.list, sample.sizes = NULL) 
   {
@@ -165,12 +200,12 @@ TreeDriftTestAll <- function (tree, mean.list, cov.matrix.list, sample.sizes = N
                                                              title.plot =  node) )
     
     names(test.list.cor.contrasts) <-  nodes[node.mask]
-    test.list.reg <- llply(nodes[node.mask], function(node) DriftTest(means = getMeans(mean.list, tree, node), 
+    test.list.reg <- llply(nodes[node.mask], function(node) DriftTest0(means = getMeans(mean.list, tree, node), 
                                                                       cov.matrix = cov.matrices[[node]], 
                                                                       show.plot = FALSE))
     names(test.list.reg) <- nodes[node.mask]
     
-    test.list.reg.contrasts <- llply(nodes[node.mask], function(node) DriftTest(means = getContrasts(ind.cont, tree, node), 
+    test.list.reg.contrasts <- llply(nodes[node.mask], function(node) DriftTest0(means = getContrasts(ind.cont, tree, node), 
                                                                       cov.matrix = cov.matrices[[node]], 
                                                                       show.plot = FALSE))
     names(test.list.reg.contrasts) <- nodes[node.mask]
