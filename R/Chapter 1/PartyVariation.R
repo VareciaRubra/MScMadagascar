@@ -2,6 +2,16 @@
 #### referencias: Yves Desdevises et al 2003: Evolution: QUANTIFYING PHYLOGENETICALLY STRUCTURED ENVIRONMENTAL VARIATION
 ####              Legendre, 1998: Livro: Numerical ecology
 
+cov.mx <- sp.main.data %>% llply(function(x) x$matrix$cov)
+cor.mx <- sp.main.data %>% llply(function(x) x$matrix$cor)
+mx.rep <- sp.main.data %>% ldply(function(x) x$Mx.Rep$BootsRep) 
+mx.rep.mc <- sp.main.data.t%>% ldply(function(x) x$Mx.Rep$MCRep) 
+mx.rep.all <- cbind(mx.rep, mx.rep.mc[,-1])
+n.size <- sp.main.data %>% ldply(function(x) x$sample.size)
+
+mask <- ldply(cov.mx, function(x) !is.na(x[1]))[,2]
+names (cov.mx[mask])
+
 #1# Verificar se as matrizes de resultados de comparação sao euclidianas: ade4::is.euclid()
 mx.compare %>% llply(function(x) x$correlations) %>% llply(., .fun = dist) %>% llply(., .fun = is.euclid)
 Steppan[1:2] %>% llply(., .fun = dist) %>% llply(., .fun = is.euclid)
@@ -52,18 +62,16 @@ multi.means<- multi.means[mask]
 MahalaLemur<- MultiMahalanobis(means =multi.means, cov.matrix = W.matrix)
 MahalaLemur %>%  dist %>% is.euclid
 
-#6# montando as PCOA de tudo essas coisa ae: ape:: pcoa
-
-mx.dissimilarity.all<-  mx.compare %>% llply(function(x) x$correlations) %>% llply( function (x) sqrt(1-x) )
-mx.pcoa.all <- mx.dissimilarity.all %>% llply(., .fun = dist) %>% llply(., rn = dimnames(mx.dissimilarity.all$BS.RS)[[1]], .fun = pcoa, .progress = "text") 
-
-
-plot(mx.pcoa.all$MC.RS$vectors[, 1], mx.pcoa.all$MC.RS$vectors[, 2])
-text(mx.pcoa.all$MC.RS$vectors[, 1], mx.pcoa.all$MC.RS$vectors[, 2], labels = names(mx.pcoa.all$MC.RS$vectors[, 1]) )
-
+#6# pegando os valores médios das distribuiçoes de R2 geradas pela evolqg::BootstrapR2()
+r2.means <- sp.main.data %>% llply(function (x) mean(x$BootsR2$ed.means) )
+mask <- ldply(cov.mx, function(x) !is.na(x[1]))[,2]
+r2.means <- r2.means[mask][-41]
+r2.means %>% dist %>% is.euclid
+r2.means <- as.matrix(dist(r2.means, diag = T))
+isSymmetric(r2.means)
 
 
-
+#7# montando as PCOA de tudo essas coisa ae: ape:: pcoa
 mx.pcoa <- mx.dissimilarity %>% llply(., .fun = dist) %>% llply(., rn = dimnames(mx.all.at.tree)[[1]], .fun = pcoa, .progress = "text") 
 mx.pcoa$BS.RS$values
 mx.pcoa$Steppan.RS$values
@@ -76,12 +84,15 @@ phylo.pcoa$values
 mahala.pcoa <- MahalaLemur %>% dist %>% pcoa
 mahala.pcoa$values
 
+r2.pcoa <- r2.means %>% dist %>% pcoa
+
 phylomorphospace(tree = pruned.tree.with.mx, X = mahala.pcoa$vectors[,c(1,2)], label = "horizontal")
 phylomorphospace(tree = pruned.tree.with.mx, X = phylo.pcoa$vectors[,c(1,2)], label = "horizontal")
+phylomorphospace(tree = pruned.tree.with.mx, X = r2.pcoa$vectors[,c(1,2)], label = "horizontal")
 
 
 # tentando jogar essas coisas no vegan
-varpart(mx.pcoa$BS.RS$vectors[1:10], phylo.pcoa$vectors[1:10], mahala.pcoa$vectors[1:10]  )
+varpart(mx.pcoa$BS.RS$vectors[1:10], r2.pcoa$vectors[1:10], phylo.pcoa$vectors[1:10], mahala.pcoa$vectors[1:10]  )
 rda(mx.pcoa$BS.RS$vectors[1:10], phylo.pcoa$vectors[1:10])
 rda(mx.pcoa$BS.RS$vectors[1:10], mahala.pcoa$vectors[1:10])
 
