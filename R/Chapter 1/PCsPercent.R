@@ -2,7 +2,7 @@
 ############ OLHANDO PARA OS PCs DAS MATRIZES: INTERPRETANDO OS PCs E VENDO A DISTRIBUIÇÃO DE VARIAÇÃO #################################
 ########################################################################################################################################
 current.data <- sp.main.data
-current.data <- gen.main.data
+#current.data <- gen.main.data
 
 cov.mx <- current.data %>% llply(function(x) x$matrix$cov)
 cor.mx <- current.data %>% llply(function(x) x$matrix$cor)
