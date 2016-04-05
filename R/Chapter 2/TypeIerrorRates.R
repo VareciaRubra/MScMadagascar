@@ -1,10 +1,13 @@
-DriftTestInterpretation <- function (tree, mean.list, cov.matrix.list, W.fixed, sample.sizes = NULL) 
+DriftTestInterpretation <- function (tree, mean.list, cov.matrix.list, W.fixed = NULL, sample.sizes = NULL) 
 {
   if (!all(tree$tip.label %in% names(mean.list))) 
     stop("All tip labels must be in names(mean.list).")
   if (!all(tree$tip.label %in% names(cov.matrix.list))) 
     stop("All tip labels must be in names(cov.matrix.list).")
   cov.matrices <- PhyloW(tree, cov.matrix.list, sample.sizes)
+  
+    if(is.null(W.fixed)) W.fixed <- cov.matrices[[length(cov.matrices)]] else W.fixed <-W.fixed
+  
   nodes <- names(cov.matrices)
   node.mask <- laply(nodes, function(x) length(getMeans(mean.list, tree, x))) > 3
   if (!any(node.mask)) 
@@ -32,59 +35,35 @@ DriftTestInterpretation <- function (tree, mean.list, cov.matrix.list, W.fixed, 
                                                                                show.plot = FALSE))
   names(test.list.reg) <- nodes[node.mask]
   
-  beta <- vector()
-  prob <- vector()
-  #generate samples from pop populations with n obs each. the ancestral vector is composed of m zeros.
-  M <-mvrnorm(pop, rep(0, ncol(G)), tNe*G)
-  group <- factor( rep( seq(1:pop), each = n))
-  data <- matrix(0, pop*n, ncol(P) )
-  #for (j in 1: (n*pop) )
-  #{
-  #  data[j,] <- mvrnorm(1, M[group[j],], P)
-  #}
-  
-  data<-adply(1: (n*pop), 1, function(j) mvrnorm(1, M[group[j],], P))[,-1]
-  #calculate matrix of mean vectors from simulations
-  
-  zmeans <- matrix(unlist(by(data, group, colMeans)),  nrow=pop, ncol = ncol(G), byrow=T)
-  
-  #calculate within-group phenotypic covariance and extract eigenvalues
-  
-  eigW <- eigen(cov( data - zmeans[rep(1:nrow(zmeans), each = n),]))
-  
-  #Project mean vectors for the pop pops on within group eigenvectors
-  
-  zm.proj <- zmeans %*% eigW$vectors
-  
-  #calculate among-group variance
-  
-  v <- diag(cov(zm.proj))
-  
-  #perform Ackermann and Cheverud test with t-test for unity slope
-  
-  model <- summary(lm(log(v) ~ log(eigW$values)))
-  prob[i] <- pt(abs((model$coefficients[2,1]-1) / model$coefficients[2,2]), df = model$df[2], lower.tail=F)*2
-  beta[i] <- model$coefficients[2,1]
-}
-#Calculate 95% confidence limits
-Beta <- data.frame(Lower = NA, Upper = NA, Mean = NA)
-Beta$Upper<-mean(beta)+1.96*sd(beta)
-Beta$Lower<-mean(beta)-1.96*sd(beta)
-Beta$Mean <- mean(beta)
-
-tIe <- mean(prob < 0.05)
-  
   return(list ("Correlation.W.fixed" = test.list.cor,
                "Regression.W.fixed" = test.list.reg,
-               "BW.compare" = BW.compare,
-               "TypeIerror" = tIe,
-               "Probabilities" = prob,
-               "Beta.ic" = Beta,
-               "betas.dist" = beta) )
+               "BW.compare" = BW.compare
+) )
 }
 
-DriftTestInterpretation(tree = Trees$all.with.ed, 
+Drift.results$fixed <- DriftTestInterpretation(tree = Trees$all.with.ed, 
                         mean.list = All.sp.data$means[mask.at.tree][rowSums(missing.ed) == 39], 
                         cov.matrix.list = All.sp.data$cov.mx[mask.at.tree][rowSums(missing.ed) == 39], 
-                        W.fixed = ancestral.mx$`42`,
+                        W.fixed = NULL,
+                        #W.fixed = ancestral.mx$`42`,
                         sample.sizes = All.sp.data$n.sizes[mask.at.tree][rowSums(missing.ed) == 39] )
+
+Drift.results$fixed <- DriftTestInterpretation(tree = Trees$extant.sp.tree, 
+                                               mean.list = All.sp.data$means[mask.extant & mask.at.tree], 
+                                               cov.matrix.list = All.sp.data$cov.mx[mask.extant & mask.at.tree], 
+                                               #W.fixed = NULL,
+                                               W.fixed = ancestral.mx$Daubentonia_madagascariensis,
+                                               sample.sizes = All.sp.data$n.sizes[mask.extant & mask.at.tree] )
+
+Drift.results.Toplot$Fixed$Plots$Corr.Contrasts  <- Drift.results$fixed$Correlation.W.fixed %>% llply(function (x) x$P.value.plot) %>% llply(function(x) x + theme(legend.position = "none") ) %>% cowplot::plot_grid(plotlist = .) 
+Drift.results.Toplot$FixedW.Extants$Results$Node.ref <- Drift.results$fixed$Correlation.W.fixed %>% ldply(function(x) dim(table(x$Bonferroni == T, exclude = T)) ==2) %>% .[,1]
+Drift.results.Toplot$FixedW.Extants$Results$Corr.Ed.1 <- Drift.results$fixed$Correlation.W.fixed %>% ldply(function(x) dim(table(x$Bonferroni == T, exclude = T)) ==2) %>% .[,2]
+Drift.results.Toplot$FixedW.Extants$Results$Regression.Ed <- Drift.results$fixed$Regression.W.fixed %>% ldply(function(x) x$drift_rejected )  %>% .[,2]
+
+Plot.Drift.Results(tree = Trees$extant.sp.tree, 
+                   info = Drift.results.Toplot$FixedW.Extants$Results, 
+                   font.size = 0.4,
+                   contrasts = F)
+
+Drift.results.Toplot$Fixed$Plots$Corr.Contrasts  <- Drift.results$fixed$Correlation.W.fixed %>% llply(function (x) x$P.value.plot) %>% llply(function(x) x + theme(legend.position = "none") ) %>% cowplot::plot_grid(plotlist = .) 
+
