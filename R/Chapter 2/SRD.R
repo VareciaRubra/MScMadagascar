@@ -44,6 +44,12 @@ SRD(cov.x = mx.list.taxonomy)
 
 srd.results.all <- SRD(cov.x =mx.list.taxonomy, parallel = TRUE)
 
+# from PartyVariation.R file @chap1 ####
+plot(mx.pcoa.all$MC.RS$vectors[, 1], mx.pcoa.all$MC.RS$vectors[, 2])
+text(mx.pcoa.all$MC.RS$vectors[, 1], mx.pcoa.all$MC.RS$vectors[, 2], labels = names(mx.pcoa.all$MC.RS$vectors[, 1]) )
+##
+
+
 eigenLemur <- EigenTensorDecomposition(mx.list.taxonomy [1:(length(mx.list.taxonomy) -1)])
 dimnames(eigenLemur$projection)$X1 <-  names(mx.list.taxonomy)[-length(mx.list.taxonomy)]
 eigenLemur.SaguinusP <- ProjectMatrix(Saguinus_P.cov,eigenLemur)
