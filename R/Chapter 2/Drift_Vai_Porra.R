@@ -229,22 +229,21 @@ Drift.results.Toplot$All.sp$Results$Regression.Contrasts <- Drift.results$all.sp
 Drift.results.Toplot$Extants$Results$Regression.Ed <- Drift.results$extant.sp$Regression.test %>% ldply(function(x) x$drift_rejected )  %>% .[,2]
 Drift.results.Toplot$Extants$Results$Regression.Contrasts <- Drift.results$extant.sp$Regression.test.Contrasts %>% ldply(function(x) x$drift_rejected )  %>% .[,2]
 
-Plot.Drift.Results <- function (tree, node.ref, info, font.size = 0.4) {
+Plot.Drift.Results <- function (tree, node.ref, info, font.size = 0.4, contrasts = TRUE) {
   node.ref <- as.numeric(info$Node.ref)
   results.ed <- data.frame(V1 = as.numeric(info$Corr.Ed.1) * 0.5, V2 = as.numeric(info$Regression.Ed) * 0.5  )
-  results.ci <- data.frame(V1 = as.numeric(info$Corr.Contrasts.1) * 0.5, V2 = as.numeric(info$Regression.Contrasts) * 0.5) 
+  if (contrasts == TRUE) results.ci <- data.frame(V1 = as.numeric(info$Corr.Contrasts.1) * 0.5, V2 = as.numeric(info$Regression.Contrasts) * 0.5) 
   
   results.ed$V3 <- abs(results.ed$V1 + results.ed$V2 -1)
-  results.ci$V3 <- abs(results.ci$V1 + results.ci$V2 -1)
+  if (contrasts == TRUE) results.ci$V3 <- abs(results.ci$V1 + results.ci$V2 -1)
   results.ed<- as.matrix(results.ed)
-  results.ci<- as.matrix(results.ci)
-  par(mfrow = c(1,2))
+  if (contrasts == TRUE) results.ci<- as.matrix(results.ci)
+  if (contrasts == TRUE) par(mfrow = c(1,2)) else par(mfrow = c(1,1)) 
   plot.phylo(tree, font = 3, no.margin = TRUE,  cex = font.size, edge.color = "darkgrey", edge.width = 3, label.offset = 1 )
   nodelabels(node = node.ref, 
              pie = results.ed[,1:3], cex=0.6, 
              piecol = c("#FFAF02", "#0912C2", "#C3BBBF")  )
-  #title(main = "B.matrices obtained from ED")
-  #nodelabels(node = node.ref, bg = "transparent", frame = "n",cex = 0.6, col = "black", adj = 0.9)
+  nodelabels(node = node.ref, bg = "transparent", frame = "n",cex = 0.6, col = "black", adj = c(1.2, 1.1) )
   legend("bottomleft", inset = .08,
          title ="Drift test \nB.matrices obtained from ED",
          text.col = "grey10",
@@ -254,12 +253,12 @@ Plot.Drift.Results <- function (tree, node.ref, info, font.size = 0.4) {
          border = "grey", box.lwd = "n",
          bg= "transparent",
          cex = 0.5)
-  plot.phylo(tree, font = 3, no.margin = TRUE,  cex = font.size, edge.color = "darkgrey", edge.width = 3, label.offset = 1 )
+  
+  if (contrasts == TRUE) {plot.phylo(tree, font = 3, no.margin = TRUE,  cex = font.size, edge.color = "darkgrey", edge.width = 3, label.offset = 1 )
   nodelabels(node = node.ref, 
              pie = results.ci[,1:3], cex=0.6, 
              piecol = c("#FFAF02", "#0912C2", "#C3BBBF")  )
-  #title(main = "B.matrices obtained from IC")
-  #nodelabels(node = node.ref, bg = "transparent", frame = "n",cex = 0.6, col = "black", adj = 0.9)
+  nodelabels(node = node.ref, bg = "transparent", frame = "n",cex = 0.6, col = "black", adj = c(1.1, 1.1) )
   legend("bottomleft", inset = 0.08,
          title ="Drift test \nB.matrices obtained from IC",
          text.col = "grey10",
@@ -270,13 +269,20 @@ Plot.Drift.Results <- function (tree, node.ref, info, font.size = 0.4) {
          bg= "transparent",
          cex = 0.5)
  
-    par(mfrow = c(1,1))
+    par(mfrow = c(1,1)) 
     return(data.frame("node" = node.ref,
            "ed" = results.ed,
-           "ic" = results.ci) )
+           "ic" = results.ci) ) }
+  
+  else return(data.frame("node" = node.ref,
+                         "ed" = results.ed) ) 
 }
-Drift.results.Toplot$Extants$Plots$Tree <- Plot.Drift.Results(tree = Trees$extant.sp.tree, info = Drift.results.Toplot$Extants$Results, font.size = 0.4)
-Drift.results.Toplot$All.sp$Plots$Tree <- Plot.Drift.Results(tree = Trees$all.with.ed, info = Drift.results.Toplot$All.sp$Results, font.size = 0.4)
+Drift.results.Toplot$Extants$Plots$Tree <- Plot.Drift.Results(tree = Trees$extant.sp.tree, 
+                                                              info = Drift.results.Toplot$Extants$Results, 
+                                                              font.size = 0.4)
+Drift.results.Toplot$All.sp$Plots$Tree <- Plot.Drift.Results(tree = Trees$all.with.ed, 
+                                                             info = Drift.results.Toplot$All.sp$Results, 
+                                                             font.size = 0.4)
 
 
 drift.vai.porra$sum.abs.values <- Drift.alltests.tree$Correlation.test.Regular %>% llply(function (x) x$Correlation.p.value[1:39,1:39]) %>% llply(abs) %>% laply( function (x) x[lower.tri(x)]) %>% colSums 
