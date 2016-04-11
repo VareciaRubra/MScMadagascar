@@ -1,14 +1,22 @@
 ########################################################################################################################################
 ########################################################################################################################################
 ########################################################################################################################################
-current.data <- sp.main.data
-PCs1to4<- current.data[mask] %>% llply(function(x) as.data.frame(eigen(x$matrix$cov)$vectors[,1:4]) ) %>% llply(function(x) as.list(x) )
-PC1 <- current.data[mask] %>% ldply(function(x) eigen(x$matrix$cov)$vectors[,1])
-names.sp <-  PC1[,1]
-PC1<- as.matrix(PC1[,-1])
-dimnames(PC1)[[1]] <- names.sp
+# extraindo tamanho das matrizes através da conta (log(ed)) - log(gm)
+
+sizeles.log<- sp.main.data %>% llply(function (x) var(log(x$ed) - t(log(x$gm.ind)) ) )
+#sizeles.log <- sp.main.data %>% llply(function (x) var( t(apply(log(x$ed), 1 , function(y) y - mean(y) ) ) )) #### teoricamente esses dois sao a mesma coisa
+#nesse caso, a correla─c"ao com o vetor isométrico vai parar no último PC (em matrizes que tem mais que 39 bichos na estimativa delas)
+
+#pegando os 10 primeiros autovetores
+PC <- vector("list")
+PC$PCs.regular <- sp.main.data[mask] %>% llply(function(x) as.data.frame(eigen(x$matrix$cov)$vectors[, 1:39]) ) #%>% llply(function(x) as.list(x) )
+PC$PCs.sizeless <- sp.main.data[mask] %>% llply(function(x) as.data.frame(eigen(x$matrix$cov.sizeless)$vectors[, 1:39]) ) #%>% llply(function(x) as.list(x) )
+PC$PCs.log <- sp.main.data[mask] %>% llply(function(x) as.data.frame(eigen(x$matrix$cov.log)$vectors[, 1:39]) ) #%>% llply(function(x) as.list(x) )
+PC$PCs.sizeless.log <- sizeles.log[mask] %>% llply(function(x) as.data.frame(eigen(x)$vectors[, 1:39]) ) #%>% llply(function(x) as.list(x) )
+
 # se estiver correlacionado negativamente com o vetor isometrico, multiplicar por -1
-ed.names <- names(current.data[mask][[1]]$ed)
+ed.names <- names(sp.main.data[mask][[1]]$ed)
+
 Iso.Compare <- function(x) {
   isometrico<- rep( (1/sqrt(39)) , 39) # construindo vetor isométrico 
   corr = rep(NA, length(x) )
@@ -24,13 +32,21 @@ Iso.Compare <- function(x) {
   
   return(results= list("corr" = corr, "re.oriented" = re.oriented)) 
 }
-PCs1to4<- current.data[mask] %>% llply(function(x) as.data.frame(eigen(x$matrix$cov)$vectors[,1:4]) ) %>% llply(function(x) as.list(x) )
-PCs1to4.log<- current.data[mask] %>% llply(function(x) as.data.frame(eigen(x$matrix$cov.log)$vectors[,1:4]) ) %>% llply(function(x) as.list(x) ) 
+
+
+PCs1to4<- sp.main.data[mask] %>% llply(function(x) as.data.frame(eigen(x$matrix$cov)$vectors[,1:4]) ) %>% llply(function(x) as.list(x) )
+PCs1to4.log<- sp.main.data[mask] %>% llply(function(x) as.data.frame(eigen(x$matrix$cov.log)$vectors[,1:4]) ) %>% llply(function(x) as.list(x) ) 
+PCs.sizeless.log <- sizeles.log[mask] %>% llply(function(x) as.data.frame(eigen(x)$vectors[,1:39]) )
+
+
 ### com os valores de PCs Logados
 myPalette <- colorRampPalette(rev(brewer.pal(5, 'Spectral')), space = 'Lab')(n = 1000)
 
-Iso.Compare.reoriented <- llply(PCs1to4, Iso.Compare) %>% ldply(function(x) as.data.frame(x$re.oriented)) 
-names(Iso.Compare.reoriented) <- c(".sp", "PC1", "PC2", "PC3", "PC4")
+Iso.Compare.reoriented <- llply(PCs1to4.log, Iso.Compare) %>% ldply(function(x) as.data.frame(x$re.oriented)) 
+Iso.Compare.reoriented.corr <- llply(PCs.sizeless.log, Iso.Compare) %>% ldply(function(x) as.data.frame(x$corr)) 
+
+names(Iso.Compare.reoriented)[1] <- c(".sp")
+names(Iso.Compare.reoriented)
 Iso.Compare.reoriented$.ed <- ed.names
 Iso.Compare.reoriented$.sp <- factor(Iso.Compare.reoriented$.sp, levels = unique(Iso.Compare.reoriented$.sp)) 
 Iso.Compare.reoriented$.ed <- factor(Iso.Compare.reoriented$.ed, levels = rev(ed.names) ) 
@@ -57,10 +73,10 @@ Iso.Compare.cor.iso %>% gather(key="Isometric.Correlation", value=value, 2:5 ) %
         axis.text.y = element_text(face = "italic", size= 10),
         plot.title = element_text(lineheight=.8, face="bold")) 
 
-Iso.Compare.reoriented %>% gather(key="Isometric.Correlation", value=value, 2:5 ) %>%
+Iso.Compare.reoriented %>% gather(key="Isometric.Correlation", value=value, 2:5) %>%
   ggplot (.) +
   geom_tile(aes(x = Isometric.Correlation, y = .sp, fill = abs(value) ) ) +
-  geom_text(aes(x= Isometric.Correlation, y = .sp, label = round(value, digits = 2 ) ) ) +
+  #geom_text(aes(x= Isometric.Correlation, y = .sp, label = round(value, digits = 2 ) ) ) +
   theme_bw() +
   scale_fill_gradientn(name = 'Correlation with \nIsometric vector', colours = myPalette(50)) +
   ylab ('') + xlab ('') +
@@ -85,12 +101,12 @@ size.matters %>%
   ggplot(  aes(x= variable, y = value) ) + 
   geom_violin() + 
   geom_text(aes(label = .sp, color = Pc.iso.cor )  ) +
-  scale_color_gradientn(name = 'Pc1 Correlation with \nIsometric vector', colours = myPalette(50)) 
+  scale_color_gradientn(name = 'PC1 Correlation with \nIsometric vector', colours = myPalette(50)) 
 
 size.matters %>% 
-  ggplot(  aes(y= variable, x = value) ) + 
+  ggplot(  aes(x= variable, y = value) ) + 
   #geom_violin() + 
-  geom_text(aes(y= Pc.iso.cor, x = value, label = .sp )  ) +
+  geom_text(aes(x= Pc.iso.cor, y = value, label = .sp )  ) +
   #scale_color_gradientn(name = 'Pc1 Correlation with \nIsometric vector', colours = myPalette(50)) 
   facet_wrap(~variable)
   
@@ -105,7 +121,7 @@ size.matters %>%
 sp.main.data[mask] %>% llply(., function(x) x$rs.size.comparisson[[1]] ) 
 
 
-PCs1to4<- current.data[mask] %>% ldply(function(x) as.data.frame(eigen(x$matrix$cov)$vectors[,1:4]) )  
+PCs1to4<- sp.main.data[mask] %>% ldply(function(x) as.data.frame(eigen(x$matrix$cov)$vectors[,1:4]) )  
 names(PCs1to4) <- c(".sp", "PC1", "PC2", "PC3", "PC4")
 PCs1to4$.ed <- ed.names
 PCs1to4 %>% gather(key=".pcScore", value=value, 2:5 )
