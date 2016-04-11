@@ -19,20 +19,23 @@ ed.names <- names(sp.main.data[mask][[1]]$ed)
 
 Iso.Compare <- function(x) {
   isometrico<- rep( (1/sqrt(39)) , 39) # construindo vetor isométrico 
-  corr = rep(NA, length(x) )
-  re.oriented = x
+  corr = rep(NA, length(x) ) # gerando o objeto que vai armazenar as correlações 
+  re.oriented = x # gerando o objeto que vai receber os valores reorientados de 
+  corr.abs = x
   for (i in 1:length(x)) {
     corr[i]<- x[[i]] %*% isometrico
     
     if(corr[i] <0) {re.oriented[[i]] <- as.numeric(as.matrix(x[[i]]) * -1)}  else x[[i]]
+    corr.abs [[i]] <- abs(corr[i])
   }
   
   names (corr) <- paste ("PC", 1:length(x), sep = "")
   names (re.oriented) <- paste ("PC", 1:length(x), sep = "") 
   
-  return(results= list("corr" = corr, "re.oriented" = re.oriented)) 
+  return(results= list("corr" = corr, 
+                       "abs.corr" = corr.abs, 
+                       "re.oriented" = re.oriented)) 
 }
-
 
 PCs1to4<- sp.main.data[mask] %>% llply(function(x) as.data.frame(eigen(x$matrix$cov)$vectors[,1:4]) ) %>% llply(function(x) as.list(x) )
 PCs1to4.log<- sp.main.data[mask] %>% llply(function(x) as.data.frame(eigen(x$matrix$cov.log)$vectors[,1:4]) ) %>% llply(function(x) as.list(x) ) 
@@ -44,6 +47,8 @@ myPalette <- colorRampPalette(rev(brewer.pal(5, 'Spectral')), space = 'Lab')(n =
 
 Iso.Compare.reoriented <- llply(PCs1to4.log, Iso.Compare) %>% ldply(function(x) as.data.frame(x$re.oriented)) 
 Iso.Compare.reoriented.corr <- llply(PCs.sizeless.log, Iso.Compare) %>% ldply(function(x) as.data.frame(x$corr)) 
+Iso.Compare.reoriented.abs.corr <- llply(PCs.sizeless.log, Iso.Compare) %>% ldply(function(x) as.data.frame(x$abs.corr)) 
+
 
 names(Iso.Compare.reoriented)[1] <- c(".sp")
 names(Iso.Compare.reoriented)
