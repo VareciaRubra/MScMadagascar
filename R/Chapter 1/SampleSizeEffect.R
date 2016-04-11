@@ -89,12 +89,12 @@ mx.compare$BS.RS$correlations.residual5 <- var(mx.compare$BS.RS$correlations.res
 MatrixCor(mx.compare$BS.RS$correlations, mx.compare$BS.RS$correlations.residual5)
 
 ############################# Vendo efeito de filogenia ##########################################
-notat.tree<- is.na(match(dimnames(mx.compare$RS$correlations)[[1]], treefile$tip.label)) 
+notat.tree <- is.na(match(dimnames(mx.compare$RS$correlations)[[1]], treefile$tip.label)) 
 names.at.tree <- dimnames(mx.compare$RS$correlations)[[1]][!notat.tree] 
-mx.all.at.tree<- mx.compare$RS$correlations[!notat.tree,!notat.tree]
-pruned.tree.all<- drop.tip(treefile,treefile$tip.label[-match( names.at.tree, treefile$tip.label)])
-phylo.dist.all.at.tree<- cophenetic.phylo(pruned.tree.all)
-phylo.dist.all.at.tree<- phylo.dist.all.at.tree[rownames( mx.all.at.tree), rownames( mx.all.at.tree)]
+mx.all.at.tree <- mx.compare$RS$correlations[!notat.tree,!notat.tree]
+pruned.tree.all <- drop.tip(treefile,treefile$tip.label[-match( names.at.tree, treefile$tip.label)])
+phylo.dist.all.at.tree <- cophenetic.phylo(pruned.tree.all)
+phylo.dist.all.at.tree <- phylo.dist.all.at.tree[rownames( mx.all.at.tree), rownames( mx.all.at.tree)]
 
 dimnames(mx.all.at.tree)[[1]] %in% dimnames(mx.compare$BS.RS$correlations[-c(41,43:44), -c(41,43:44)])
 MatrixCor(phylo.dist.all.at.tree, mx.all.at.tree)
@@ -179,7 +179,7 @@ MatrixCor(phylo.dist.all.at.tree[rownames( mx.all.at.tree), rownames( mx.all.at.
 COr.PHyHM$Matrix.Similarity.KRZ <- Sim.Mx.bs.krz
 Plot.Phy.SIM.k<- 
   COr.PHyHM %>% 
-  ggplot( ., aes(x = Phylogenetic.Distance, y = Matrix.Similarity.KRZ.mc), varwidth = T) +
+  ggplot( ., aes(x = sqrt(Phylogenetic.Distance), y = Matrix.Similarity.KRZ.mc), varwidth = T) +
   geom_point(color = "grey") +
   stat_smooth(method="lm", aes(group=1), color = "red") +
   #scale_x_continuous(limits = c(0.1, 0.7)) +
@@ -191,8 +191,8 @@ Plot.Phy.SIM.k<-
   xlab( "Phylogenetic distance") + 
   ylab("Matrix similarity by KRZ")
 
-summary(lm(Matrix.Similarity.KRZ.mc ~ Phylogenetic.Distance , data = COr.PHyHM))
-MatrixCor(phylo.dist.all.at.tree[rownames( mx.all.at.tree), rownames( mx.all.at.tree)], mx.compare$BS.KRZ$correlations[-c(41,43:44), -c(41,43:44)])
+summary(lm(Matrix.Similarity.KRZ.mc ~ sqrt(Phylogenetic.Distance ), data = COr.PHyHM))
+MatrixCor( sqrt(phylo.dist.all.at.tree[rownames( mx.all.at.tree) , rownames( mx.all.at.tree)] ),  mx.compare$BS.KRZ$correlations[-c(41,43:44), -c(41,43:44)])
 
 Plot.HM.SIM<- 
   COr.PHyHM %>% 
