@@ -1,152 +1,159 @@
-require (geomorph)
-require (shapes)
-require (RColorBrewer)
-require (ape)
-require (evolqg)
-require (expm)
-require (plyr)
-require (plotrix)
-require (doMC)
-require (reshape2)
-require (ggplot2)
-require (phytools)
-require (geiger)
-require (mvtnorm)
-require (MCMCglmm)
-# require (grid)
-# require (gridExtra)
-# require (gridBase)
-# require (surface)
-require (rmarkdown)
-require (knitr)
-require (pander)
-require (shape)
-require (adephylo)
-require (dplyr)
-require (magrittr)
-require (tidyr)
-require (slidify)
-require (slidifyLibraries)
-require (StatMatch)
-require (scales)
-require (cowplot)
-require (ggtree)
-require (phylobase)
 
-registerDoMC (cores = 2)
-
-## require (devtools)
-## install_github('muschellij2/slidify')
-## install_github('ramnathv/slidifyLibraries')
-## install_github('uyedaj/bayou')
-
-attach ('~/MEGA/Doc/Databases/Reference.RData')
-attach ('~/MEGA/Doc/Databases/ED.RData')
-attach ('~/MEGA/Doc/Databases/Sym.RData')
-attach ('~/MEGA/Doc/Databases/OneDef.RData')
-attach ('~/MEGA/Doc/Databases/Tree.RData')
-attach ('~/MEGA/Doc/Databases/Aux.RData')
-attach ('~/MEGA/Doc/Databases/LifeHistory.RData')
-
-options(contrasts = c('contr.sum', 'contr.poly'))
-
-.source.files <- dir('~/MEGA/Doc/Tese/Func', pattern = '.R', full.names = TRUE)
-.source.files <- .source.files [!grepl ('~', .source.files)]
-for (i in 1:length (.source.files))
-  source (.source.files [i])
-
-attach('WPCs_Strepsirrhini.RData')
-attach('WPCs_Strepsirrhini_ExtantsOnly.RData')
-
+load("~/MScMadagascar/R/Shapes/Aux.RData")
 hapalemur <- read.csv('Hapalemur_7_AMNH_shape.csv', FALSE)
 
-source ('~/MEGA/Doc/Func/glue.R')
-source ('~/MEGA/Doc/Func/osymm.R')
+glue.skulls <- function (A, Z, soln = 'svd')
+{
+  glue.skull = function (Ai, Zi, sol = "svd")
+  {
+    mA = dim (Ai) [1]
+    mZ = dim (Zi) [1]
+    lmA = dimnames (Ai) [[1]]
+    lmZ = dimnames (Zi) [[1]]
+    cA = which (lmA %in% lmZ)
+    cZ = which (lmZ %in% lmA)
+    ### ordenar landmarks
+    cA = cA[order (lmA[cA])]
+    cZ = cZ[order (lmZ[cZ])]
+    ### centroides dos pontos em comum
+    ccA = t (array (colMeans (Ai[cA,]), c(3, mA)))
+    ccZ = t (array (colMeans (Zi[cZ,]), c(3, mZ)))
+    ### centralizando no centroide dos pontos em comum
+    Ai = Ai - ccA
+    Zi = Zi - ccZ
+    ### angulos entre pontos em comum
+    M = t (Ai[cA,]) %*% Zi[cZ,]
+    UDV = svd (M)
+    ### R é ortonormal, mas faz reflexões quando M faz
+    D = diag (ifelse (UDV$d > 0, 1, -1))
+    R = UDV$v %*% D %*% t(UDV$u)
+    ### segunda rotação (sem expansão)
+    Zi = Zi %*% R
+    out = list (rbind (Ai, Zi [!(lmZ %in% lmA),]), det (R))
+    return (out)
+  }
+  if (dim (A) [3] != dim (Z) [3])
+  {
+    cat ('Número de vistas A não bate com número de vistas Z. Verifique!','\n')
+    return (-1)
+  }
+  else
+  {
+    out = list ()
+    dets = c()
+    for (i in 1:dim (A)[3])
+    {
+      tmp = glue.skull (A[,,i], Z[,,i], sol = soln)
+      if (i == 1)
+        out = array (0, c(dim (tmp[[1]]), dim (A)[3]))
+      out[,,i] = tmp[[1]]
+      dets[i] = tmp[[2]] 
+    }
+    dimnames (out) = list (rownames (tmp[[1]]),
+                           colnames (tmp[[1]]),
+                           dimnames (A) [[3]])
+    right.first = function (element)
+    {
+      return (ifelse (length (element) == 1, 0,
+                      ifelse (element [1] == 'NLT', 3,
+                              ifelse (element [2] == 'D', 1, 2))))
+    }
+    ord = strsplit (dimnames (out) [[1]], split = '-')
+    ord = sapply (ord, right.first)
+    out = out [order (ord),,]
+    return (list (out, dets))
+  }
+}
 
-glue.skull = function (Ai, Zi, sol = "svd")
-      {
-        mA = dim (Ai) [1]
-        mZ = dim (Zi) [1]
-        lmA = dimnames (Ai) [[1]]
-        lmZ = dimnames (Zi) [[1]]
-        cA = which (lmA %in% lmZ)
-        cZ = which (lmZ %in% lmA)
-        ### ordenar landmarks
-        cA = cA[order (lmA[cA])]
-        cZ = cZ[order (lmZ[cZ])]
-        ### centroides dos pontos em comum
-        ccA = t (array (colMeans (Ai[cA,]), c(3, mA)))
-        ccZ = t (array (colMeans (Zi[cZ,]), c(3, mZ)))
-        ### centralizando no centroide dos pontos em comum
-        Ai = Ai - ccA
-        Zi = Zi - ccZ
-        ### angulos entre pontos em comum
-        M = t (Ai[cA,]) %*% Zi[cZ,]
-        UDV = svd (M)
-        ### R é ortonormal, mas faz reflexões quando M faz
-        D = diag (ifelse (UDV$d > 0, 1, -1))
-        R = UDV$v %*% D %*% t(UDV$u)
-        ### segunda rotação (sem expansão)
-        Zi = Zi %*% R
-        out = list (rbind (Ai, Zi [!(lmZ %in% lmA),]), det (R))
-        return (out)
-      }
+Reference <- c("IS","NSL","NA", "BR", "PNS","BA", "OPI","LD", "PM-D","PT-D","FM-D","ZS-D","ZI-D","MT-D","APET-D","EAM-D","PEAM-D","ZYGO-D","TSP-D","TS-D","JP-D","AS-D","PM-E","PT-E","FM-E","ZS-E","ZI-E","MT-E","APET-E","EAM-E","PEAM-E","ZYGO-E", "TSP-E","TS-E","JP-E","AS-E")
+SHAPE = hapalemur
+W.MATRIX = W.matrix
 
-dim (hapalemur)
+PCLoadShapePlotter <- function( SHAPE, W.MATRIX )
+{
 
-hapa.lm <- hapalemur [, 1]
-hapa.skull <- array (as.matrix (hapalemur [, 2:7]), c(27, 2, 3, 2))
-hapa.skull <- aperm(hapa.skull, c(1, 3, 2, 4))
+  dim (SHAPE)
+  
+SHAPE.lm <- SHAPE [, 1]
+SHAPE.skull <- array (as.matrix (SHAPE [, 2:7]), c(27, 2, 3, 2))
+SHAPE.skull <- aperm(SHAPE.skull, c(1, 3, 2, 4))
 
-hapa.left <- hapa.skull [, , 1, ]
-hapa.right <- hapa.skull [, , 2, ]
+SHAPE.left <- SHAPE.skull [, , 1, ]
+SHAPE.right <- SHAPE.skull [, , 2, ]
 
-hapa.lm <- as.character (hapa.lm)
-hapa.lm [3] <- hapa.lm [29] <- 'NA'
-hapa.lm [22] <- 'TSe'
+SHAPE.lm <- as.character (SHAPE.lm)
 
-hapa.lm [28:54] <- gsub('e', 'd', hapa.lm[1:27])
+SHAPE.lm[is.na(SHAPE.lm)] <-  'NA'
+SHAPE.lm %<>% gsub("La", "LA", .)
+SHAPE.lm %<>% gsub("Zi", "ZI", .)
+SHAPE.lm %<>% gsub("As", "AS", .)
+SHAPE.lm %<>% gsub("Ts", "TS", .)
+SHAPE.lm %<>% gsub("Oc", "OC", .)
 
-dimnames (hapa.left) <- list (hapa.lm[1:27], c ('X', 'Y', 'Z'))
-dimnames (hapa.right) <- list (hapa.lm[28:54], c ('X', 'Y', 'Z'))
+dimnames (SHAPE.left) <- list (SHAPE.lm[1:27], c ('X', 'Y', 'Z'))
+dimnames (SHAPE.right) <- list (SHAPE.lm[28:54], c ('X', 'Y', 'Z'))
 
 
-hapa.full <- glue.skulls(hapa.left, hapa.right) [[1]]
+SHAPE.full <- glue.skulls(SHAPE.left, SHAPE.right) [[1]]
 
-hapa.av <- procGPA(hapa.full) $ mshape
+SHAPE.av <- procGPA(SHAPE.full) $ mshape
 
-dimnames (hapa.av) <- dimnames (hapa.full) [1:2]
-rownames (hapa.full)
+dimnames (SHAPE.av) <- dimnames (SHAPE.full) [1:2]
+rownames (SHAPE.full)
 
-hapa.sym <- OSymm (hapa.av, 1:9, 28:45, 10:27) $ symmconf
+SHAPE.sym <- OSymm (SHAPE.av, 1:9, 28:45, 10:27) $ symmconf
 
-rownames (hapa.sym) <- gsub ('d', '-D', gsub ('e', '-E', rownames (hapa.sym)))
-
-hapa.sym <- hapa.sym [which (rownames (hapa.sym) %in% rownames (Reference)), ]
-
-hapa.sym <- hapa.sym [match(rownames (Reference), rownames (hapa.sym)), ]
+rownames (SHAPE.sym) <- gsub ('d', '-D', gsub ('e', '-E', rownames (SHAPE.sym)))
 
 
-WPCs <- eigen(W.matrix)$vectors
+SHAPE.sym <- SHAPE.sym [which (rownames (SHAPE.sym) %in% rownames (hapa.sym)), ]
+
+SHAPE.sym <- SHAPE.sym [match(rownames (hapa.sym), rownames (SHAPE.sym)), ]
+
+
+WPCs <- eigen(W.MATRIX)$vectors
 WPCs[, 1] <- -WPCs[, 1]
+
+traits <- rownames(SHAPE.sym) %>% strsplit(split = "-") %>% laply(function (x) x[1])
 
 myPalette <- colorRampPalette(rev(brewer.pal(11, "Spectral")), space="Lab")
 shape.plot <- list()
 for (i in 1:39)
-  shape.plot [[i]] <-
-  ggshape(hapa.sym,
-          Aux $ tessel.39 [1:39, ],
-          WPCs[, i],
-          rotation = c(1, -1, 1.3), culo = 0.01, thickness = 2) +
+{
+myBreaks <- c(round(min(WPCs[, i]), digits = 1), round(mean (WPCs[, i]), digits = 1 ), round(max(WPCs[, i]), digits = 1 )) 
+interval <- mean (WPCs[, i])
+shape.plot [[i]] <-
+  ggshape(shape = SHAPE.sym,
+          wireframe = Aux $ tessel.39 [1:39, ],
+          colors = WPCs[, i],
+          rotation = c(1, -1, 1), 
+          culo = 0.02, 
+          thickness = 2) +
+  geom_point (aes (x = X, y = Y), alpha = 0.6) +
+  geom_label(aes (x = X, y = Y, label = traits ),  alpha = 0.6) +
   ggtitle(paste("PC", i, sep = " ")) +
   theme(plot.title = element_text(face = "bold", size = 12),
-        legend.position= c(0.3,0.1), legend.direction="horizontal") 
-  
-  shape.plot [[4]]
-rm(i)
+        legend.position= c(0.3,0.1), legend.direction="horizontal") +
+  scale_fill_gradientn("", limits = c(min(WPCs[, i])-0.09, max(WPCs[, i])+0.09),
+                        breaks= myBreaks,
+                        guide = guide_colorbar(nbin=100, draw.ulim = T, draw.llim = T),
+                        colors = myPalette(11)) +
+  scale_color_gradientn("", limits = c(min(WPCs[, i]) -0.09, max(WPCs[, i]) +0.09 ),
+                        breaks= myBreaks,
+                        guide = guide_colorbar(nbin=100, draw.ulim = T, draw.llim = T),
+                        colors = myPalette(11))
+}
+shape.plot [[4]]
 shape.plot [[40]] <- plot_grid(plotlist = shape.plot, ncol = 4) + ggtitle("Trais scores on W\nusing Hapalemur frame")
-shape.plot [[41]] <- plot_grid(shape.plot[[1]], shape.plot[[2]],shape.plot[[3]], shape.plot[[4]], ncol = 4) + ggtitle("Trais scores on W\nusing Hapalemur frame")
+shape.plot [[41]] <- plot_grid(shape.plot[[1]], shape.plot[[2]],shape.plot[[3]], shape.plot[[4]], ncol = 2) + ggtitle("Trais scores on W\nusing Hapalemur frame")
 shape.plot [[41]]
-rm(shape.plot)
+#rm(shape.plot)
 
-save (shape.plot, file = 'shape.plot.RData')
+return( list("W.Loadings.Shape" = shape.plot ))
+
+}
+
+temp <- PCLoadShapePlotter(SHAPE = hapalemur, W.MATRIX = W.matrix)
+temp$W.Loadings.Shape[[41]]
+
+#save (shape.plot, file = 'shape.plot.RData')
