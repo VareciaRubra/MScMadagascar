@@ -9,10 +9,12 @@ sizeles.log<- sp.main.data %>% llply(function (x) var(log(x$ed) - t(log(x$gm.ind
 
 #pegando os 10 primeiros autovetores
 PC <- vector("list")
-PC$PCs.regular <- sp.main.data[mask] %>% llply(function(x) as.data.frame(eigen(x$matrix$cov)$vectors[, 1:39]) ) #%>% llply(function(x) as.list(x) )
-PC$PCs.sizeless <- sp.main.data[mask] %>% llply(function(x) as.data.frame(eigen(x$matrix$cov.sizeless)$vectors[, 1:39]) ) #%>% llply(function(x) as.list(x) )
-PC$PCs.log <- sp.main.data[mask] %>% llply(function(x) as.data.frame(eigen(x$matrix$cov.log)$vectors[, 1:39]) ) #%>% llply(function(x) as.list(x) )
-PC$PCs.sizeless.log <- sizeles.log[mask] %>% llply(function(x) as.data.frame(eigen(x)$vectors[, 1:39]) ) #%>% llply(function(x) as.list(x) )
+PC$PCs.regular <- sp.main.data[mask] %>% llply(function(x) as.data.frame(eigen(x$matrix$cov)$vectors[, 1:39]) ) %>% llply(function(x) as.list(x) )
+PC$PCs.sizeless <- sp.main.data[mask] %>% llply(function(x) as.data.frame(eigen(x$matrix$cov.sizeless)$vectors[, 1:39]) ) %>% llply(function(x) as.list(x) )
+PC$PCs.log <- sp.main.data[mask] %>% llply(function(x) as.data.frame(eigen(x$matrix$cov.log)$vectors[, 1:39]) ) %>% llply(function(x) as.list(x) )
+PC$PCs.sizeless.log <- sizeles.log[mask] %>% llply(function(x) as.data.frame(eigen(x)$vectors[, 1:39]) ) %>% llply(function(x) as.list(x) )
+
+PC$isometric.comparison <- PC %>% llply( function(x) llply( x, Iso.Compare) ) 
 
 # se estiver correlacionado negativamente com o vetor isometrico, multiplicar por -1
 ed.names <- names(sp.main.data[mask][[1]]$ed)
