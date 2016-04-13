@@ -38,11 +38,14 @@ mx.list.taxonomy$Saguinus.P <- Saguinus_P.cov
 mx.list.taxonomy$Saguinus.G <- Saguinus_G.cov
 
 
-
 SRD(cov.x = mx.list.taxonomy)
+
+srd.Lm.In <- SRD(mx.list.taxonomy$W.Indridae, mx.list.taxonomy$W.Lemuridae)
+srd.Lm.In$output
 
 
 srd.results.all <- SRD(cov.x =mx.list.taxonomy, parallel = TRUE)
+srd.results.all %>% str
 
 # from PartyVariation.R file @chap1 ####
 plot(mx.pcoa.all$MC.RS$vectors[, 1], mx.pcoa.all$MC.RS$vectors[, 2])
