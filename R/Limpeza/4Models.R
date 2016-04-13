@@ -225,7 +225,7 @@ colore <- c("#FF9326",  "#9999FF", "#D92121", "#21D921", "#FFFF4D", "#2121D9", "
 
 cvs %>%  
   ggplot(aes(x = traits, y = value)) +
-  geom_text(aes(label = variable, alpha = value - 0.1, colour = factor(cagated) )) +
+  geom_text(aes(label = variable, alpha = value - 0.1, colour = factor(cagated) ), fontface = "italic" ) +
   geom_point() + 
   scale_colour_manual (values= colore[c(3,7)] ) +
   theme_bw() + 
