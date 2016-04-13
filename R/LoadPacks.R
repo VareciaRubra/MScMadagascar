@@ -26,6 +26,8 @@ if(!require(gdata)) {install.packages('gdata'); library(gdata)}
 if(!require(psych)) {install.packages('psych'); library(psych)} # pro Bartlet test cortest.bartlett {psych}
 if(!require(xtable)) {install.packages('xtable'); library(xtable)}
 if(!require(geomorph)) {install.packages('geomorph'); library(geomorph)} # k.multi pra ver sinal filogenetico a la Adams
+if(!require(shapes)) {install.packages('shapes'); library(shapes)} 
+
 
 
 
