@@ -1,8 +1,13 @@
-
 load("~/MScMadagascar/R/Shapes/Aux.RData")
 load("~/MScMadagascar/R/Shapes/shapes/mx_list_taxonomy.RData")
+load("~/MScMadagascar/R/Shapes/file.RData")
+load("~/MScMadagascar/R/Shapes/shapes/traits.RData")
+
+source('~/MScMadagascar/R/LoadPacks.R', echo=TRUE)
+
 
 tupaia <- read.csv('R/Shapes/shapes/Tupaia_4A_RMNH_shape.csv', FALSE)
+allocebus <- read.csv('R/Shapes/shapes/Allocebus_1A_MNHN_shape.csv', FALSE)
 microcebus <- read.csv('R/Shapes/shapes/Microcebus_1A_MNHN_shape.csv', FALSE)
 cheirogaleus <- read.csv('R/Shapes/shapes/Cheirogaleus_2B_MNHN_shape.csv', FALSE)
 phaner <- read.csv('R/Shapes/shapes/Phaner_6A_RMNH_shape.csv', FALSE)
@@ -18,7 +23,7 @@ propithecus <- read.csv('R/Shapes/shapes/Propithecus_1A_RMNH_shape.csv', FALSE)
 avahi <- read.csv('R/Shapes/shapes/Avahi_10A_MNHN_shape.csv', FALSE)
 daubentonia <- read.csv('R/Shapes/shapes/Daubentonia_4A_RMNH_shape.csv', FALSE)
 euoticus <- read.csv('R/Shapes/shapes/Euoticus_2A_AMNH_shape.csv', FALSE)
-otolemur <- read.csv('R/Shapes/shapes/Otolemur', FALSE)
+otolemur <- read.csv('R/Shapes/shapes/Otolemur_1C_USNM_shape.csv', FALSE)
 galago <- read.csv('R/Shapes/shapes/Galago_1C_USNM_shape.csv', FALSE)
 loris <- read.csv('R/Shapes/shapes/Loris_1A_FMNH_shape.csv', FALSE)
 nycticebus <- read.csv('R/Shapes/shapes/Nycticebus_3B_FMNH_shape.csv', FALSE)
@@ -141,11 +146,9 @@ SHAPE.sym <- SHAPE.sym [match(rownames (hapa.sym), rownames (SHAPE.sym)), ]
 WPCs <- eigen(W.MATRIX)$vectors
 WPCs <- -WPCs
 
-traits <- rownames(SHAPE.sym) %>% strsplit(split = "-") %>% laply(function (x) x[1])
-
 myPalette <- colorRampPalette(rev(brewer.pal(11, "Spectral")), space="Lab")
 shape.plot <- list()
-for (i in 1:39)
+for (i in 1:6)
 {
 myBreaks <- c(round(min(WPCs[, i]), digits = 1), round(mean (WPCs[, i]), digits = 1 ), round(max(WPCs[, i]), digits = 1 )) 
 interval <- mean (WPCs[, i])
@@ -170,51 +173,67 @@ shape.plot [[i]] <-
                         guide = guide_colorbar(nbin=100, draw.ulim = T, draw.llim = T),
                         colors = myPalette(11))
 }
-shape.plot [[40]] <- plot_grid(plotlist = shape.plot, ncol = 4, labels = TTL) 
-shape.plot [[41]] <- plot_grid(shape.plot[[1]], shape.plot[[2]],shape.plot[[3]], shape.plot[[4]], ncol = 4, align = "hv", labels = TTL)
-shape.plot [[42]] <- shape.plot[[1]] + scale_color_gradientn(colours = "darkgrey") + ggtitle(TTL) + theme(plot.title  = element_text(face = "italic", size = 25), legend.position = "none")
-
+#shape.plot [[40]] <- plot_grid(plotlist = shape.plot, ncol = 4, labels = TTL) 
+shape.plot [[7]] <- plot_grid(shape.plot[[1]], shape.plot[[2]],shape.plot[[3]], shape.plot[[4]], shape.plot[[5]], shape.plot[[6]], ncol = 6, align = "hv", labels = TTL)
+shape.plot [[8]] <- shape.plot[[1]] + scale_color_gradientn(colours = "darkgrey") + ggtitle(TTL) + theme(plot.title  = element_text(face = "italic", size = 25), legend.position = "none")
 #rm(shape.plot)
-
-return( list("W.Loadings.Shape" = shape.plot ))
-
+return( shape.plot )
 }
 
 PC.Plots <- vector("list")
 
-PC.Plots$Tarsius <- ancestral.mx$'43'
-PC.Plots$Microcebus <- PCLoadShapePlotter(SHAPE = microcebus, W.MATRIX = mx.list.taxonomy$Microcebus, ROTACIONI = c(1,-1,1), TTL = "Microcebus")
-PC.Plots$Mirza <- PCLoadShapePlotter(SHAPE = mirza, W.MATRIX = mx.list.taxonomy$Mirza, ROTACIONI = c(-1,-1,1), TTL = "Mirza")
-PC.Plots$Cheirogaleus <- PCLoadShapePlotter(SHAPE = cheirogaleus, W.MATRIX = mx.list.taxonomy$Cheirogaleus, ROTACIONI = c(-1,-1,1), TTL = "Cheirogaleus")
-PC.Plots$Phaner <- PCLoadShapePlotter(SHAPE = phaner, W.MATRIX = mx.list.taxonomy$Phaner, ROTACIONI = c(-1,-1,1), TTL ="Phaner")
-PC.Plots$W.Cheirogaleidae <- PCLoadShapePlotter(SHAPE = microcebus, W.MATRIX = mx.list.taxonomy$W.Cheirogaleidae, ROTACIONI = c(-1,-1,1), TTL ="Cheirogaleidae (f)")
-PC.Plots$Lepilemur <- PCLoadShapePlotter(SHAPE = lepilemur, W.MATRIX = mx.list.taxonomy$Lepilemur, ROTACIONI = c(-1,-1,1), TTL = "Lepilemur")
-PC.Plots$Avahi <- PCLoadShapePlotter(SHAPE = avahi, W.MATRIX = mx.list.taxonomy$Avahi_laniger, ROTACIONI = c(-1,-1,1), TTL ="Avahi")
-PC.Plots$Propithecus <- PCLoadShapePlotter(SHAPE = propithecus, W.MATRIX = mx.list.taxonomy$Propithecus, ROTACIONI = c(-1,-1,1), TTL = "Propithecus")
-PC.Plots$Indri <- PCLoadShapePlotter(SHAPE = indri, W.MATRIX = mx.list.taxonomy$Indri, ROTACIONI = c(-1,-1,1), TTL = "Indri")
-PC.Plots$W.Indridae <- PCLoadShapePlotter(SHAPE = propithecus, W.MATRIX = mx.list.taxonomy$W.Indridae, ROTACIONI = c(-1,-1,1), TTL = "Indridae (f)")
-PC.Plots$Eulemur <- PCLoadShapePlotter(SHAPE = eulemur, W.MATRIX = mx.list.taxonomy$Eulemur, ROTACIONI = c(1,-1,1), TTL = "Eulemur")
-PC.Plots$Hapalemur <- PCLoadShapePlotter(SHAPE = hapalemur, W.MATRIX = mx.list.taxonomy$Hapalemur, ROTACIONI = c(1,-1,1), TTL = "Hapalemur")
-PC.Plots$Prolemur <- PCLoadShapePlotter(SHAPE = prolemur, W.MATRIX = mx.list.taxonomy$Prolemur, ROTACIONI = c(-1,-1,1), TTL = "Prolemur")
-PC.Plots$Lemur <- PCLoadShapePlotter(SHAPE = lemur, W.MATRIX = mx.list.taxonomy$Lemur, ROTACIONI = c(1,-1,1), TTL = "Lemur")
-PC.Plots$Varecia <- PCLoadShapePlotter(SHAPE = varecia, W.MATRIX = mx.list.taxonomy$Varecia, ROTACIONI = c(-1,-1,1), TTL = "Varecia")
-PC.Plots$W.Lemuridae <- PCLoadShapePlotter(SHAPE = lemur, W.MATRIX = mx.list.taxonomy$W.Lemuridae, ROTACIONI = c(-1,-1,1), TTL ="Lemuridae (f)")
-PC.Plots$Daubentonia <- PCLoadShapePlotter(SHAPE = daubentonia, W.MATRIX = mx.list.taxonomy$Daubentonia, ROTACIONI = c(1,-1,1), TTL = "Daubentonia")
-PC.Plots$W.Madagascar <- PCLoadShapePlotter(SHAPE = hapalemur, W.MATRIX = mx.list.taxonomy$W.Madagascar, ROTACIONI = c(1,-1,1), TTL = "Madagascar")
-PC.Plots$Perodicticus <- ancestral.mx$Perodicticus_potto
-PC.Plots$Loris <- ancestral.mx$Loris_tardigradus
-PC.Plots$W.Lorisidae <- PCLoadShapePlotter(SHAPE = loris, W.MATRIX = mx.list.taxonomy$W.Lorisidae, ROTACIONI = c(-1,-1,1), TTL = "Lorisidae (f)")
-PC.Plots$Nycticebus <- PCLoadShapePlotter(SHAPE = nycticebus, W.MATRIX = mx.list.taxonomy$W.Lorisidae, ROTACIONI = c(-1,-1,1), TTL = "Nycticebus")
+PC.Plots$Galago <- PCLoadShapePlotter(SHAPE = galago, W.MATRIX = mx.list.taxonomy$Galago, ROTACIONI = c(-1,-1,1), TTL = "Galago")
+PC.Plots$Otolemur <- PCLoadShapePlotter(SHAPE = otolemur, W.MATRIX = mx.list.taxonomy$Otolemur, ROTACIONI = c(1,-1,1), TTL = "Otolemur")
 PC.Plots$Euoticus <- PCLoadShapePlotter(SHAPE = euoticus, W.MATRIX = mx.list.taxonomy$Euoticus, ROTACIONI = c(-1,-1,1), TTL = "Euoticus")
-PC.Plots$Otolemur <- ancestral.mx$Otolemur_crassicaudatus
-PC.Plots$Galago <- ancestral.mx$Galago_senegalensis
-PC.Plots$W.Galagidae <- ancestral.mx$'80'
-PC.Plots$W.OutMadagascar <- ancestral.mx$'77'
+PC.Plots$Nycticebus <- PCLoadShapePlotter(SHAPE = nycticebus, W.MATRIX = mx.list.taxonomy$W.Lorisidae, ROTACIONI = c(-1,-1,1), TTL = "Nycticebus")
+PC.Plots$Loris <- PCLoadShapePlotter(SHAPE = loris, W.MATRIX = mx.list.taxonomy$W.Lorisidae, ROTACIONI = c(-1,-1,1), TTL = "Loris")
+PC.Plots$Perodicticus <- PCLoadShapePlotter(SHAPE = perodicticus, W.MATRIX = mx.list.taxonomy$Perodicticus, ROTACIONI = c(-1,-1,1), TTL = "Perodicticus")
+PC.Plots$Arctocebus <- PCLoadShapePlotter(SHAPE = arctocebus, W.MATRIX = mx.list.taxonomy$W.Lorisidae, ROTACIONI = c(1,-1,1), TTL = "Arctocebus")
+
+PC.Plots$Daubentonia <- PCLoadShapePlotter(SHAPE = daubentonia, W.MATRIX = mx.list.taxonomy$Daubentonia, ROTACIONI = c(1,-1,1), TTL = "Daubentonia")
+
+PC.Plots$Varecia <- PCLoadShapePlotter(SHAPE = varecia, W.MATRIX = mx.list.taxonomy$Varecia, ROTACIONI = c(-1,-1,1), TTL = "Varecia")
+PC.Plots$Lemur <- PCLoadShapePlotter(SHAPE = lemur, W.MATRIX = mx.list.taxonomy$Lemur, ROTACIONI = c(1,-1,1), TTL = "Lemur")
+PC.Plots$Prolemur <- PCLoadShapePlotter(SHAPE = prolemur, W.MATRIX = mx.list.taxonomy$Prolemur, ROTACIONI = c(-1,-1,1), TTL = "Prolemur")
+PC.Plots$Hapalemur <- PCLoadShapePlotter(SHAPE = hapalemur, W.MATRIX = mx.list.taxonomy$Hapalemur, ROTACIONI = c(1,-1,1), TTL = "Hapalemur")
+PC.Plots$Eulemur <- PCLoadShapePlotter(SHAPE = eulemur, W.MATRIX = mx.list.taxonomy$Eulemur, ROTACIONI = c(1,-1,1), TTL = "Eulemur")
+
+
+PC.Plots$Indri <- PCLoadShapePlotter(SHAPE = indri, W.MATRIX = mx.list.taxonomy$Indri, ROTACIONI = c(-1,-1,1), TTL = "Indri")
+PC.Plots$Propithecus <- PCLoadShapePlotter(SHAPE = propithecus, W.MATRIX = mx.list.taxonomy$Propithecus, ROTACIONI = c(-1,-1,1), TTL = "Propithecus")
+PC.Plots$Avahi <- PCLoadShapePlotter(SHAPE = avahi, W.MATRIX = mx.list.taxonomy$Avahi_laniger, ROTACIONI = c(-1,-1,1), TTL ="Avahi")
+
+PC.Plots$Lepilemur <- PCLoadShapePlotter(SHAPE = lepilemur, W.MATRIX = mx.list.taxonomy$Lepilemur, ROTACIONI = c(-1,-1,1), TTL = "Lepilemur")
+PC.Plots$Phaner <- PCLoadShapePlotter(SHAPE = phaner, W.MATRIX = mx.list.taxonomy$Phaner, ROTACIONI = c(-1,-1,1), TTL ="Phaner")
+PC.Plots$Cheirogaleus <- PCLoadShapePlotter(SHAPE = cheirogaleus, W.MATRIX = mx.list.taxonomy$Cheirogaleus, ROTACIONI = c(1,-1,1), TTL = "Cheirogaleus")
+PC.Plots$Mirza <- PCLoadShapePlotter(SHAPE = mirza, W.MATRIX = mx.list.taxonomy$Mirza, ROTACIONI = c(-1,-1,1), TTL = "Mirza")
+PC.Plots$Microcebus <- PCLoadShapePlotter(SHAPE = microcebus, W.MATRIX = mx.list.taxonomy$Microcebus, ROTACIONI = c(1,-1,1), TTL = "Microcebus")
+PC.Plots$Allocebus<- PCLoadShapePlotter(SHAPE = allocebus, W.MATRIX = mx.list.taxonomy$Microcebus, ROTACIONI = c(1,-1,1), TTL = "Allocebus")
+PC.Plots$Tarsius <- PCLoadShapePlotter(SHAPE = tarsius, W.MATRIX = mx.list.taxonomy$Tarsius, ROTACIONI = c(1,-1,1), TTL = "Tarsius")
+
+PC.Plots$W.Daubentonia <- PCLoadShapePlotter(SHAPE = daubentonia, W.MATRIX = mx.list.taxonomy$Daubentonia, ROTACIONI = c(1,-1,1), TTL = "Daubentonia (g)")
+PC.Plots$W.Lemuridae <- PCLoadShapePlotter(SHAPE = lemur, W.MATRIX = mx.list.taxonomy$W.Lemuridae, ROTACIONI = c(-1,-1,1), TTL ="Lemuridae (f)")
+PC.Plots$W.Indridae <- PCLoadShapePlotter(SHAPE = propithecus, W.MATRIX = mx.list.taxonomy$W.Indridae, ROTACIONI = c(-1,-1,1), TTL = "Indridae (f)")
+PC.Plots$W.Lepilemuridae <- PCLoadShapePlotter(SHAPE = lepilemur, W.MATRIX = mx.list.taxonomy$Lepilemur, ROTACIONI = c(1,-1,1), TTL = "Lepilemuridae (f)")
+PC.Plots$W.Cheirogaleidae <- PCLoadShapePlotter(SHAPE = microcebus, W.MATRIX = mx.list.taxonomy$W.Cheirogaleidae, ROTACIONI = c(1,-1,1), TTL ="Cheirogaleidae (f)")
+PC.Plots$W.Madagascar <- PCLoadShapePlotter(SHAPE = hapalemur, W.MATRIX = mx.list.taxonomy$W.Madagascar, ROTACIONI = c(1,-1,1), TTL = "Malagasy clade")
+
+PC.Plots$W.Lorisidae <- PCLoadShapePlotter(SHAPE = loris, W.MATRIX = mx.list.taxonomy$W.Lorisidae, ROTACIONI = c(-1,-1,1), TTL = "Lorisidae (f)")
+PC.Plots$W.Galagidae <- PCLoadShapePlotter(SHAPE = galago, W.MATRIX = mx.list.taxonomy$W.Galagidae, ROTACIONI = c(-1,-1,1), TTL = "Galagidae (f)")
+PC.Plots$W.OutMadagascar <- PCLoadShapePlotter(SHAPE = galago, W.MATRIX = mx.list.taxonomy$W.OutMadagascar, ROTACIONI = c(1,-1,1), TTL = "Malagasy clade")
 PC.Plots$W.Strepsirrhini <- PCLoadShapePlotter(SHAPE = hapalemur, W.MATRIX = mx.list.taxonomy$W.Strepsirrhini, ROTACIONI = c(1,-1,1), TTL = "Strepsirrhini")
+PC.Plots$Tarsius.g <- PCLoadShapePlotter(SHAPE = tarsius, W.MATRIX = mx.list.taxonomy$Tarsius, ROTACIONI = c(1,-1,1), TTL = "Tarsius (g)")
 PC.Plots$W.Prosimian <-PCLoadShapePlotter(SHAPE = tupaia, W.MATRIX = mx.list.taxonomy$W.Prosimian, ROTACIONI = c(-1,-1,1), TTL = "Prosimian")
 
+save.image(file = 'Data/PC_loadings_plots.RData')
 
-PC.Plots <- 
-temp$W.Loadings.Shape[[41]]
+shapes.general <- PC.Plots[1:7] %>% llply(function (x) x[[8]]) 
+plot.shapes.out.madagascar <- plot_grid(plotlist = shapes.general, ncol = 1)
+shapes.general <- PC.Plots[1:7] %>% llply(function (x) x[[8]]) 
+plot.shapes.out.madagascar <- plot_grid(plotlist = shapes.general, ncol = 1)
+shapes.general <- PC.Plots[8:22] %>% llply(function (x) x[[8]]) 
+plot.shapes.lemuridae <- plot_grid(plotlist = shapes.general)
+shapes.general <- PC.Plots[14] %>% llply(function (x) x[[8]]) 
+plot.shapes.indridae <- plot_grid(plotlist = shapes.general, ncol = 1)
 
-save (PC.Plots, file = 'mx_list_taxonomy.RData')
+
