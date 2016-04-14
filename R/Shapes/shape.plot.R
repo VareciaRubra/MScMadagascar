@@ -18,6 +18,14 @@ propithecus <- read.csv('R/Shapes/shapes/Propithecus_1A_RMNH_shape.csv', FALSE)
 avahi <- read.csv('R/Shapes/shapes/Avahi_10A_MNHN_shape.csv', FALSE)
 daubentonia <- read.csv('R/Shapes/shapes/Daubentonia_4A_RMNH_shape.csv', FALSE)
 euoticus <- read.csv('R/Shapes/shapes/Euoticus_2A_AMNH_shape.csv', FALSE)
+otolemur <- read.csv('R/Shapes/shapes/Otolemur', FALSE)
+galago <- read.csv('R/Shapes/shapes/Galago_1C_USNM_shape.csv', FALSE)
+loris <- read.csv('R/Shapes/shapes/Loris_1A_FMNH_shape.csv', FALSE)
+nycticebus <- read.csv('R/Shapes/shapes/Nycticebus_3B_FMNH_shape.csv', FALSE)
+perodicticus <- read.csv('R/Shapes/shapes/Perodicticus_10A_FMNH_shape.csv', FALSE)
+arctocebus <- read.csv('R/Shapes/shapes/Arctocebus_1A_FMNH_shape.csv', FALSE)
+tarsius <- read.csv('R/Shapes/shapes/Tarsius_1B_FMNH_shape.csv', FALSE)
+
 
 glue.skulls <- function (A, Z, soln = 'svd')
 {
@@ -195,8 +203,8 @@ PC.Plots$Daubentonia <- PCLoadShapePlotter(SHAPE = daubentonia, W.MATRIX = mx.li
 PC.Plots$W.Madagascar <- PCLoadShapePlotter(SHAPE = hapalemur, W.MATRIX = mx.list.taxonomy$W.Madagascar, ROTACIONI = c(1,-1,1), TTL = "Madagascar")
 PC.Plots$Perodicticus <- ancestral.mx$Perodicticus_potto
 PC.Plots$Loris <- ancestral.mx$Loris_tardigradus
-PC.Plots$W.Lorisidae <- ancestral.mx$'78'
-PC.Plots$Nycticebus <- ancestral.mx$Nycticebus_coucang
+PC.Plots$W.Lorisidae <- PCLoadShapePlotter(SHAPE = loris, W.MATRIX = mx.list.taxonomy$W.Lorisidae, ROTACIONI = c(-1,-1,1), TTL = "Lorisidae (f)")
+PC.Plots$Nycticebus <- PCLoadShapePlotter(SHAPE = nycticebus, W.MATRIX = mx.list.taxonomy$W.Lorisidae, ROTACIONI = c(-1,-1,1), TTL = "Nycticebus")
 PC.Plots$Euoticus <- PCLoadShapePlotter(SHAPE = euoticus, W.MATRIX = mx.list.taxonomy$Euoticus, ROTACIONI = c(-1,-1,1), TTL = "Euoticus")
 PC.Plots$Otolemur <- ancestral.mx$Otolemur_crassicaudatus
 PC.Plots$Galago <- ancestral.mx$Galago_senegalensis
