@@ -33,6 +33,8 @@ nodelabels(cex = 0.7)
 SRD.results <- SRD.Tree(tree = Trees$extant.sp.tree, 
                         cov.matrix.list = All.sp.data$cov.mx[mask.extant & mask.at.tree],
                         sample.sizes = All.sp.data$n.sizes[mask.extant & mask.at.tree])
+#save(SRD.results, file = "Data/SRDatTreeResults.RData")
+
 SRD.results$rolated <- SRD.results %>% ldply(., function(x) class(x) == "SRD") 
 
 SRD.results$summary <- SRD.results[SRD.results$rolated[,2]] %>% laply(function(x) x$output[,5]) %>% alply(., 2, summary) %>% ldply(function (x) x) 
@@ -40,6 +42,7 @@ SRD.results$summary <- SRD.results[SRD.results$rolated[,2]] %>% laply(function(x
 SRD.results %>% filter(names(SRD.results) == "node77" )
 SRD.selected <- list("Prosimian" = SRD.results$node71,
                      "Strepsirrhini" = SRD.results$node73,
+                     "Out.Madagascar" = SRD.results$node131,
                      "Madagascar" = SRD.results$node74,
                      "L-IxL-C" = SRD.results$node75,
                      "LemxInd" = SRD.results$node99,
@@ -71,80 +74,57 @@ ggplot(SRD.to.plot) +
         strip.background = element_rect(fill = "transparent")) 
 
 
-Shaper <- function( SHAPE){
-  SHAPE.lm <- SHAPE [, 1]
-  SHAPE.skull <- array (as.matrix (SHAPE [, 2:7]), c(27, 2, 3, 2))
-  SHAPE.skull <- aperm(SHAPE.skull, c(1, 3, 2, 4))
-  SHAPE.left <- SHAPE.skull [, , 1, ]
-  SHAPE.right <- SHAPE.skull [, , 2, ]
-  
-  SHAPE.lm <- as.character (SHAPE.lm)
-  
-  SHAPE.lm[is.na(SHAPE.lm)] <-  'NA'
-  SHAPE.lm %<>% gsub("La", "LA", .)
-  SHAPE.lm %<>% gsub("Zi", "ZI", .)
-  SHAPE.lm %<>% gsub("As", "AS", .)
-  SHAPE.lm %<>% gsub("Ts", "TS", .)
-  SHAPE.lm %<>% gsub("Oc", "OC", .)
-  
-  dimnames (SHAPE.left) <- list (SHAPE.lm[1:27], c ('X', 'Y', 'Z'))
-  dimnames (SHAPE.right) <- list (SHAPE.lm[28:54], c ('X', 'Y', 'Z'))
-  
-  
-  SHAPE.full <- glue.skulls(SHAPE.left, SHAPE.right) [[1]]
-  
-  SHAPE.av <- procGPA(SHAPE.full) $ mshape
-  
-  dimnames (SHAPE.av) <- dimnames (SHAPE.full) [1:2]
-  rownames (SHAPE.full)
-  
-  SHAPE.sym <- OSymm (SHAPE.av, 1:9, 28:45, 10:27) $ symmconf
-  
-  rownames (SHAPE.sym) <- gsub ('d', '-D', gsub ('e', '-E', rownames (SHAPE.sym)))
-  
-  
-  SHAPE.sym <- SHAPE.sym [which (rownames (SHAPE.sym) %in% rownames (hapa.sym)), ]
-  
-  SHAPE.sym <- SHAPE.sym [match(rownames (hapa.sym), rownames (SHAPE.sym)), ]
-  
-  return(SHAPE.sym)
-}
+load("Data/Shapes.RData")
+load("~/MScMadagascar/R/Shapes/file.RData")
+load("~/MScMadagascar/R/Shapes/Aux.RData")
+load("~/MScMadagascar/R/Shapes/shapes/traits.RData")
+source('R/Shapes/ggshape.R', echo=TRUE)
 
 
-
-CODE <- SRD.results$node71$model$code
-muDEV <- SRD.results$node71$output[,5]
-  myBreaks <- c(round(min(muDEV), digits = 1), round(mean (muDEV), digits = 1 ), round(max(muDEV), digits = 1 )) 
- 
-    ggshape(shape = ,
+SRD.plot.wire <- function (SRD.result, SHAPE, ROTACIONI =  c(1,-1,1), TTL = "Awesome SRD result") {
+CODE <- SRD.result$model$code
+muDev = as.numeric(SRD.result$output[,5])
+plot.cheetows <- 
+  ggshape(shape = SHAPE,
             wireframe = Aux $ tessel.39 [1:39, ],
-            colors = muDEV,
-            rotation = ROTACIONI , 
+            colors = CODE,
+            rotation =ROTACIONI, 
             culo = 0.02, 
             thickness = 1) +
     geom_point (aes (x = X, y = Y), alpha = 0.6, color ="darkgrey", size = 1.2) +
-    geom_label(aes (x = X, y = Y, label = traits ),  alpha = 0.6, size = 3, label.padding = unit(0.3, "mm")) +
-    #ggtitle(paste("PC", i, sep = " ")) +
+    geom_label(aes (x = X, y = Y, label = traits ),  alpha = 0.6, size = 2, label.padding = unit(0.3, "mm")) +
+    ggtitle(TTL) +
     theme(plot.title = element_text(face = "bold", size = 12),
-          legend.position= c(0.3,0.1), 
+          legend.position= "none", 
           legend.direction="horizontal",
           legend.text = element_text(size = 8),
           plot.margin = unit(c(0,0,-0,0), "cm"), 
           legend.key.size = unit(0.3, "cm"), 
           panel.margin.x = unit(0.3, "cm"), 
           panel.margin.y = unit(0.3, "cm") ) +
-    scale_fill_gradientn(paste("PC", i, sep = " "), limits = c(min(WPCs[, i])-0.09, max(WPCs[, i])+0.09),
-                         breaks= myBreaks,
-                         #colors = myPalette(11),
-                         colors = myPalette(11),
+    scale_fill_gradientn(colors = c("darkgrey", "red"),
                          guide = guide_colorbar(nbin=100, draw.ulim = T, draw.llim = T) ) +
-    scale_color_gradientn(paste("PC", i, sep = " "), limits = c(min(WPCs[, i]) -0.09, max(WPCs[, i]) +0.09 ),
-                          breaks= myBreaks,
+    scale_color_gradientn(colors = c("darkgrey", "red"),
                           #colors = myPalette(11),
-                          colors = myPalette(11),
-                          guide = guide_colorbar(nbin=100, draw.ulim = T, draw.llim = T) ) 
-  
+                          guide = guide_colorbar(nbin=100, draw.ulim = T, draw.llim = T) )
+  # scale_fill_gradientn(colors = c("red", "darkgrey", "blue"),
+  #                       guide = guide_colorbar(nbin=100, draw.ulim = T, draw.llim = T) ) +
+  # scale_color_gradientn(colors = c("red", "darkgrey", "blue"),
+  #                       guide = guide_colorbar(nbin=100, draw.ulim = T, draw.llim = T) ) 
+return(plot.cheetows)
+}
 
+SRD.selected.Tree.plot <- plot_grid(SRD.plot.wire(SRD.result = SRD.selected$LemxInd, SHAPE = Shapes.sym$propithecus, ROTACIONI =  c(-1,-1,1), TTL = "Lemuridae x Indridae" ),
+SRD.plot.wire(SRD.result = SRD.selected$LepxChe, SHAPE = Shapes.sym$cheirogaleus, ROTACIONI =  c(1,-1,1), TTL = "Lepilemuridae x Cheirogaleidae"),
+SRD.plot.wire(SRD.result = SRD.selected$`L-IxL-C`, SHAPE = Shapes.sym$hapalemur, ROTACIONI =  c(1,-1,1), TTL = "Lem-Ind x Lep-Che"),
+SRD.plot.wire(SRD.result = SRD.selected$Madagascar, SHAPE = Shapes.sym$daubentonia, ROTACIONI =  c(1,-1,1), TTL = "Madagascar\n Lemurs x Daubentonidae"),
+SRD.plot.wire(SRD.result = SRD.selected$Out.Madagascar, SHAPE = Shapes.sym$loris, ROTACIONI =  c(-1,-1,1), TTL = "Out Madagascar\n Galagidae x Lorisidae"),
+SRD.plot.wire(SRD.result = SRD.selected$Strepsirrhini, SHAPE = Shapes.sym$galago, ROTACIONI =  c(-1,-1,1), TTL = "Strepsirrhini"),
+SRD.plot.wire(SRD.result = SRD.selected$Prosimian, SHAPE = Shapes.sym$tupaia, ROTACIONI =  c(-1,-1,1), TTL = "Prosimian\n Strepsirrhini + Tarsiidae" ))
+
+SRD.selected.Tree.plot
+
+as.numeric(SRD.selected$Prosimian$output[,5])
 
 plot.phylo(Trees$extant.sp.tree, no.margin = T, cex = 0.8)
 nodelabels(cex = 0.7)

@@ -31,7 +31,6 @@ perodicticus <- read.csv('R/Shapes/shapes/Perodicticus_10A_FMNH_shape.csv', FALS
 arctocebus <- read.csv('R/Shapes/shapes/Arctocebus_1A_FMNH_shape.csv', FALSE)
 tarsius <- read.csv('R/Shapes/shapes/Tarsius_1B_FMNH_shape.csv', FALSE)
 
-
 glue.skulls <- function (A, Z, soln = 'svd')
 {
   glue.skull = function (Ai, Zi, sol = "svd")
@@ -316,3 +315,33 @@ Shaper <- function( SHAPE){
   
   return(SHAPE.sym)
 }
+
+Shapes <- vector("list")
+Shapes$tupaia <- tupaia 
+Shapes$allocebus <- allocebus
+Shapes$microcebus <- microcebus
+Shapes$cheirogaleus <- cheirogaleus
+Shapes$phaner <- phaner
+Shapes$mirza <- mirza
+Shapes$varecia <- varecia
+Shapes$eulemur <- eulemur
+Shapes$prolemur <- prolemur
+Shapes$hapalemur <- hapalemur
+Shapes$lemur <- lemur
+Shapes$lepilemur <- lepilemur
+Shapes$indri <- indri
+Shapes$propithecus <- propithecus
+Shapes$avahi <- avahi
+Shapes$daubentonia <- daubentonia
+Shapes$euoticus <- euoticus
+Shapes$otolemur <- otolemur
+Shapes$galago <- galago
+Shapes$loris <- loris
+Shapes$nycticebus <- nycticebus
+Shapes$perodicticus <- perodicticus
+Shapes$arctocebus <- arctocebus
+Shapes$tarsius <- tarsius
+
+
+Shapes.sym <- Shapes %>% llply(Shaper)
+save(Shapes.sym, file = "Data/Shapes.RData")
