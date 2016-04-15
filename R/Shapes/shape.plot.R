@@ -275,3 +275,44 @@ save_plot(filename = "R/Shapes/plot.pc.out.madagascar.png", plot = plot.pc.out.m
 shapes.PC.main.Madagascar <-plot_grid(PC.Plots$Daubentonia[[7]], PC.Plots$W.Lemuridae[[7]], PC.Plots$W.Indridae[[7]], PC.Plots$W.Lepilemuridae[[7]], PC.Plots$W.Cheirogaleidae[[7]], ncol = 1, align = "hv")
 save_plot(filename = "R/Shapes/shapes.PC.main.Madagascar.png", plot = shapes.PC.main.Madagascar, 
           base_aspect_ratio = 1, base_height = 12)
+
+
+
+Shaper <- function( SHAPE){
+  SHAPE.lm <- SHAPE [, 1]
+  SHAPE.skull <- array (as.matrix (SHAPE [, 2:7]), c(27, 2, 3, 2))
+  SHAPE.skull <- aperm(SHAPE.skull, c(1, 3, 2, 4))
+  SHAPE.left <- SHAPE.skull [, , 1, ]
+  SHAPE.right <- SHAPE.skull [, , 2, ]
+  
+  SHAPE.lm <- as.character (SHAPE.lm)
+  
+  SHAPE.lm[is.na(SHAPE.lm)] <-  'NA'
+  SHAPE.lm %<>% gsub("La", "LA", .)
+  SHAPE.lm %<>% gsub("Zi", "ZI", .)
+  SHAPE.lm %<>% gsub("As", "AS", .)
+  SHAPE.lm %<>% gsub("Ts", "TS", .)
+  SHAPE.lm %<>% gsub("Oc", "OC", .)
+  
+  dimnames (SHAPE.left) <- list (SHAPE.lm[1:27], c ('X', 'Y', 'Z'))
+  dimnames (SHAPE.right) <- list (SHAPE.lm[28:54], c ('X', 'Y', 'Z'))
+  
+  
+  SHAPE.full <- glue.skulls(SHAPE.left, SHAPE.right) [[1]]
+  
+  SHAPE.av <- procGPA(SHAPE.full) $ mshape
+  
+  dimnames (SHAPE.av) <- dimnames (SHAPE.full) [1:2]
+  rownames (SHAPE.full)
+  
+  SHAPE.sym <- OSymm (SHAPE.av, 1:9, 28:45, 10:27) $ symmconf
+  
+  rownames (SHAPE.sym) <- gsub ('d', '-D', gsub ('e', '-E', rownames (SHAPE.sym)))
+  
+  
+  SHAPE.sym <- SHAPE.sym [which (rownames (SHAPE.sym) %in% rownames (hapa.sym)), ]
+  
+  SHAPE.sym <- SHAPE.sym [match(rownames (hapa.sym), rownames (SHAPE.sym)), ]
+  
+  return(SHAPE.sym)
+}
