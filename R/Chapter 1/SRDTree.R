@@ -42,12 +42,18 @@ SRD.results$summary <- SRD.results[SRD.results$rolated[,2]] %>% laply(function(x
 SRD.results %>% filter(names(SRD.results) == "node77" )
 SRD.selected <- list("Prosimian" = SRD.results$node71,
                      "Strepsirrhini" = SRD.results$node73,
-                     "Out.Madagascar" = SRD.results$node131,
-                     "Madagascar" = SRD.results$node74,
+                     "Lorisoidea" = SRD.results$node131,
+                     "Galagidae" = SRD(ancestral.mx$Galago_senegalensis, ancestral.mx$Euoticus_elegantulus),
+                     "Lorisidae" = SRD.results$node132,
+                     "Lemuroidea" = SRD.results$node74,
                      "L-IxL-C" = SRD.results$node75,
                      "LemxInd" = SRD.results$node99,
-                     "LepxChe" = SRD.results$node76)
-
+                     "Lemuridae" = SRD.results$node112,
+                     "Indridaeidea" = SRD.results$node100,
+                     "LepxChe" = SRD.results$node76,
+                     "Lepilemuridea" = SRD.results$node88,
+                     "Cheirogaleidae" = SRD.results$node77
+                     )
 SRD.summary <- SRD.selected %>% laply(function(x) x$output[,5]) 
 rownames(SRD.summary) <- names(SRD.selected) 
 
@@ -84,6 +90,7 @@ source('R/Shapes/ggshape.R', echo=TRUE)
 SRD.plot.wire <- function (SRD.result, SHAPE, ROTACIONI =  c(1,-1,1), TTL = "Awesome SRD result") {
 CODE <- SRD.result$model$code
 muDev = as.numeric(SRD.result$output[,5])
+COLORE <- abs(CODE * muDev)
 plot.cheetows <- 
   ggshape(shape = SHAPE,
             wireframe = Aux $ tessel.39 [1:39, ],
@@ -117,8 +124,8 @@ return(plot.cheetows)
 SRD.selected.Tree.plot <- plot_grid(SRD.plot.wire(SRD.result = SRD.selected$LemxInd, SHAPE = Shapes.sym$propithecus, ROTACIONI =  c(-1,-1,1), TTL = "Lemuridae x Indridae" ),
 SRD.plot.wire(SRD.result = SRD.selected$LepxChe, SHAPE = Shapes.sym$cheirogaleus, ROTACIONI =  c(1,-1,1), TTL = "Lepilemuridae x Cheirogaleidae"),
 SRD.plot.wire(SRD.result = SRD.selected$`L-IxL-C`, SHAPE = Shapes.sym$hapalemur, ROTACIONI =  c(1,-1,1), TTL = "Lem-Ind x Lep-Che"),
-SRD.plot.wire(SRD.result = SRD.selected$Madagascar, SHAPE = Shapes.sym$daubentonia, ROTACIONI =  c(1,-1,1), TTL = "Madagascar\n Lemurs x Daubentonidae"),
-SRD.plot.wire(SRD.result = SRD.selected$Out.Madagascar, SHAPE = Shapes.sym$loris, ROTACIONI =  c(-1,-1,1), TTL = "Out Madagascar\n Galagidae x Lorisidae"),
+SRD.plot.wire(SRD.result = SRD.selected$Madagascar, SHAPE = Shapes.sym$daubentonia, ROTACIONI =  c(1,-1,1), TTL = "Lemuriformes\n Lemurs x Daubentonidae"),
+SRD.plot.wire(SRD.result = SRD.selected$Out.Madagascar, SHAPE = Shapes.sym$loris, ROTACIONI =  c(-1,-1,1), TTL = "Lorisiformes\n Galagidae x Lorisidae"),
 SRD.plot.wire(SRD.result = SRD.selected$Strepsirrhini, SHAPE = Shapes.sym$galago, ROTACIONI =  c(-1,-1,1), TTL = "Strepsirrhini"),
 SRD.plot.wire(SRD.result = SRD.selected$Prosimian, SHAPE = Shapes.sym$tupaia, ROTACIONI =  c(-1,-1,1), TTL = "Prosimian\n Strepsirrhini + Tarsiidae" ))
 
