@@ -62,6 +62,7 @@ Gen.cov.list$Hapalemur <- ancestral.mx$Hapalemur_griseus
 Gen.cov.list$Prolemur <- ancestral.mx$Prolemur_simus
 Gen.cov.list$Lemur <- ancestral.mx$Lemur_catta
 Gen.cov.list$Varecia <- ancestral.mx$'76'
+Gen.cov.list$W.Lemuriformes <- ancestral.mx$'46'
 Gen.cov.list$W.Lemuridae <- ancestral.mx$'63'
 Gen.cov.list$Daubentonia <- ancestral.mx$Daubentonia_madagascariensis
 Gen.cov.list$W.Madagascar <- ancestral.mx$'45'
@@ -73,7 +74,7 @@ Gen.cov.list$Euoticus <- ancestral.mx$Euoticus_elegantulus
 Gen.cov.list$Otolemur <- ancestral.mx$Otolemur_crassicaudatus
 Gen.cov.list$Galago <- ancestral.mx$Galago_senegalensis
 Gen.cov.list$W.Galagidae <- ancestral.mx$'80'
-Gen.cov.list$W.OutMadagascar <- ancestral.mx$'77'
+Gen.cov.list$W.Lorisiformes <- ancestral.mx$'77'
 Gen.cov.list$W.Strepsirrhini <- ancestral.mx$'44'
 Gen.cov.list$W.Prosimian <- ancestral.mx$'42'
 Gen.cov.list$Saguinus.P <- Saguinus_P.cov
@@ -98,7 +99,7 @@ Steppan$Plot$GenusCompare <-
                 prob = Gen.mx.compare$RS$probabilities,
                 diag.info = rep(NA, dim(Gen.mx.compare$RS$correlations)[[1]]), 
                 method =  "Random Skewers",
-                titulo = "Genus Matrices raw values of comparison via \nKrzanowski and")
+                titulo = "Raw values of comparison via \nKrzanowski and")
 Steppan$Plot$GenusCompare + theme(legend.position= "bottom") + theme(legend.position= c(-0.1,-0.15)) 
 
 
