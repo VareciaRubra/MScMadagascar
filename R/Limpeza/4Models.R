@@ -219,23 +219,42 @@ names(cvs) %<>% gsub("_", " ", . )
 cvs$traits = factor(rownames(cvs), levels = rownames(cvs)[1:39])
 cvs %<>% melt 
 cvs$variable <- factor(cvs$variable, levels = unique(cvs$variable))
+cvs$traits <- factor(cvs$traits, levels= rev(unique(cvs$traits)) )
 cvs$cagated <- cvs$value < 0.21
 
 colore <- c("#FF9326",  "#9999FF", "#D92121", "#21D921", "#FFFF4D", "#2121D9", "white")
 
-cvs %>%  
+cv.plot <- cvs %>%  
   ggplot(aes(x = traits, y = value)) +
+  #geom_violin() +
+  geom_jitter(alpha = 0.8,color = "black", size = 2, shape = 4) +
   geom_text(aes(label = variable, alpha = value - 0.1, colour = factor(cagated) ), fontface = "italic" ) +
-  geom_point() + 
-  scale_colour_manual (values= colore[c(3,7)] ) +
+  coord_flip() +
+  scale_colour_manual (values= c("red","darkgrey") ) +
   theme_bw() + 
   #facet_wrap(~variable, nrow = 10, ncol = 4) +
-  theme(legend.position = "none", 
-        axis.text.x = element_text(angle = 90, hjust = 1)) + 
+  theme(legend.position = "none") +
   labs(x = "", y = "Coeficient of variation") 
   
 
-  #scale_y_continuous(limits = c(0, 0.2)) + 
-  #background_grid(major = 'y', minor = "y") + 
-  #theme(legend.position = c(0.15, 0.8))
+REP$Trait <- factor(REP$Trait, rev(unique(REP$Trait)))
+
+rep.plot <- REP %>% na.omit %>% group_by(Trait)  %>%
+  ggplot(.) +
+  geom_violin(aes(x = Trait, y =  Repetability), alpha = 0.4) +
+  geom_jitter(aes(x = Trait, y =  Repetability), alpha = 0.8,color = "black", size = 2, shape = 4) +
+  geom_text(aes(x = Trait, y =  Repetability, label = Specie, alpha = abs(1.1-Repetability)), color = "darkgrey", size = 4) +
+  coord_flip() +
+  theme_bw() +
+  scale_colour_brewer(palette = "Set1", direction = -1) +
+  xlab("")+
+  #ylab( "Traits repetabilities")+
+  #labs(title = "Traits repetabilities") +
+  theme(legend.position="none",
+        axis.text.y = element_text( size =10),
+        axis.text.x = element_text(size =19),
+        strip.text= element_text(size=19),
+        plot.title = element_text(face = "bold", size = 20)) 
+
+plot_grid(rep.plot, cv.plot, labels = LETTERS[1:2] )
 
