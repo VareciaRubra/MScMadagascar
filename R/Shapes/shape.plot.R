@@ -159,26 +159,27 @@ shape.plot [[i]] <-
           rotation = ROTACIONI , 
           culo = 0.02, 
           thickness = 1) +
-  geom_point (aes (x = X, y = Y), alpha = 0.6, color ="darkgrey", size = 1.2) +
-  geom_label(aes (x = X, y = Y, label = traits ),  alpha = 0.6, size = 3, label.padding = unit(0.3, "mm")) +
+  #geom_point (aes (x = X, y = Y), alpha = 0.6, color ="darkgrey", size = 1.2) +
+  #geom_label(aes (x = X, y = Y, label = traits ),  alpha = 0.6, size = 3, label.padding = unit(0.3, "mm")) +
   #ggtitle(paste("PC", i, sep = " ")) +
   theme(plot.title = element_text(face = "bold", size = 12),
-        legend.position= c(0.3,0.1), 
+        legend.position = "none",
+        #legend.position= c(0.3,0.1), 
         legend.direction="horizontal",
         legend.text = element_text(size = 8),
         plot.margin = unit(c(0,0,-0,0), "cm"), 
         legend.key.size = unit(0.3, "cm"), 
         panel.margin.x = unit(0.3, "cm"), 
         panel.margin.y = unit(0.3, "cm") ) +
-  scale_fill_gradientn(paste("PC", i, sep = " "), limits = c(min(WPCs[, i])-0.09, max(WPCs[, i])+0.09),
+  scale_fill_gradient2(paste("PC", i, sep = " "),  low = "#fdb863", mid = "#cccccc", high ="#5e3c99",  midpoint = 0, 
+                       #labels =c(-0.7, 0, 0.7), 
+                       #breaks = c(-0.7, 0, 0.7),
                         breaks= myBreaks,
                         #colors = myPalette(11),
-                        colors = myPalette(11),
                         guide = guide_colorbar(nbin=100, draw.ulim = T, draw.llim = T) ) +
-  scale_color_gradientn(paste("PC", i, sep = " "), limits = c(min(WPCs[, i]) -0.09, max(WPCs[, i]) +0.09 ),
+  scale_color_gradient2(paste("PC", i, sep = " "), low = "#fdb863", mid = "#cccccc", high ="#5e3c99",  midpoint = 0,
                         breaks= myBreaks,
                         #colors = myPalette(11),
-                        colors = myPalette(11),
                         guide = guide_colorbar(nbin=100, draw.ulim = T, draw.llim = T) ) 
 }
 #shape.plot [[40]] <- plot_grid(plotlist = shape.plot, ncol = 4, labels = TTL) 
@@ -187,6 +188,8 @@ shape.plot [[8]] <- shape.plot[[1]] + scale_fill_gradientn(colours = "darkgrey")
 #rm(shape.plot)
 return( shape.plot)
 }
+
+PC.Plots$Galago <-PCLoadShapePlotter(SHAPE = galago, W.MATRIX = mx.list.taxonomy$Galago, ROTACIONI = c(-1,-1,1), TTL = "Galago")
 
 PC.Plots <- vector("list")
 
@@ -228,7 +231,7 @@ PC.Plots$W.Madagascar <- PCLoadShapePlotter(SHAPE = hapalemur, W.MATRIX = mx.lis
 
 PC.Plots$W.Lorisidae <- PCLoadShapePlotter(SHAPE = loris, W.MATRIX = mx.list.taxonomy$W.Lorisidae, ROTACIONI = c(-1,-1,1), TTL = "Lorisidae (f)")
 PC.Plots$W.Galagidae <- PCLoadShapePlotter(SHAPE = galago, W.MATRIX = mx.list.taxonomy$W.Galagidae, ROTACIONI = c(-1,-1,1), TTL = "Galagidae (f)")
-PC.Plots$W.OutMadagascar <- PCLoadShapePlotter(SHAPE = galago, W.MATRIX = mx.list.taxonomy$W.OutMadagascar, ROTACIONI = c(-1,-1,1), TTL = "Malagasy clade")
+PC.Plots$W.OutMadagascar <- PCLoadShapePlotter(SHAPE = galago, W.MATRIX = mx.list.taxonomy$W.OutMadagascar, ROTACIONI = c(-1,-1,1), TTL = "Lorisiformes")
 PC.Plots$W.Strepsirrhini <- PCLoadShapePlotter(SHAPE = hapalemur, W.MATRIX = mx.list.taxonomy$W.Strepsirrhini, ROTACIONI = c(1,-1,1), TTL = "Strepsirrhini")
 PC.Plots$Tarsius.g <- PCLoadShapePlotter(SHAPE = tarsius, W.MATRIX = mx.list.taxonomy$Tarsius, ROTACIONI = c(-1,-1,1), TTL = "Tarsius (g)")
 PC.Plots$W.Prosimian <-PCLoadShapePlotter(SHAPE = tupaia, W.MATRIX = mx.list.taxonomy$W.Prosimian, ROTACIONI = c(-1,-1,1), TTL = "Tupaia (g)")
@@ -267,12 +270,16 @@ save_plot(filename = "R/Shapes/plot.shapes.prosimian.pdf", plot = plot.shapes.pr
 
 shapes.general <- PC.Plots[1:7] %>% llply(function (x) x[[7]]) 
 plot.pc.out.madagascar <- plot_grid(plotlist = shapes.general, ncol = 1)
-save_plot(filename = "R/Shapes/plot.pc.out.madagascar.png", plot = plot.pc.out.madagascar, 
+save_plot(filename = "R/Shapes/plot.pc.out.madagascar.pdf", plot = plot.pc.out.madagascar, 
           base_aspect_ratio = 0.9, base_height = 14, base_width = 7)
 
 
 shapes.PC.main.Madagascar <-plot_grid(PC.Plots$Daubentonia[[7]], PC.Plots$W.Lemuridae[[7]], PC.Plots$W.Indridae[[7]], PC.Plots$W.Lepilemuridae[[7]], PC.Plots$W.Cheirogaleidae[[7]], ncol = 1, align = "hv")
-save_plot(filename = "R/Shapes/shapes.PC.main.Madagascar.png", plot = shapes.PC.main.Madagascar, 
+save_plot(filename = "R/Shapes/shapes.PC.main.Madagascar.pdf", plot = shapes.PC.main.Madagascar, 
+          base_aspect_ratio = 1, base_height = 12)
+
+shapes.PC.main.Out.Madagascar <-plot_grid(PC.Plots$W.Galagidae[[7]], PC.Plots$W.Lorisidae[[7]], PC.Plots$W.OutMadagascar[[7]], ncol = 1, align = "hv")
+save_plot(filename = "R/Shapes/shapes.PC.main.OutMadagascar.pdf", plot = shapes.PC.main.Out.Madagascar, 
           base_aspect_ratio = 1, base_height = 12)
 
 

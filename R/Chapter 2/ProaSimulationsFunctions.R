@@ -38,7 +38,7 @@ simulateGP<-function(method, m, tNe, pop, n, sim.n, G="NULL", P="NULL")
 #         stop("you need to provide a valid G matrix!\n") 
 #       }
 #       
-      G <- genPositiveDefMat(dim=m,lambdaLow=1,ratioLambda=10)$Sigma
+      # G <- genPositiveDefMat(dim=m,lambdaLow=1,ratioLambda=10)$Sigma ################# colocar aqui a W
       P <- runif(1,min=1,max=10)*G
     }
     if (method=="sim3")
