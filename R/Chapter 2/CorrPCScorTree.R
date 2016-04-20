@@ -38,9 +38,9 @@ function (means, cov.matrix, taxons = names(means), show.plots = FALSE, title.pl
   }
   mx.to.bartlett <- mat.pcs.deriva # matriz que tem no triangulo superior os p.values das correlaçoes e no de baixo os valores observados de correlaçao
   mx.to.bartlett[upper.tri(mx.to.bartlett)] <- t(mx.to.bartlett)[upper.tri(mx.to.bartlett)] # transformando numa matriz toda de correla,coes
-  signal.cor <- mx.to.bartlett # pegando o sinal da correlaçao
-  signal.cor[lower.tri(signal.cor)] <- signal.cor[lower.tri(signal.cor)] > 0 # perguntando se a correla,cão é negativa
-  signal.cor[upper.tri(signal.cor)] <- signal.cor[upper.tri(signal.cor)] > 0 # perguntando se a correla,cão é negativa
+  signal.cor <- mx.to.bartlett > 0 # pegando o sinal da correlaçao
+  #signal.cor[lower.tri(signal.cor)] <- signal.cor[lower.tri(signal.cor)] > 0 # perguntando se a correla,cão é negativa
+  #signal.cor[upper.tri(signal.cor)] <- signal.cor[upper.tri(signal.cor)] > 0 # perguntando se a correla,cão é negativa
   diag(mx.to.bartlett) <- 1
   Bartlett.t <- psych::cortest.bartlett (R = mx.to.bartlett, n= length(taxons))
   mx.to.bonferroni <- mat.pcs.deriva
@@ -62,9 +62,10 @@ function (means, cov.matrix, taxons = names(means), show.plots = FALSE, title.pl
   Correction.p.bonferroni[lower.tri(Correction.p.bonferroni)] <- NA
   signal.cor <- signal.cor[1:10,1:10]
   rejected.drift<- which(!Correction.p.bonferroni, arr.ind = T)
-  mx.bonferroni[mx.bonferroni == 1] <- "Not Significative"
-  mx.bonferroni[mx.bonferroni == 0 & signal.cor == 0] <- "Significative (+)"
-  mx.bonferroni[mx.bonferroni == 0 & signal.cor == 1] <- "Significative (-)"
+ 
+  mx.bonferroni[mx.bonferroni == 0] <- "Not Significative" 
+  mx.bonferroni[mx.bonferroni == 1 & signal.cor == T] <- "Significative (+)"
+  mx.bonferroni[mx.bonferroni == 1 & signal.cor == F] <- "Significative (-)"
   mx.bonferroni %<>% melt 
   
   p.value.plot <- mx.bonferroni %>% 
@@ -72,10 +73,10 @@ function (means, cov.matrix, taxons = names(means), show.plots = FALSE, title.pl
       geom_tile(aes(x = Var2, y = Var1, fill = value ), alpha = 0.6, color = "darkgrey") +
       scale_y_discrete(limits = rev(levels(mx.bonferroni$Var1))) +
       #geom_text(aes(x = Var2, y = Var1, label = value), size = 4) +
-      scale_fill_manual(values = c("#f5f5f5", "#5ab4ac", "#f1a340")) + labs(fill = "p.value") +
+      scale_fill_manual(values = c("#cccccc","#67a9cf", "#ef8a62")) + labs(fill = "p.value") +
       ylab ('') + xlab ('') + labs(title = paste("Node:", title.plot) ) + 
       theme_minimal() +  
-      theme(plot.title = element_text(face = "bold", size = 17),
+      theme(plot.title = element_text(face = "bold", size = 7),
             axis.text.x = element_text(angle = 270, hjust = 0),
             axis.ticks = element_line(size = 0),
             legend.title = element_text(size = 15),
