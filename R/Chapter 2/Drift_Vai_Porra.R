@@ -339,3 +339,25 @@ nodelabels(node = tested.nodes , i.c.5$min, adj = -0.2, bg = "transparent", col 
 nodelabels(node = tested.nodes, i.c.5$max, adj = 1.2, bg = "transparent", col = 'blue', frame = "n", cex = i.c.5$max*0.6)
 nodelabels(node = tested.nodes, pch = (as.numeric(non.drift.nodes)+17), cex=1.4, col = (as.numeric(non.drift.nodes)+9) )
 tiplabels(pch = 19, cex = gm.mean.no.na/10, adj = -2.5)
+
+Drift.results$extant.sp$Regression.test$`71`$log.between_group_variance
+
+Regression.Tree.plot <- plot_grid(
+  Drift.results$extant.sp$Regression.test$`134`$plot + geom_abline(slope = 1, color = "red") + ggtitle ("Nyc-Lor"), 
+  Drift.results$extant.sp$Regression.test$`132`$plot + geom_abline(slope = 1, color = "red") + ggtitle ("Lorisidae") ,
+  Drift.results$extant.sp$Regression.test$`131`$plot + geom_abline(slope = 1, color = "green") + ggtitle ("Lorisiformes\n Galagidae x Lorisidae") ,
+  Drift.results$extant.sp$Regression.test$`112`$plot + geom_abline(slope = 1, color = "green") + ggtitle ("Lemuridae") ,
+  Drift.results$extant.sp$Regression.test$`100`$plot + geom_abline(slope = 1, color = "red") + ggtitle ("Indridae") ,
+  Drift.results$extant.sp$Regression.test$`99`$plot + geom_abline(slope = 1, color = "red") + ggtitle ("Lemuridae x Indridae") ,
+  Drift.results$extant.sp$Regression.test$`88`$plot + geom_abline(slope = 1, color = "red") + ggtitle ("Lepilemuridae") ,
+  Drift.results$extant.sp$Regression.test$`77`$plot + geom_abline(slope = 1, color = "green") + ggtitle ("Cheirogaleidae") ,
+  Drift.results$extant.sp$Regression.test$`76`$plot + geom_abline(slope = 1, color = "green") + ggtitle ("Lepilemuridae x Cheirogaleidae") ,
+  Drift.results$extant.sp$Regression.test$`75`$plot + geom_abline(slope = 1, color = "red") + ggtitle ("Lem-Ind x Lep-Che") ,
+  Drift.results$extant.sp$Regression.test$`74`$plot + geom_abline(slope = 1, color = "red") + ggtitle ("Lemuriformes\n Lemurs x Daubentonidae") ,
+  Drift.results$extant.sp$Regression.test$`73`$plot + geom_abline(slope = 1, color = "red") + ggtitle ("Strepsirrhini") ,
+  Drift.results$extant.sp$Regression.test$`71`$plot + geom_abline(slope = 1, color = "red") + ggtitle ("Prosimian\n Strepsirrhini + Tarsiidae") ,
+  ncol = 3)
+
+Regression.Tree.plot 
+
+Drift.results$extant.sp$Regression.test$`101`$plot + geom_abline(slope = 1, color = "red") + ggtitle ("Indridae")
