@@ -10,5 +10,6 @@
 *.png
 *.jpg
 *.jpeg
+*.svg
 *.zip
 .Rproj.user
