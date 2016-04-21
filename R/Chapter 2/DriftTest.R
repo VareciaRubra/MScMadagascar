@@ -95,12 +95,9 @@ nodelabels(node = tested.nodes, i.c.5$max, adj = 1.2, bg = "transparent", col = 
 nodelabels(node = tested.nodes, pch = (as.numeric(non.drift.nodes)+17), cex=1.4, col = (as.numeric(non.drift.nodes)+9) )
 tiplabels(pch = 19, cex = gm.mean.no.na/10, adj = -2.5)
 
-
-
 tree.drift.test$`47`
 
 nodelabels()
-
 
 mask.n.size <- n.size[,2]>40
 ###Sample sizes #####
