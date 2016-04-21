@@ -242,14 +242,14 @@ Plot.Drift.Results <- function (tree, node.ref, info, font.size = 0.4, contrasts
   plot.phylo(tree, font = 3, no.margin = TRUE,  cex = font.size, edge.color = "darkgrey", edge.width = 3, label.offset = 1 )
   nodelabels(node = node.ref, 
              pie = results.ed[,1:3], cex=0.6, 
-             piecol = c("#FFAF02", "#0912C2", "#C3BBBF")  )
+             piecol = c("#c2a5cf", "#a6dba0", "#d9d9d9")  )
   nodelabels(node = node.ref, bg = "transparent", frame = "n",cex = 0.6, col = "black", adj = c(1.2, 1.1) )
   legend("bottomleft", inset = .08,
          title ="Drift test \nB.matrices obtained from ED",
          text.col = "grey10",
          legend = c("Rejected - Correlation", "Rejected - Regression", "Not rejected"), 
-         fill = c("#FFAF02", "#0912C2", "#C3BBBF"), 
-         col = c("#FFAF02", "#0912C2", "#C3BBBF"), 
+         fill = c("#c2a5cf", "#a6dba0", "#d9d9d9"), 
+         col = c("#c2a5cf", "#a6dba0", "#d9d9d9"), 
          border = "grey", box.lwd = "n",
          bg= "transparent",
          cex = 0.5)
@@ -257,14 +257,14 @@ Plot.Drift.Results <- function (tree, node.ref, info, font.size = 0.4, contrasts
   if (contrasts == TRUE) {plot.phylo(tree, font = 3, no.margin = TRUE,  cex = font.size, edge.color = "darkgrey", edge.width = 3, label.offset = 1 )
   nodelabels(node = node.ref, 
              pie = results.ci[,1:3], cex=0.6, 
-             piecol = c("#FFAF02", "#0912C2", "#C3BBBF")  )
+             piecol = c("#c2a5cf", "#a6dba0", "#d9d9d9")  )
   nodelabels(node = node.ref, bg = "transparent", frame = "n",cex = 0.6, col = "black", adj = c(1.1, 1.1) )
   legend("bottomleft", inset = 0.08,
          title ="Drift test \nB.matrices obtained from IC",
          text.col = "grey10",
          legend = c("Rejected - Correlation", "Rejected - Regression", "Not rejected"), 
-         fill = c("#FFAF02", "#0912C2", "#C3BBBF"), 
-         col = c("#FFAF02", "#0912C2", "#C3BBBF"), 
+         fill = c("#c2a5cf", "#a6dba0", "#d9d9d9") , 
+         col = c("#c2a5cf", "#a6dba0", "#d9d9d9") , 
          border = "grey", box.lwd = "n",
          bg= "transparent",
          cex = 0.5)
@@ -279,10 +279,10 @@ Plot.Drift.Results <- function (tree, node.ref, info, font.size = 0.4, contrasts
 }
 Drift.results.Toplot$Extants$Plots$Tree <- Plot.Drift.Results(tree = Trees$extant.sp.tree, 
                                                               info = Drift.results.Toplot$Extants$Results, 
-                                                              font.size = 0.4)
+                                                              font.size = 0.7, contrasts = F)
 Drift.results.Toplot$All.sp$Plots$Tree <- Plot.Drift.Results(tree = Trees$all.with.ed, 
                                                              info = Drift.results.Toplot$All.sp$Results, 
-                                                             font.size = 0.4)
+                                                             font.size = 0.7)
 
 
 drift.vai.porra$sum.abs.values <- Drift.alltests.tree$Correlation.test.Regular %>% llply(function (x) x$Correlation.p.value[1:39,1:39]) %>% llply(abs) %>% laply( function (x) x[lower.tri(x)]) %>% colSums 
@@ -361,3 +361,33 @@ Regression.Tree.plot <- plot_grid(
 Regression.Tree.plot 
 
 Drift.results$extant.sp$Regression.test$`101`$plot + geom_abline(slope = 1, color = "red") + ggtitle ("Indridae")
+
+Plot.Drift.regression <- function(regress.result) {
+  regressae <- data.frame( "log.B_variance" = regress.result$log.between_group_variance, "log.W_eVals" = regress.result$log.W_eVals, names = 1:(dim(mean.array)[2]) ) 
+  
+  if (regress.result$drift_rejected == T) beta <- "red" else "green"
+  empirical.c.i <- regress.result$coefficient_CI_95[2, ]
+  beta.coef <- lm(data = regressae[-1,], log.B_variance ~ log.W_eVals)$coefficients[2]
+  
+  plotows <- 
+    ggplot(regressae, aes (y = log.B_variance, x = log.W_eVals) ) +
+    geom_abline(slope = beta.coef, color = beta, size = 2, alpha = 0.4) +
+    geom_text(aes(label = names, size = 5)) + 
+    geom_smooth(method = "lm", color = beta) + 
+    labs(x = "log(W Eigenvalues)", y = "log(B variances)") + 
+    theme_bw() +
+    theme(legend.position = "none") +
+    geom_abline(slope = 1, color = "black") 
+  return(list("regression.plot" = plotows,
+              "beta.1" = regress.result$regression$coefficients[2], 
+              "beta.-1" = beta.coef, 
+              "IC95" = empirical.c.i, 
+              "drift.rejected" = regress.result$drift_rejected))
+}
+
+Plot.Drift.regression (regress.result = Drift.results$extant.sp$Regression.test$`134`)
+
+Drift.results.Toplot$Extants$Results$Regression <- Drift.results$extant.sp$Regression.test %>% llply(Plot.Drift.regression)
+
+
+Drift.results.Toplot$Extants$Results$Regression$`131`
