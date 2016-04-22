@@ -36,16 +36,18 @@ ggplot (.) +
 
 Modulemurs$AVG.ratio<- Modulemurs$test.modularity %>% ldply(function (x) x$`AVG Ratio`)
 names(Modulemurs$AVG.ratio) <- c("sp", Modulemurs$test.modularity$Tarsius_bancanus$hypothesis)
+Modulemurs$AVG.ratio$sp <- factor (Modulemurs$AVG.ratio$sp, levels = rev(unique(Modulemurs$AVG.ratio$sp)))
+Modulemurs$AVG.ratio$sp %<>% gsub("_", " ",.)
+Modulemurs$AVG.ratio$sp <- factor (Modulemurs$AVG.ratio$sp, levels = rev(unique(Modulemurs$AVG.ratio$sp)))
 rownames(Modulemurs$AVG.ratio) <- Modulemurs$AVG.ratio[,1]
 Modulemurs$AVG.ratio[,1] <- rownames(Modulemurs$AVG.ratio)
 
 Modulemurs$AVG.ratio %>% gather(key = "Region", value = AVG.ratio, 2:10) %>% 
   ggplot (.) +
-  geom_tile(aes(x = Region, y = sp, fill = AVG.ratio), alpha = 0.9,  color = "grey") +
+  geom_tile(aes(x = Region, y = sp, fill = abs(AVG.ratio)) , alpha = 0.9,  color = "grey") +
   #geom_point(aes(x =AVG.ratio, y = sp, color = as.numeric(AVG.ratio<= 0.05) ) ) +
   theme_bw() +
-  scale_fill_gradientn(name = 'AVG.ratio', colors = myPalette(100)) +
-  #scale_color_gradient(name = 'AVG.ratio', low = "transparent", high = "red" ) +
+  scale_fill_gradient2(name = 'AVG ratio', low = "transparent", mid = "#f46d43", high ="#d73027", midpoint = 3) +
   ylab ('') + xlab ('') +
   theme(axis.text.x = element_text(angle = 90, hjust = 0.5, vjust = 1, size = 8),
         axis.ticks = element_line(size = 0),
@@ -54,11 +56,35 @@ Modulemurs$AVG.ratio %>% gather(key = "Region", value = AVG.ratio, 2:10) %>%
         rect = element_blank(), 
         line = element_blank())
 
+Modulemurs$cor.pc1.flex <- cbind.data.frame("cor.Flex" = cor(abs(Modulemurs$AVG.ratio[, 2:10]), Flex$V1), 
+                                            "cor.PC1" = cor(abs(Modulemurs$AVG.ratio[, 2:10]), PC1.percent$V1))
+
+Flex <- Variae %>% ldply( function(x) mean(x$flex.dist))
+PC1.percent <- Variae %>% ldply( function(x) x$intervalo.mc.pc$observed[1] )
+AVG.r <- Modulemurs$AVG.ratio %>% gather(key = "Region", value = AVG.ratio, 2:10) 
+AVG.r$Flex <- rep(Flex$V1, 9) 
+AVG.r$PC1.percent <- rep(PC1.percent$V1, 9) 
+AVG.r$cor.flex <- rep(Modulemurs$cor.pc1.flex$cor.Flex, each = length(unique(AVG.r$sp)) )
+AVG.r$cor.PC1<- rep(Modulemurs$cor.pc1.flex$cor.PC1, each = length(unique(AVG.r$sp)) )
+AVG.r %>% tbl_df %>%
+  ggplot (aes(group = Region)) +
+  geom_smooth(aes(y = AVG.ratio, x = Flex), method = "lm") +
+  geom_text(aes(y = max(AVG.ratio), x = max(Flex) , label = cor.flex, group = Region)) +
+  geom_text(aes(y = AVG.ratio, x = Flex, label = sp), size = 2) + 
+  facet_wrap(~Region, scale = "free")
+AVG.r %>% tbl_df %>%
+  ggplot (aes(group =Region )) +
+  geom_smooth(method = "lm") +
+  geom_text(aes(y = max(AVG.ratio), x = max(Flex) , label = cor.PC1, group = Region)) +
+  geom_text(aes(label = sp), size = 2) + 
+  facet_wrap(~Region, scale = "free")
 
 
-Modulemurs$Probs
 
+
+  
 class(Modulemurs$test.modularity$Tarsius_bancanus$hypothesis)
+Variae$Tarsius_bancanus
 
 
 DistModular <- function (x, simulations = 100, modularity.hipot = Modular.hyp)
