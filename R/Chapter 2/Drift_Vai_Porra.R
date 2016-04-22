@@ -292,73 +292,29 @@ drift.vai.porra$mean.abs.values <- temp / length(Drift.alltests.tree$Correlation
 
 
 
-######### changing plot 
-tested.nodes <- as.numeric(names(tree.drift.test))
-non.drift.nodes <- laply(tree.drift.test, function(x) x$drift_rejected)
-i.c.5 <- ldply(tree.drift.test, function(x) x$coefficient_CI_95[2,])
-i.c.5<- ldply(tree.drift.test, function(x) x$coefficient_CI_95[1,])
-names(i.c.5) <- c('node', 'min', 'max')
-i.c.5$min <- round(i.c.5$min, digits=2)
-i.c.5$max <- round(i.c.5$max, digits=2)
+Correlation.Tree.plot <- plot_grid(
+  Drift.results$extant.sp$Correlation.test.Regular$`131`$P.value.plot + theme(legend.position = "none") + ggtitle ("Lorisiformes\n Galagidae x Lorisidae") ,
+  Drift.results$extant.sp$Correlation.test.Regular$`132`$P.value.plot + theme(legend.position = "none") + ggtitle ("Lorisidae") ,
+  Drift.results$extant.sp$Correlation.test.Regular$`134`$P.value.plot + theme(legend.position = "none") + ggtitle ("Nyc-Lor"), 
+  
+  Drift.results$extant.sp$Correlation.test.Regular$`99`$P.value.plot + theme(legend.position = "none") + ggtitle ("Lemuridae x Indridae") ,
+  Drift.results$extant.sp$Correlation.test.Regular$`100`$P.value.plot + theme(legend.position = "none") + ggtitle ("Indridae") ,
+  Drift.results$extant.sp$Correlation.test.Regular$`112`$P.value.plot + theme(legend.position = "none") + ggtitle ("Lemuridae") ,
+  
 
-# par(mfrow = c(1,1))
-par(mar=c(1,1,1,1))
+  Drift.results$extant.sp$Correlation.test.Regular$`76`$P.value.plot + theme(legend.position = "none") + ggtitle ("Lepilemuridae x Cheirogaleidae") ,
+  Drift.results$extant.sp$Correlation.test.Regular$`77`$P.value.plot + theme(legend.position = "none") + ggtitle ("Cheirogaleidae") ,
+  Drift.results$extant.sp$Correlation.test.Regular$`88`$P.value.plot + theme(legend.position = "none") + ggtitle ("Lepilemuridae") ,
 
-plot(pruned.tree.edited, font = 3, label.offset = 11, no.margin = T, edge.color = "grey80", edge.width = 5, cex= 0.9, x.lim = c(-8, 100) )
-
-#nodelabels(node = tested.nodes, thermo = as.numeric(non.drift.nodes))
-i.c.5 <- ldply(tree.drift.test, function(x) x$coefficient_CI_95[2,])
-names(i.c.5) <- c('node', 'min', 'max')
-i.c.5$min <- round(i.c.5$min, digits=2)
-i.c.5$max <- round(i.c.5$max, digits=2)
-nodelabels(node = tested.nodes , text = i.c.5$min, adj = 1.2, bg = "transparent", col = 'red', frame = "n", cex = i.c.5$min)
-nodelabels(node = tested.nodes, i.c.5$max, adj = -0.2, bg = "transparent", col = 'blue', frame = "n", cex = i.c.5$max)
-nodelabels(node = tested.nodes, pch = (as.numeric(non.drift.nodes)+17), cex=1.4, col = (as.numeric(non.drift.nodes)+5) )
-
-compare.stuff<- cbind( n.size[n.size[,1] %in% pruned.tree.edited$tip.label, ], gm.mean[gm.mean[,1] %in% pruned.tree.edited$tip.label, 2])
-names(compare.stuff) <- c('Especie', 'n', 'gm')
-compare.stuff<- compare.stuff[with(compare.stuff, order(Especie)), ]
-rownames(compare.stuff)<- compare.stuff$Especie
-compare.stuff<- picante::match.phylo.data(phy = pruned.tree.edited, data = compare.stuff)$data
-compare.stuff$n <- as.numeric(as.character(compare.stuff$n))
-compare.stuff$gm <- as.numeric(as.character(compare.stuff$gm))
-tiplabels(pch = 21, cex =compare.stuff$n/18, adj = 6)
-tiplabels(pch = 15, cex = compare.stuff$gm/9, adj = 9)
-nodelabels(node = tested.nodes, col = 'grey30', adj = c(0.5, 1.25), cex = 0.5, frame = "n")
-# compare.stuff$Especie <- compare.stuff[sort(compare.stuff[,1]),]
-
-par(mar=c(0,0,1,3)+0.1)
-plot(pruned.tree, font = 3, label.offset = -3, no.margin = T, edge.color = "grey80", edge.width = 5, cex= 1.1, direction ="leftwards", show.tip.label = T, col = "white")
-#nodelabels(node = tested.nodes, thermo = as.numeric(non.drift.nodes))
-i.c.5<- ldply(tree.drift.test, function(x) x$coefficient_CI_95[1,])
-names(i.c.5) <- c('node', 'min', 'max')
-names(intercept.ic) <- c('node', 'min', 'max')
-i.c.5$min <- round(i.c.5$min, digits=2)
-i.c.5$max <- round(i.c.5$max, digits=2)
-nodelabels(node = tested.nodes , i.c.5$min, adj = -0.2, bg = "transparent", col = 'red', frame = "n", cex = i.c.5$min*0.6)
-nodelabels(node = tested.nodes, i.c.5$max, adj = 1.2, bg = "transparent", col = 'blue', frame = "n", cex = i.c.5$max*0.6)
-nodelabels(node = tested.nodes, pch = (as.numeric(non.drift.nodes)+17), cex=1.4, col = (as.numeric(non.drift.nodes)+9) )
-tiplabels(pch = 19, cex = gm.mean.no.na/10, adj = -2.5)
-
-Drift.results$extant.sp$Regression.test$`71`$log.between_group_variance
-
-Regression.Tree.plot <- plot_grid(
-  Drift.results$extant.sp$Regression.test$`134`$plot + geom_abline(slope = 1, color = "red") + ggtitle ("Nyc-Lor"), 
-  Drift.results$extant.sp$Regression.test$`132`$plot + geom_abline(slope = 1, color = "red") + ggtitle ("Lorisidae") ,
-  Drift.results$extant.sp$Regression.test$`131`$plot + geom_abline(slope = 1, color = "green") + ggtitle ("Lorisiformes\n Galagidae x Lorisidae") ,
-  Drift.results$extant.sp$Regression.test$`112`$plot + geom_abline(slope = 1, color = "green") + ggtitle ("Lemuridae") ,
-  Drift.results$extant.sp$Regression.test$`100`$plot + geom_abline(slope = 1, color = "red") + ggtitle ("Indridae") ,
-  Drift.results$extant.sp$Regression.test$`99`$plot + geom_abline(slope = 1, color = "red") + ggtitle ("Lemuridae x Indridae") ,
-  Drift.results$extant.sp$Regression.test$`88`$plot + geom_abline(slope = 1, color = "red") + ggtitle ("Lepilemuridae") ,
-  Drift.results$extant.sp$Regression.test$`77`$plot + geom_abline(slope = 1, color = "green") + ggtitle ("Cheirogaleidae") ,
-  Drift.results$extant.sp$Regression.test$`76`$plot + geom_abline(slope = 1, color = "green") + ggtitle ("Lepilemuridae x Cheirogaleidae") ,
-  Drift.results$extant.sp$Regression.test$`75`$plot + geom_abline(slope = 1, color = "red") + ggtitle ("Lem-Ind x Lep-Che") ,
-  Drift.results$extant.sp$Regression.test$`74`$plot + geom_abline(slope = 1, color = "red") + ggtitle ("Lemuriformes\n Lemurs x Daubentonidae") ,
-  Drift.results$extant.sp$Regression.test$`73`$plot + geom_abline(slope = 1, color = "red") + ggtitle ("Strepsirrhini") ,
-  Drift.results$extant.sp$Regression.test$`71`$plot + geom_abline(slope = 1, color = "red") + ggtitle ("Prosimian\n Strepsirrhini + Tarsiidae") ,
+  Drift.results$extant.sp$Correlation.test.Regular$`73`$P.value.plot + theme(legend.position = "none") + ggtitle ("Strepsirrhini") ,
+  Drift.results$extant.sp$Correlation.test.Regular$`74`$P.value.plot + theme(legend.position = "none") + ggtitle ("Lemuriformes x Daubentonidae") ,
+  Drift.results$extant.sp$Correlation.test.Regular$`75`$P.value.plot + theme(legend.position = "none") + ggtitle ("Lemuriformes") ,
+  Drift.results$extant.sp$Correlation.test.Regular$`71`$P.value.plot + theme(legend.position = "none") + ggtitle ("Prosimian\n Strepsirrhini + Tarsiidae") ,
   ncol = 3)
 
-Regression.Tree.plot 
+Correlation.Tree.plot 
+save_plot(filename = "Figures/Correlation_Tree_plot.png", plot = Correlation.Tree.plot, 
+          base_aspect_ratio = 0.3, base_height = 15, base_width = 9.5)
 
 Drift.results$extant.sp$Regression.test$`101`$plot + geom_abline(slope = 1, color = "red") + ggtitle ("Indridae")
 
@@ -389,5 +345,28 @@ Plot.Drift.regression (regress.result = Drift.results$extant.sp$Regression.test$
 
 Drift.results.Toplot$Extants$Results$Regression <- Drift.results$extant.sp$Regression.test %>% llply(Plot.Drift.regression)
 
+Regression.Tree.plot <- plot_grid(
+  Drift.results$extant.sp$Regression.test$`131`$plot + ggtitle ("Lorisiformes\n Galagidae x Lorisidae") ,
+  Drift.results$extant.sp$Regression.test$`132`$plot + ggtitle ("Lorisidae") ,
+  Drift.results$extant.sp$Regression.test$`134`$plot + ggtitle ("Nyc-Lor"), 
+  
+  Drift.results$extant.sp$Regression.test$`99`$plot + ggtitle ("Lemuridae x Indridae") ,
+  Drift.results$extant.sp$Regression.test$`100`$plot + ggtitle ("Indridae") ,
+  Drift.results$extant.sp$Regression.test$`112`$plot + ggtitle ("Lemuridae") ,
+  
+  
+  Drift.results$extant.sp$Regression.test$`76`$plot + ggtitle ("Lepilemuridae x Cheirogaleidae") ,
+  Drift.results$extant.sp$Regression.test$`77`$plot + ggtitle ("Cheirogaleidae") ,
+  Drift.results$extant.sp$Regression.test$`88`$plot + ggtitle ("Lepilemuridae") ,
+  
+  Drift.results$extant.sp$Regression.test$`73`$plot + ggtitle ("Strepsirrhini") ,
+  Drift.results$extant.sp$Regression.test$`74`$plot + ggtitle ("Lemuriformes x Daubentonidae") ,
+  Drift.results$extant.sp$Regression.test$`75`$plot + ggtitle ("Lemuriformes") ,
+  Drift.results$extant.sp$Regression.test$`71`$plot + ggtitle ("Prosimian\n Strepsirrhini + Tarsiidae") ,
+  ncol = 3)
 
-Drift.results.Toplot$Extants$Results$Regression$`131`
+Regression.Tree.plot 
+
+Drift.results.Toplot$Extants$Results$Regression.Ed
+save_plot(filename = "R/Figures/Correlation_Tree_plot.pdf", plot = Correlation.Tree.plot, 
+          base_aspect_ratio = 0.9, base_height = 14, base_width = 4)
