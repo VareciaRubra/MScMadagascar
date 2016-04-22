@@ -105,12 +105,6 @@ Modulemurs$Plot$AVG.PC1 <- AVG.r %>% tbl_df %>%
 
 plot_grid(Modulemurs$Plot$AVG.Flex, Modulemurs$Plot$AVG.PC1, ncol = 2) #########################################################################################
 
-
-  
-class(Modulemurs$test.modularity$Tarsius_bancanus$hypothesis)
-Variae$Tarsius_bancanus
-
-
 DistModular <- function (x, simulations = 1000, modularity.hipot = Modular.hyp)
   {
   hypothesis <- c(dimnames(Modular.hyp)[[2]], "Full.integration")
@@ -125,80 +119,102 @@ DistModular <- function (x, simulations = 1000, modularity.hipot = Modular.hyp)
   AVG.rat <- matrix(data = NA, nrow = simulations, ncol = dim(Modular.hyp)[[2]]+ 1)
   colnames(AVG.rat) <- hypothesis
  
+  observed <- TestModularity(cor.matrix = x$matrix$cor, modularity.hipot = Modular.hyp , permutations = 1, MHI = F)
   
   for (i in 1:simulations)  {
     Mx.Cor <- var (rmvnorm (x$sample.size, sigma = x$matrix$cor, method = 'svd') )
-    modular <- TestModularity(cor.matrix = Mx.Cor, modularity.hipot = Modular.hyp , permutations = 200, MHI = F) 
+    modular <- TestModularity(cor.matrix = Mx.Cor, modularity.hipot = Modular.hyp , permutations = 1, MHI = F) 
     
     Rsquared [i, ] <- modular$Rsquared
     AVG.plus [i, ] <- modular$`AVG+`
     AVG.minus [i, ] <- modular$`AVG-`
-    Probability [i, ] <-  modular$Probability
+   # Probability [i, ] <-  modular$Probability
     AVG.rat [i, ] <-  modular$`AVG Ratio`
   }
   plotaisso <- cbind(rep (unique(x$info.raw$Especie), simulations),
-  melt(Probability, value.name = "Probability")[2:3],
-  melt(AVG.plus, value.name = "AVG+")[3],
+ # melt(Probability, value.name = "Probability")[2:3],
+  melt(AVG.plus, value.name = "AVG+")[2:3],
   melt(AVG.minus, value.name = "AVG-")[3] )
   names(plotaisso)[1:2] <- c("sp", "hyp")
   
   who <- unique(x$info.raw$Especie)
-  Probs <- cbind(rep (unique(x$info.raw$Especie), simulations), melt(Probability, value.name = "Probability")[2:3])
-  names(Probs)[1:2] <- c("sp", "hyp")
+  #Probs <- cbind(rep (unique(x$info.raw$Especie), simulations), melt(Probability, value.name = "Probability")[2:3])
+  #names(Probs)[1:2] <- c("sp", "hyp")
   AVG.r <- cbind(rep (unique(x$info.raw$Especie), simulations), melt(AVG.rat, value.name = "AVG.rat")[2:3])
   names(AVG.r)[1:2] <- c("sp", "hyp")
-  AVG.r.plot <- AVG.r %>% 
-    ggplot(., aes (x = hyp, y = AVG.rat, group = hyp)) +
-    geom_violin() +
-    ggtitle(who) 
+  # AVG.r.plot <- AVG.r %>% 
+  #   ggplot(., aes (x = hyp, y = abs(AVG.rat), group = hyp)) +
+  #   geom_violin() +
+  #   ggtitle(who) 
+
+  Plotavg <- data.frame("sp" = as.character(rep(unique(AVG.r$sp), 9)),
+        "hypotesis"= observed$hypothesis,
+        "AVG.ratio" = observed$`AVG Ratio`,
+        "mean" = AVG.r %>%  group_by(hyp) %>% summarise_each(funs(mean(abs(.))), abs(AVG.rat)) %>% as.data.frame%>% .[,2],
+        "min" = AVG.r %>%  group_by(hyp) %>% summarise_each(funs(sort(abs(.))[simulations*0.025]), abs(AVG.rat) ) %>% as.data.frame%>% .[,2],
+        "max" = AVG.r %>%  group_by(hyp) %>% summarise_each(funs(sort(abs(.))[simulations*0.975]), abs(AVG.rat) ) %>% as.data.frame %>% .[,2] )
   
-  plot <- plotaisso %>% melt %>%
-    ggplot(., aes(x = variable, y = value, group = interaction(hyp, variable))) +
+  AVG.r.plot <- Plotavg %>% 
+    ggplot (data = ., aes (group = sp) ) + 
+    geom_linerange(aes(x = sp, ymin = min, ymax = max, group = interaction (hypotesis, sp)), size =4, alpha = 0.2) +
+    geom_point(aes(x = sp, y = mean, group = interaction (hypotesis, sp)), size = 4, color = "darkgrey", alpha = 0.7) +
+    geom_point(aes(x = sp, y = AVG.ratio, group = interaction (hypotesis, sp))) +
+    facet_wrap(~ hypotesis) + theme_bw() + coord_flip() + xlab("") + ylab("AVG ratio")
+
+plot <- plotaisso %>% melt %>%
+    ggplot(., aes(x = variable, y = abs(value), group = interaction(hyp, variable))) +
     geom_boxplot(aes(group = variable)) +
     ggtitle(who) +
-    facet_wrap(~hyp, ncol = 3)
-  
-  return(list ("plotaisso" = plotaisso,
-               "plot" = plot,
-               "probability" =  Probs, 
+    facet_wrap(~hyp, ncol = 3) + theme_bw() + ylab("absolute value") + xlab("")
+
+  return(list ("plotaisso" = Plotavg,
                "AVG.r" =  AVG.r,
+               "AVG.+-.plot" = plot,
                "AVG.r.plot" = AVG.r.plot
-               ) )
+                ) )
 }
 
-temp <- DistModular(x = sp.main.data$Varecia_variegata, simulations = 1000, modularity.hipot =  Modular.hyp )
-boxplot(temp$probability$Probability)
-temp$plot
+temp <- DistModular(x = sp.main.data$Varecia_variegata, simulations = 100, modularity.hipot =  Modular.hyp )
+temp$AVG.r.plot
+temp$`AVG.+-.plot`
 temp$AVG.r %>% ggplot(., aes (x = hyp, y = AVG.rat, group = hyp)) +
   geom_violin() +
   geom_boxplot() +
-  geom_point(aes (x = hyp, y = mean(AVG.rat), group = hyp) )
-  geom_errorbar(aes(x = hyp, ymin = min(AVG.r), ymax = max(AVG.r), group = hyp ))+
+  geom_point(aes (x = hyp, y = mean(AVG.rat), group = hyp) ) +
+  #geom_errorbar(aes(x = hyp, ymin = min(AVG.r), ymax = max(AVG.r), group = hyp ))+
   ggtitle(who) 
 
-Modulemurs$test.modularity.dist <- sp.main.data[mask.no.na.cov] %>% llply(function (x) DistModular(x = x, simulations = 100, modularity.hipot =  Modular.hyp) , .progress = "text")
+temp$plotaisso$hypotesis <- factor(as.factor(temp$plotaisso$hypotesis), levels = unique(temp$plotaisso$hypotesis))
+temp$AVG.r$sp
+temp$plotaisso %>% head 
+
+Modulemurs$test.modularity.dist <- sp.main.data[mask.no.na.cov] %>% llply(function (x) DistModular(x = x, simulations = 1000, modularity.hipot =  Modular.hyp) , .progress = "text")
 save(Modulemurs, file = "Data/Modularity.RData")
 
+Modulemurs$Plot$Oral <- Modulemurs$test.modularity.dist %>%  # pot em 10 x 15
+  ldply(function(x) x$plotaisso) %>% filter (sp != "Euoticus_elegantulus") %>% 
+  filter (sp != "Prolemur_simus") %>% 
+  filter (hypotesis == "Oral") %>% 
+  ggplot (data = ., aes (group = sp) ) + 
+  geom_linerange(aes(x = sp, ymin = min, ymax = max, group = interaction (hypotesis, sp)), size =4, alpha = 0.2) +
+  geom_point(aes(x = sp, y = mean, group = interaction (hypotesis, sp)), size = 4, color = "darkgrey", alpha = 0.7) +
+  geom_point(aes(x = sp, y = abs(AVG.ratio), group = interaction (hypotesis, sp))) +
+  facet_wrap(~ hypotesis) + theme_bw() + coord_flip() + xlab("") + ylab("AVG ratio")
 
-Modulemurs$test.modularity.dist %>% ldply(function(x) x$probability) %>% melt %>% 
-  ggplot(., aes(x = variable, y = value, group = interaction(variable, hyp, sp))) +
-  geom_violin() +
-  facet_wrap(~hyp, ncol = 3)
+Modulemurs$Plot$AVG.ratio <- plot_grid(Modulemurs$Plot$Oral, 
+          Modulemurs$Plot$Nasal + theme(axis.text.y = element_blank() ), 
+          Modulemurs$Plot$Zygomatic+ theme(axis.text.y = element_blank() ), 
+          Modulemurs$Plot$Orbit, 
+          Modulemurs$Plot$Base+ theme(axis.text.y = element_blank() ), 
+          Modulemurs$Plot$Vault+ theme(axis.text.y = element_blank() ), 
+          Modulemurs$Plot$Face, 
+          Modulemurs$Plot$Neuro+ theme(axis.text.y = element_blank() ), 
+          Modulemurs$Plot$Full+ theme(axis.text.y = element_blank() ), ncol = 3, rel_widths = c(1.8,1,1,1.8,1,1,1.9,1,1))
 
-
-Modulemurs$test.modularity.dist %>% ldply(function(x) x$plotaisso[, 3]) %>% melt %>% 
-  ggplot(., aes(x = variable, y = value, group = interaction(variable, hyp, sp))) +
-  geom_boxplot(aes(group = interaction (variable, hyp, sp))) +
-  facet_wrap(~hyp, ncol = 3)
-
-Modulemurs$test.modularity.dist %>% ldply(function(x) x$plotaisso[, -3]) %>% melt %>% head
-  ggplot(., aes(x = variable, y = value, group = interaction(variable, hyp, sp))) +
-  geom_boxplot(aes(group = interaction (variable, hyp, sp))) +
-  facet_wrap(~hyp, ncol = 3)
-
-  temp <- 
-    Modulemurs$test.modularity.dist %>% llply(function(x) apply (x, 1 , FUN = x$plotaisso$`AVG+`/x$plotaisso$`AVG-`) ) %>% head
-
+Modulemurs$test.modularity.dist %>% ldply(function(x) x$plotaisso) %>% melt %>% 
+  ggplot(., aes(x = variable, y = value, group = interaction(variable, hypotesis, .id))) +
+  geom_boxplot(aes(group = interaction (variable, hypotesis, .id))) +
+  facet_wrap(~hypotesis, ncol = 3)
 
 
 Modulemurs$test.modularity.dist$Tarsius_bancanus$plotaisso$`AVG+`/ Modulemurs$test.modularity.dist$Tarsius_bancanus$plotaisso$`AVG-`
