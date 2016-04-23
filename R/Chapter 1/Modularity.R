@@ -62,7 +62,6 @@ criminosos <- criminosos== FALSE
 Modulemurs$cor.pc1.flex <- cbind.data.frame("cor.Flex" = cor(abs(Modulemurs$AVG.ratio[criminosos, 2:10]), Flex$V1[criminosos]), 
                                             "cor.PC1" = cor(abs(Modulemurs$AVG.ratio[criminosos, 2:10]), PC1.percent$V1[criminosos]),
                                             "cor.r2" = cor(abs(Modulemurs$AVG.ratio[criminosos, 2:10]), r2.stuff[42:1,2][criminosos,]))
-r2.stuff[42:1,]
 Flex <- Variae %>% ldply( function(x) mean(x$flex.dist))
 PC1.percent <- Variae %>% ldply( function(x) x$intervalo.mc.pc$observed[1] )
 R2 <- Variae %>% ldply(function(x) mean(x$r2.dist ))
@@ -73,7 +72,6 @@ AVG.r$r2 <- rep(R2$V1, 9)
 AVG.r$cor.flex <- rep(Modulemurs$cor.pc1.flex$cor.Flex, each = length(unique(AVG.r$sp)) )
 AVG.r$cor.PC1<- rep(Modulemurs$cor.pc1.flex$cor.PC1, each = length(unique(AVG.r$sp)) )
 AVG.r$cor.r2<- rep(Modulemurs$cor.pc1.flex$mean, each = length(unique(AVG.r$sp)) )
-
 
 Modulemurs$Plot$AVG.Flex <- AVG.r %>% tbl_df %>% filter (sp != "Euoticus elegantulus") %>% filter (sp != "Prolemur simus")%>% filter (sp != "Tarsius syrichta")%>%
   ggplot (aes(group = Region)) +
