@@ -1,7 +1,7 @@
 #### from Proa et al, Evolution, 2013:
 # TYPE I ERROR RATES FOR TESTING GENETIC DRIFT WITH PHENOTYPIC COVARIANCE MATRICES: A SIMULATION STUDY
 
-simulateGP<-function(method, m, tNe, pop, n, sim.n, G="NULL", P="NULL")
+simulateGP<-function(method, m, tNe, pop, n, sim.n, G, P)
   {
   #method = choose "sim1", "sim2", "sim3", "sim4", "sim5", according to description in manuscript and bellow
   #m = genetic covariance matrix dimension
@@ -10,66 +10,24 @@ simulateGP<-function(method, m, tNe, pop, n, sim.n, G="NULL", P="NULL")
   #n = sample size for each population
   #sim.n = number of simulations
 
-  
-  #define an empty variable to contain the results
+    #define an empty variable to contain the results
   beta <- vector()
   prob <- vector()
   require(MASS)
   require(clusterGeneration)
   
-  for (i in 1:sim.n) 
+   for (i in 1:sim.n) 
   {
-    if (method=="sim1")
-    {
-      if (G=="NULL") 
-      {
-        stop("you need to provide a valid G matrix!\n") 
-      }
-      if (P=="NULL") {stop("you need to provide a valid P matrix!\n") 
-      }
-      #Predetermined G and P will be used 
-      ###### segundo o artigo é meter a W no lugar da P e a B no lugar da G
-    }
-    if (method=="sim2")
-    {
-      #G is defined as a random positive definite matrix, and P = xG, only different by a random constant of proportionality.
-#       if (G=="NULL") 
-#       {
-#         stop("you need to provide a valid G matrix!\n") 
-#       }
-#       
-      # G <- genPositiveDefMat(dim=m,lambdaLow=1,ratioLambda=10)$Sigma ################# colocar aqui a W
-      P <- runif(1,min=1,max=10)*G
-    }
-    if (method=="sim3")
-    {
-      #G and P matrices are defined randomly and independently from each other, with the constraint that the variances in P are always larger than the respective variances in G.
-      G <- genPositiveDefMat(dim = m, covMethod = "unifcorrmat", rangeVar = c(1,10))$Sigma
-      R <- G + genPositiveDefMat(dim = m, covMethod = "unifcorrmat", rangeVar = c(1,15))$Sigma
-      var<-runif(m,2,9)*diag(G)
-      P<-diag(sqrt(var))%*%R%*%diag(sqrt(var))
-    }
-    if (method=="sim4")
-    {
-      #G and E matrices are defined randomly and independently from each other, whereas P = G+E. P and G do not share a common PC structure but are related
-      G <- genPositiveDefMat(dim = m, covMethod = "unifcorrmat", rangeVar = c(1,10))$Sigma
-      P <- G + genPositiveDefMat(dim = m, covMethod = "unifcorrmat", rangeVar = c(1,15))$Sigma
-    }
-    if (method=="sim5")
-    {
-      #G and E matrices are defined randomly and independently from each other, whereas P = G+E. P and G share a common PC structure
-      G <- genPositiveDefMat(dim=m, lambdaLow=1, ratioLambda=10)$Sigma
-      P <- G + genPositiveDefMat(dim=m, covMethod="unifcorrmat", rangeVar = c(1,5))$Sigma
-    }
+         #if (method=="sim1")
+         #Predetermined G and P will be used
+         if (method=="sim2") {  P <- runif(1,min=1,max=10)*G   }
     #generate samples from pop populations with n obs each. the ancestral vector is composed of m zeros.
     M <-mvrnorm(pop, rep(0, ncol(G)), tNe*G)
     group <- factor( rep( seq(1:pop), each = n))
     data <- matrix(0, pop*n, ncol(P) )
-    #for (j in 1: (n*pop) )
-    #{
-    #  data[j,] <- mvrnorm(1, M[group[j],], P)
-    #}
     
+    for (j in 1: (n*pop) ) {data[j,] <- mvrnorm(1, M[group[j],], P)}
+
     data<-adply(1: (n*pop), 1, function(j) mvrnorm(1, M[group[j],], P))[,-1]
     #calculate matrix of mean vectors from simulations
     
@@ -128,7 +86,7 @@ simulateGPBeta<-function(method, m, tNe, pop, n, sim.n, G="NULL", P="NULL",smax)
     if (method=="sim2")
     {
       #G is defined as a random positive definite matrix, and P = xG, only different by a random constant of proportionality.
-      G<-genPositiveDefMat(dim=m,lambdaLow=1,ratioLambda=10)$Sigma
+      #G<-genPositiveDefMat(dim=m,lambdaLow=1,ratioLambda=10)$Sigma
       P<-runif(1,min=1,max=10)*G
     }
     if (method=="sim3")

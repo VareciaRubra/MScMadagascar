@@ -31,49 +31,54 @@ MatrixCompare(B.sumsqr, Ancestral.Matrices$`42`)
 registerDoParallel(cores = 2)
 Proa <- vector("list", 5)
 
-Proa$Sim1 <- 
-          simulateGP(method = "sim1", 
-                        m = dim(cov.mx[[1]])[1], 
-                        tNe = 0.001, 
-                        pop = length(n.size[mask.madagascar & mask.no.na.cov]),
-                        n = 40,
-                        sim.n = 1000,
-                        G = B.sumsqr, 
-                        P = ancestral.mx$`42`)
+# Quando rodei o teste de deriva mandei ele salvar todos os pares de B e W por nó.
+# isso está armazenado em:
+Drift.results$extant.sp$BW.compare$
 
-Proa$Sim2 <- simulateGP(method = "sim2", 
+Proa$Sim1.lower <- simulateGP(method = "sim1", 
                         m = dim(cov.mx[[1]])[1], 
-                        tNe = 0.001, 
-                        pop = length(n.size[mask.madagascar & mask.no.na.cov]),
+                        tNe =1.25, 
+                        pop = length(n.size[mask.extant, 2]),
                         n = 40,
                         sim.n = 1000,
-                        G = B.sumsqr, 
-                        P = Ancestral.Matrices$`45`)
+                        G = Drift.results$extant.sp$BW.compare$`71`$W, 
+                        P = Drift.results$extant.sp$BW.compare$`71`$B.ed)
+Proa$Sim1.lower$TypeIerror
+Proa$Sim1.lower$Beta.ic
 
-Proa$Sim3 <- simulateGP(method = "sim3", 
+Proa$Sim1.upper <- simulateGP(method = "sim1", 
                         m = dim(cov.mx[[1]])[1], 
-                        tNe = 0.001, 
-                        pop = length(n.size[mask.madagascar & mask.no.na.cov]),
+                        tNe =700, 
+                        pop = length(n.size[mask.extant, 2]),
                         n = 40,
                         sim.n = 1000,
-                        G = B.sumsqr, 
-                        P = Ancestral.Matrices$`45`)
-Proa$Sim4 <- simulateGP(method = "sim4", 
-                        m = dim(cov.mx[[1]])[1], 
-                        tNe = 0.001, 
-                        pop = length(n.size[mask.madagascar & mask.no.na.cov]),
-                        n = 40,
-                        sim.n = 1000,
-                        G = B.sumsqr, 
-                        P = Ancestral.Matrices$`45`)
-Proa$Sim5 <- simulateGP(method = "sim5", 
-                        m = dim(cov.mx[[1]])[1], 
-                        tNe = 0.001, 
-                        pop = length(n.size[mask.madagascar & mask.no.na.cov]),
-                        n = 40,
-                        sim.n = 1000,
-                        G = B.sumsqr, 
-                        P = Ancestral.Matrices$`45`)
+                        G = Drift.results$extant.sp$BW.compare$`71`$W, 
+                        P = Drift.results$extant.sp$BW.compare$`71`$B.ed)
+Proa$Sim1.upper$TypeIerror
+Proa$Sim1.upper$Beta.ic
+
+
+Proa$Sim2.lower <- simulateGP(method = "sim2", 
+                              m = dim(cov.mx[[1]])[1], 
+                              tNe =1.25, 
+                              pop = length(n.size[mask.extant, 2]),
+                              n = 40,
+                              sim.n = 1000,
+                              G = Drift.results$extant.sp$BW.compare$`71`$W, 
+                              P = Drift.results$extant.sp$BW.compare$`71`$B.ed)
+Proa$Sim2.lower$TypeIerror
+Proa$Sim2.lower$Beta.ic
+
+Proa$Sim2.upper <- simulateGP(method = "sim2", 
+                              m = dim(cov.mx[[1]])[1], 
+                              tNe =700, 
+                              pop = length(n.size[mask.extant, 2]),
+                              n = 40,
+                              sim.n = 1000,
+                              G = Drift.results$extant.sp$BW.compare$`71`$W, 
+                              P = Drift.results$extant.sp$BW.compare$`71`$B.ed)
+Proa$Sim2.upper$TypeIerror
+Proa$Sim2.upper$Beta.ic
 
 save.image("~/MScMadagascar/.RData")
 

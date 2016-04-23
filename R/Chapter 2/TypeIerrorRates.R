@@ -67,3 +67,54 @@ Plot.Drift.Results(tree = Trees$extant.sp.tree,
 
 Drift.results.Toplot$Fixed$Plots$Corr.Ed.1  <- Drift.results$fixed$Correlation.W.fixed %>% llply(function (x) x$P.value.plot) %>% llply(function(x) x + theme(legend.position = "none") ) %>% cowplot::plot_grid(plotlist = .) 
 
+GetBW<- function (tree, mean.list, cov.matrix.list, sample.sizes = NULL) 
+{
+  if (!all(tree$tip.label %in% names(mean.list))) 
+    stop("All tip labels must be in names(mean.list).")
+  if (!all(tree$tip.label %in% names(cov.matrix.list))) 
+    stop("All tip labels must be in names(cov.matrix.list).")
+  cov.matrices <- PhyloW(tree, cov.matrix.list, sample.sizes)
+  
+  nodes <- names(cov.matrices)
+  node.mask <- laply(nodes, function(x) length(getMeans(mean.list, tree, x))) > 3
+  if (!any(node.mask)) 
+    stop("For the regression test:/nAt least one node must have more than 4 descendents in mean.list")
+  
+  ind.cont<- ldply(mean.list, function(x) x) 
+  rownames(ind.cont) <- ind.cont[,1]
+  ind.cont <- ind.cont[,-1]
+  ind.cont <- apply(ind.cont, 2, FUN = function (x) ape::pic(x, tree) ) 
+  
+  BW.compare <- llply(nodes[node.mask], function(node) DumBW.compare(means = getMeans(mean.list, tree, node), 
+                                                                     contrasts = getContrasts(ind.cont, tree, node), 
+                                                                     W.mx = cov.matrices[[node]])  )
+  names(BW.compare) <- nodes[node.mask]
+  
+  test.list.reg <- llply(nodes[node.mask], function(node) DriftTest0(means = getMeans(mean.list, tree, node), 
+                                                                     cov.matrix = cov.matrices[[node]], 
+                                                                     show.plot = FALSE))
+  names(test.list.reg) <- nodes[node.mask]
+  
+  return(list ("Observed.Regression.Test" = test.list.reg,
+               "BW.compare" = BW.compare
+  ) )
+}
+
+BWtoSimulate <- vector("list")
+
+BWtoSimulate$All.sp <- GetBW(tree = Trees$all.with.ed, 
+                             mean.list = All.sp.data$means[mask.at.tree][rowSums(missing.ed) == 39], 
+                             cov.matrix.list = All.sp.data$cov.mx[mask.at.tree][rowSums(missing.ed) == 39], 
+                             sample.sizes = All.sp.data$n.sizes[mask.at.tree][rowSums(missing.ed) == 39] )
+
+BWtoSimulate$Extants <- GetBW(tree = Trees$extant.sp.tree, 
+                              mean.list = All.sp.data$means[mask.extant & mask.at.tree], 
+                              cov.matrix.list = All.sp.data$cov.mx[mask.extant & mask.at.tree], 
+                              sample.sizes = All.sp.data$n.sizes[mask.extant & mask.at.tree] )
+
+
+P <- BWtoSimulate$Extants$BW.compare$`71`$B.ed
+G <- BWtoSimulate$Extants$BW.compare$`71`$W
+pop <- BWtoSimulate$Extants$BW.compare$`71`$B.sample.size
+
+
