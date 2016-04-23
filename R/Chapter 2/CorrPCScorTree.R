@@ -257,6 +257,7 @@ MatrixCompare(var(contrasts), Ancestral.Matrices$`42`)
 DumBW.compare <- function (means, contrasts, W.mx) {
   B.ed <- var(laply(means, identity) ) 
   B.ic <- var(as.matrix(contrasts)  ) 
+  n <- length(means)
   BW.compare <- data.frame (BedBic = MatrixCompare(B.ed, B.ic)$correlation,
                            BedW = MatrixCompare(B.ed, W.mx)$correlation,
                            BicW = MatrixCompare(B.ic, W.mx)$correlation , 
@@ -266,7 +267,8 @@ DumBW.compare <- function (means, contrasts, W.mx) {
   return (list ("BW.compare" = BW.compare,
                 "B.ed" = B.ed,
                 "B.ic" = B.ic,
-                "W" = W.mx) )
+                "W" = W.mx,
+                "B.sample.size" = n) )
   
 }
 DumBW.compare(means = ed.means.with.mx[-41], contrasts = contrasts, W.mx = ancestral.mx$`45`)
