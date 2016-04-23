@@ -1,10 +1,10 @@
 Modular.hyp <- Aux$def.hyp[c(2:20, 1, 21:39),] # pegando as hipoteses modulares do arquivo auxiliat do Pato
-Modular.hyp[21,] <- c(0,0,1,0,0,1,1,1) # mas ele tem logCS e nao tem PT.TSP, enfiemolhos!
+Modular.hyp[20,] <- c(0,0,1,0,0,1,1,1) # mas ele tem logCS e nao tem PT.TSP, enfiemolhos!
 rownames(Modular.hyp)[20] <- "PT.TSP"
 
 Modulemurs <- vector("list")
 Modulemurs$test.modularity <- sp.main.data[mask.no.na.cov] %>% 
-  llply (function (x) TestModularity(cor.matrix = x$matrix$cor, modularity.hipot = Modular.hyp , permutations = 10000, MHI = F), .progress = "text")
+  llply (function (x) TestModularity(cor.matrix = x$matrix$cor, modularity.hipot = Modular.hyp , permutations = 1000, MHI = F), .progress = "text")
 
 Modulemurs$Probability<- Modulemurs$test.modularity %>% ldply(function (x) x$Probability)
 names(Modulemurs$Probability) <- c("sp", Modulemurs$test.modularity$Tarsius_bancanus$hypothesis)
@@ -56,28 +56,6 @@ Modulemurs$AVG.ratio %>% gather(key = "Region", value = AVG.ratio, 2:10) %>%
         rect = element_blank(), 
         line = element_blank())
 
-Modulemurs$AVG.ratio<- Modulemurs$test.modularity %>% ldply(function (x) x$`AVG Ratio`)
-names(Modulemurs$AVG.ratio) <- c("sp", Modulemurs$test.modularity$Tarsius_bancanus$hypothesis)
-Modulemurs$AVG.ratio$sp <- factor (Modulemurs$AVG.ratio$sp, levels = rev(unique(Modulemurs$AVG.ratio$sp)))
-Modulemurs$AVG.ratio$sp %<>% gsub("_", " ",.)
-Modulemurs$AVG.ratio$sp <- factor (Modulemurs$AVG.ratio$sp, levels = rev(unique(Modulemurs$AVG.ratio$sp)))
-rownames(Modulemurs$AVG.ratio) <- Modulemurs$AVG.ratio[,1]
-Modulemurs$AVG.ratio[,1] <- rownames(Modulemurs$AVG.ratio)
-
-Modulemurs$AVG.ratio %>% gather(key = "Region", value = AVG.ratio, 2:10) %>% 
-  ggplot (.) +
-  geom_tile(aes(x = Region, y = sp, fill = abs(AVG.ratio)) , alpha = 0.9,  color = "grey") +
-  #geom_point(aes(x =AVG.ratio, y = sp, color = as.numeric(AVG.ratio<= 0.05) ) ) +
-  theme_bw() +
-  scale_fill_gradient2(name = 'AVG ratio', low = "transparent", mid = "#f46d43", high ="#d73027", midpoint = 3) +
-  ylab ('') + xlab ('') +
-  theme(axis.text.x = element_text(angle = 90, hjust = 0.5, vjust = 1, size = 8),
-        axis.ticks = element_line(size = 0),
-        axis.text.y = element_text(face = "italic", size= 10),
-        #legend.position = "none",
-        rect = element_blank(), 
-        line = element_blank())
-
 Modulemurs$cor.pc1.flex <- cbind.data.frame("cor.Flex" = cor(abs(Modulemurs$AVG.ratio[, 2:10]), Flex$V1), 
                                             "cor.PC1" = cor(abs(Modulemurs$AVG.ratio[, 2:10]), PC1.percent$V1))
 
@@ -90,18 +68,20 @@ AVG.r$cor.flex <- rep(Modulemurs$cor.pc1.flex$cor.Flex, each = length(unique(AVG
 AVG.r$cor.PC1<- rep(Modulemurs$cor.pc1.flex$cor.PC1, each = length(unique(AVG.r$sp)) )
 Modulemurs$Plot$AVG.Flex <- AVG.r %>% tbl_df %>%
   ggplot (aes(group = Region)) +
-  geom_smooth(aes(y = AVG.ratio, x = Flex), method = "lm") +
-  geom_text(aes(y = 3, x = 0.27 , label = round(cor.flex,2), group = Region)) +
-  #geom_text(aes(y = AVG.ratio, x = Flex, label = sp), size = 2) + 
-  geom_point(aes(y = AVG.ratio, x = Flex), size = 1, color = "darkgrey") + 
-  facet_wrap(~Region, scale = "free")
+ geom_point(aes(y = abs(AVG.ratio), x = Flex), size = 1, color = "darkgrey") + 
+  geom_text(aes(y = 4.2, x = 0.37 , label = paste ("r=", round(cor.flex,2) ), group = Region)) +
+  geom_text(aes(y = AVG.ratio, x = Flex, label = sp), size = 3, alpha = 0.8) + 
+  geom_smooth(aes(y = abs(AVG.ratio), x = Flex), method = "lm") +
+  facet_wrap(~Region) + theme_bw() +
+  theme(axis.text = element_text(size = 7))
 Modulemurs$Plot$AVG.PC1 <- AVG.r %>% tbl_df %>%
   ggplot (aes(group = Region )) +
-  geom_smooth(aes(y = AVG.ratio, x = PC1.percent), method = "lm") +
-  geom_text(aes(y = 3, x = 0.65 , label = round(cor.PC1, 2), group = Region)) +
-  #geom_text(aes(y = AVG.ratio, x = PC1.percent, label = sp), size = 2) + 
-  geom_point(aes(y = AVG.ratio, x = PC1.percent), size = 1, color = "darkgrey") + 
-  facet_wrap(~Region, scale = "free")
+  geom_point(aes(y = abs(AVG.ratio), x = PC1.percent), size = 1, color = "darkgrey") + 
+  geom_text(aes(y = 4.2, x = 0.45 , label = paste("r=", round(cor.PC1, 2)), group = Region)) +
+  geom_text(aes(y = AVG.ratio, x = PC1.percent, label = sp),  size = 3, alpha = 0.8) + 
+  geom_smooth(aes(y = abs(AVG.ratio), x = PC1.percent), method = "lm", alpha = 0.5) +
+  facet_wrap(~Region)+ theme_bw() +
+  theme(axis.text = element_text(size = 7))
 
 plot_grid(Modulemurs$Plot$AVG.Flex, Modulemurs$Plot$AVG.PC1, ncol = 2) #########################################################################################
 
@@ -184,10 +164,6 @@ temp$AVG.r %>% ggplot(., aes (x = hyp, y = AVG.rat, group = hyp)) +
   #geom_errorbar(aes(x = hyp, ymin = min(AVG.r), ymax = max(AVG.r), group = hyp ))+
   ggtitle(who) 
 
-temp$plotaisso$hypotesis <- factor(as.factor(temp$plotaisso$hypotesis), levels = unique(temp$plotaisso$hypotesis))
-temp$AVG.r$sp
-temp$plotaisso %>% head 
-
 Modulemurs$test.modularity.dist <- sp.main.data[mask.no.na.cov] %>% llply(function (x) DistModular(x = x, simulations = 1000, modularity.hipot =  Modular.hyp) , .progress = "text")
 save(Modulemurs, file = "Data/Modularity.RData")
 
@@ -209,7 +185,7 @@ Modulemurs$Plot$AVG.ratio <- plot_grid(Modulemurs$Plot$Oral,
           Modulemurs$Plot$Vault+ theme(axis.text.y = element_blank() ), 
           Modulemurs$Plot$Face, 
           Modulemurs$Plot$Neuro+ theme(axis.text.y = element_blank() ), 
-          Modulemurs$Plot$Full+ theme(axis.text.y = element_blank() ), ncol = 3, rel_widths = c(1.8,1,1,1.8,1,1,1.9,1,1))
+          Modulemurs$Plot$Full+ theme(axis.text.y = element_blank() ), ncol = 3, rel_widths = c(1.8,1,1,1.8,1,1,1.9,1,1))  ################ 
 
 Modulemurs$test.modularity.dist %>% ldply(function(x) x$plotaisso) %>% melt %>% 
   ggplot(., aes(x = variable, y = value, group = interaction(variable, hypotesis, .id))) +
@@ -217,7 +193,42 @@ Modulemurs$test.modularity.dist %>% ldply(function(x) x$plotaisso) %>% melt %>%
   facet_wrap(~hypotesis, ncol = 3)
 
 
-Modulemurs$test.modularity.dist$Tarsius_bancanus$plotaisso$`AVG+`/ Modulemurs$test.modularity.dist$Tarsius_bancanus$plotaisso$`AVG-`
+Modulemurs$Plot$AVG.ratio.selected <- Modulemurs$test.modularity.dist %>%  # pot em 10 x 15
+  ldply(function(x) x$plotaisso) %>% 
+  filter (sp == "Galago_senegalensis" | 
+            sp == "Otolemur_crassicaudatus" |
+            sp = "Euoticus_elegantulus" |
+            sp == "Nycticebus_coucang" |
+            sp == "Loris_tardigradus" | 
+            sp == "Perodicticus_potto" |
+            sp == "Daubentonia_madagascariensis" |
+            sp == "Varecia_variegata" | 
+            sp == "Lemur_catta" | 
+            sp == "Hapalemur_griseorufus" | 
+            sp == "Eulemur_rubriventer" |
+            sp == "Indri_indri" | 
+            sp == "Propithecus_verreauxi" | 
+            sp == "Avahi_laniger" | 
+            sp == "Lepilemur_mustelinus" | 
+            sp == "Phaner_furcifer" |
+            sp == "Cheirogaleus_medius" | 
+            sp == "Mirza_coquereli" | 
+            sp == "Microcebus_griseorufus" |
+            sp == "Tarsius_bancanus")
 
+Modulemurs$Plot$AVG.ratio.selected$hypotesis <- factor (Modulemurs$Plot$AVG.ratio.selected$hypotesis, levels = c(dimnames(Modular.hyp)[[2]], "Full Integration") ) 
+Modulemurs$Plot$AVG.ratio.selected$sp <- factor (Modulemurs$Plot$AVG.ratio.selected$sp, levels = unique(Modulemurs$Plot$AVG.ratio.selected$sp) ) 
+Modulemurs$Plot$AVG.ratio.selected$sp %<>% gsub("_", " ", .)
+Modulemurs$Plot$AVG.ratio.selected$sp <- factor (Modulemurs$Plot$AVG.ratio.selected$sp, levels = unique(Modulemurs$Plot$AVG.ratio.selected$sp) ) 
 
+Modulemurs$Plot$AVG.ratio.selected %>% 
+  ggplot (data = ., aes (group = sp) ) + 
+  geom_linerange(aes(x = sp, ymin = min, ymax = max, group = interaction (sp, hypotesis)), size =4, alpha = 0.2) +
+  geom_point(aes(x = sp, y = mean, group = interaction (sp, hypotesis)), size = 4, color = "darkgrey", alpha = 0.7) +
+  geom_point(aes(x = sp, y = abs(AVG.ratio), group = interaction (sp, hypotesis))) +
+  facet_wrap(~ hypotesis) + theme_bw() + coord_flip() + xlab("") + ylab("AVG ratio") + 
+  theme(axis.text = element_text(size = 17), 
+        strip.text =element_text(size = 21),
+        axis.text.y = element_text(face = "italic"))
 
+Modulemurs$test.modularity.dist$Euoticus_elegantulus
