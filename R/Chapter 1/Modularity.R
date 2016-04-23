@@ -55,18 +55,27 @@ Modulemurs$AVG.ratio %>% gather(key = "Region", value = AVG.ratio, 2:10) %>%
         #legend.position = "none",
         rect = element_blank(), 
         line = element_blank())
-
-Modulemurs$cor.pc1.flex <- cbind.data.frame("cor.Flex" = cor(abs(Modulemurs$AVG.ratio[, 2:10]), Flex$V1), 
-                                            "cor.PC1" = cor(abs(Modulemurs$AVG.ratio[, 2:10]), PC1.percent$V1))
-
+PC1.percent$.id %in% criminosos
+criminosos_ <- c("Euoticus_elegantulus", "Prolemur_simus", "Tarsius_syrichta")
+criminosos = PC1.percent$.id %in% criminosos_
+criminosos <- criminosos== FALSE
+Modulemurs$cor.pc1.flex <- cbind.data.frame("cor.Flex" = cor(abs(Modulemurs$AVG.ratio[criminosos, 2:10]), Flex$V1[criminosos]), 
+                                            "cor.PC1" = cor(abs(Modulemurs$AVG.ratio[criminosos, 2:10]), PC1.percent$V1[criminosos]),
+                                            "cor.r2" = cor(abs(Modulemurs$AVG.ratio[criminosos, 2:10]), r2.stuff[42:1,2][criminosos,]))
+r2.stuff[42:1,]
 Flex <- Variae %>% ldply( function(x) mean(x$flex.dist))
 PC1.percent <- Variae %>% ldply( function(x) x$intervalo.mc.pc$observed[1] )
+R2 <- Variae %>% ldply(function(x) mean(x$r2.dist ))
 AVG.r <- Modulemurs$AVG.ratio %>% gather(key = "Region", value = AVG.ratio, 2:10) 
 AVG.r$Flex <- rep(Flex$V1, 9) 
 AVG.r$PC1.percent <- rep(PC1.percent$V1, 9) 
+AVG.r$r2 <- rep(R2$V1, 9) 
 AVG.r$cor.flex <- rep(Modulemurs$cor.pc1.flex$cor.Flex, each = length(unique(AVG.r$sp)) )
 AVG.r$cor.PC1<- rep(Modulemurs$cor.pc1.flex$cor.PC1, each = length(unique(AVG.r$sp)) )
-Modulemurs$Plot$AVG.Flex <- AVG.r %>% tbl_df %>%
+AVG.r$cor.r2<- rep(Modulemurs$cor.pc1.flex$mean, each = length(unique(AVG.r$sp)) )
+
+
+Modulemurs$Plot$AVG.Flex <- AVG.r %>% tbl_df %>% filter (sp != "Euoticus elegantulus") %>% filter (sp != "Prolemur simus")%>% filter (sp != "Tarsius syrichta")%>%
   ggplot (aes(group = Region)) +
  geom_point(aes(y = abs(AVG.ratio), x = Flex), size = 1, color = "darkgrey") + 
   geom_text(aes(y = 4.2, x = 0.37 , label = paste ("r=", round(cor.flex,2) ), group = Region)) +
@@ -74,7 +83,7 @@ Modulemurs$Plot$AVG.Flex <- AVG.r %>% tbl_df %>%
   geom_smooth(aes(y = abs(AVG.ratio), x = Flex), method = "lm") +
   facet_wrap(~Region) + theme_bw() +
   theme(axis.text = element_text(size = 7))
-Modulemurs$Plot$AVG.PC1 <- AVG.r %>% tbl_df %>%
+Modulemurs$Plot$AVG.PC1 <- AVG.r%>% tbl_df %>% filter (sp != "Euoticus elegantulus") %>% filter (sp != "Prolemur simus")%>% filter (sp != "Tarsius syrichta")%>%
   ggplot (aes(group = Region )) +
   geom_point(aes(y = abs(AVG.ratio), x = PC1.percent), size = 1, color = "darkgrey") + 
   geom_text(aes(y = 4.2, x = 0.45 , label = paste("r=", round(cor.PC1, 2)), group = Region)) +
@@ -84,6 +93,15 @@ Modulemurs$Plot$AVG.PC1 <- AVG.r %>% tbl_df %>%
   theme(axis.text = element_text(size = 7))
 
 plot_grid(Modulemurs$Plot$AVG.Flex, Modulemurs$Plot$AVG.PC1, ncol = 2) #########################################################################################
+
+Modulemurs$Plot$AVG.R2 <- AVG.r %>% tbl_df %>% filter (sp != "Euoticus elegantulus") %>% filter (sp != "Prolemur simus")%>% filter (sp != "Tarsius syrichta")%>%
+  ggplot (aes(group = Region)) +
+  geom_point(aes(y = abs(AVG.ratio), x = r2), size = 1, color = "darkgrey") + 
+  geom_text(aes(y = 4.2, x = 0.22 , label = paste ("r=", round(cor.r2,2) ), group = Region)) +
+  geom_text(aes(y = AVG.ratio, x = r2, label = sp), size = 3, alpha = 0.8) + 
+  geom_smooth(aes(y = abs(AVG.ratio), x = r2), method = "lm") +
+  facet_wrap(~Region) + theme_bw() +
+  theme(axis.text = element_text(size = 7))
 
 DistModular <- function (x, simulations = 1000, modularity.hipot = Modular.hyp)
   {
@@ -108,11 +126,11 @@ DistModular <- function (x, simulations = 1000, modularity.hipot = Modular.hyp)
     Rsquared [i, ] <- modular$Rsquared
     AVG.plus [i, ] <- modular$`AVG+`
     AVG.minus [i, ] <- modular$`AVG-`
-   # Probability [i, ] <-  modular$Probability
+    Probability [i, ] <-  modular$Probability
     AVG.rat [i, ] <-  modular$`AVG Ratio`
   }
   plotaisso <- cbind(rep (unique(x$info.raw$Especie), simulations),
- # melt(Probability, value.name = "Probability")[2:3],
+  #melt(Probability, value.name = "Probability")[2:3],
   melt(AVG.plus, value.name = "AVG+")[2:3],
   melt(AVG.minus, value.name = "AVG-")[3] )
   names(plotaisso)[1:2] <- c("sp", "hyp")
@@ -147,6 +165,12 @@ plot <- plotaisso %>% melt %>%
     ggtitle(who) +
     facet_wrap(~hyp, ncol = 3) + theme_bw() + ylab("absolute value") + xlab("")
 
+plotaisso <- cbind(rep (unique(x$info.raw$Especie), simulations),
+                   melt(Probability, value.name = "Probability")[2:3],
+                   melt(AVG.plus, value.name = "AVG+")[2:3],
+                   melt(AVG.minus, value.name = "AVG-")[3] )
+names(plotaisso)[1:2] <- c("sp", "hyp")
+
   return(list ("plotaisso" = Plotavg,
                "AVG.r" =  AVG.r,
                "AVG.+-.plot" = plot,
@@ -154,7 +178,7 @@ plot <- plotaisso %>% melt %>%
                 ) )
 }
 
-temp <- DistModular(x = sp.main.data$Varecia_variegata, simulations = 100, modularity.hipot =  Modular.hyp )
+temp <- DistModular(x = sp.main.data$Varecia_variegata, simulations = 10, modularity.hipot =  Modular.hyp )
 temp$AVG.r.plot
 temp$`AVG.+-.plot`
 temp$AVG.r %>% ggplot(., aes (x = hyp, y = AVG.rat, group = hyp)) +
@@ -192,19 +216,20 @@ Modulemurs$test.modularity.dist %>% ldply(function(x) x$plotaisso) %>% melt %>%
   geom_boxplot(aes(group = interaction (variable, hypotesis, .id))) +
   facet_wrap(~hypotesis, ncol = 3)
 
+Modulemurs$test.modularity.dist$Hapalemur_griseus$`AVG.+-.plot`
 
 Modulemurs$Plot$AVG.ratio.selected <- Modulemurs$test.modularity.dist %>%  # pot em 10 x 15
-  ldply(function(x) x$plotaisso) %>% 
+  ldply(function(x) x$plotaisso) %>%  tbl_df %>%
   filter (sp == "Galago_senegalensis" | 
             sp == "Otolemur_crassicaudatus" |
-            sp = "Euoticus_elegantulus" |
+            sp == "Euoticus_elegantulus" |
             sp == "Nycticebus_coucang" |
             sp == "Loris_tardigradus" | 
             sp == "Perodicticus_potto" |
             sp == "Daubentonia_madagascariensis" |
             sp == "Varecia_variegata" | 
             sp == "Lemur_catta" | 
-            sp == "Hapalemur_griseorufus" | 
+            sp == "Hapalemur_griseus" | 
             sp == "Eulemur_rubriventer" |
             sp == "Indri_indri" | 
             sp == "Propithecus_verreauxi" | 
@@ -231,4 +256,31 @@ Modulemurs$Plot$AVG.ratio.selected %>%
         strip.text =element_text(size = 21),
         axis.text.y = element_text(face = "italic"))
 
-Modulemurs$test.modularity.dist$Euoticus_elegantulus
+Modulemurs$Plot$AVG.mm.selected <- Modulemurs$test.modularity.dist %>%  # pot em 10 x 15
+  llply(function(x) x$`AVG.+-.plot`)
+
+plot_grid(Modulemurs$Plot$AVG.mm.selected$Galago_senegalensis,
+          Modulemurs$Plot$AVG.mm.selected$Otolemur_crassicaudatus,
+          Modulemurs$Plot$AVG.mm.selected$Euoticus_elegantulus,
+          Modulemurs$Plot$AVG.mm.selected$Nycticebus_coucang,
+          Modulemurs$Plot$AVG.mm.selected$Loris_tardigradus,
+          Modulemurs$Plot$AVG.mm.selected$Perodicticus_potto,
+          Modulemurs$Plot$AVG.mm.selected$Daubentonia_madagascariensis,
+          Modulemurs$Plot$AVG.mm.selected$Varecia_variegata,
+          Modulemurs$Plot$AVG.mm.selected$Lemur_catta,
+          Modulemurs$Plot$AVG.mm.selected$Hapalemur_griseus,
+          Modulemurs$Plot$AVG.mm.selected$Eulemur_rubriventer,
+          Modulemurs$Plot$AVG.mm.selected$Indri_indri,
+          Modulemurs$Plot$AVG.mm.selected$Propithecus_verreauxi,
+          Modulemurs$Plot$AVG.mm.selected$Avahi_laniger,
+          Modulemurs$Plot$AVG.mm.selected$Lepilemur_mustelinus,
+          Modulemurs$Plot$AVG.mm.selected$Phaner_furcifer,
+          Modulemurs$Plot$AVG.mm.selected$Cheirogaleus_medius,
+          Modulemurs$Plot$AVG.mm.selected$Mirza_coquereli,
+          Modulemurs$Plot$AVG.mm.selected$Microcebus_griseorufus,
+          Modulemurs$Plot$AVG.mm.selected$Tarsius_bancanus, ncol =3)
+
+Modulemurs$Plot$AVG.ratio.selected <- Modulemurs$test.modularity.dist %>%  # pot em 10 x 15
+  ldply(function(x) x$plotaisso) %>%  tbl_df %>%
+  filter (sp == "Hapalemur_griseus"  )
+            

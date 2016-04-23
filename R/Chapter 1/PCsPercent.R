@@ -221,8 +221,8 @@ r2.stuff <- r2.stuff %>% melt(variable.name = "iteration" ) %>%
   summarise(mean = mean(value), min = min(value), max= max(value) )  
 
 r2.stuff.plot <- r2.stuff%>% ggplot() + 
-  geom_linerange(aes(x = .id, ymin = min, ymax = max), size =4, alpha = 0.2) +
-  geom_point(aes(x = .id, y = mean)) +
+  # geom_linerange(aes(x = .id, ymin = min, ymax = max), size =4, alpha = 0.2) +
+  # geom_point(aes(x = .id, y = mean)) +
   scale_x_discrete()  +
   #  scale_y_continuous(limits = c(0, 0.77), breaks = c(0.25, 0.5, 0.75) ) +
   xlab("") + ylab("") + labs(title = "Mean squared correlation (r²)") + 
