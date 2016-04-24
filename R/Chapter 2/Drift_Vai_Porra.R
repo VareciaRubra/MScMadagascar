@@ -229,7 +229,9 @@ Drift.results.Toplot$All.sp$Results$Regression.Contrasts <- Drift.results$all.sp
 Drift.results.Toplot$Extants$Results$Regression.Ed <- Drift.results$extant.sp$Regression.test %>% ldply(function(x) x$drift_rejected )  %>% .[,2]
 Drift.results.Toplot$Extants$Results$Regression.Contrasts <- Drift.results$extant.sp$Regression.test.Contrasts %>% ldply(function(x) x$drift_rejected )  %>% .[,2]
 
-Plot.Drift.Results <- function (tree, node.ref, info, font.size = 0.4, contrasts = TRUE) {
+paleta.deriva <- c("#c2a5cf", "#a6dba0", "#d9d9d9") 
+
+Plot.Drift.Results <- function (tree, node.ref, info, font.size = 0.4, contrasts = TRUE, paleta.deriva  = c("#c2a5cf", "#a6dba0", "#d9d9d9") ) {
   node.ref <- as.numeric(info$Node.ref)
   results.ed <- data.frame(V1 = as.numeric(info$Corr.Ed.1) * 0.5, V2 = as.numeric(info$Regression.Ed) * 0.5  )
   if (contrasts == TRUE) results.ci <- data.frame(V1 = as.numeric(info$Corr.Contrasts.1) * 0.5, V2 = as.numeric(info$Regression.Contrasts) * 0.5) 
@@ -242,34 +244,35 @@ Plot.Drift.Results <- function (tree, node.ref, info, font.size = 0.4, contrasts
   plot.phylo(tree, font = 3, no.margin = TRUE,  cex = font.size, edge.color = "darkgrey", edge.width = 3, label.offset = 1 )
   nodelabels(node = node.ref, 
              pie = results.ed[,1:3], cex=0.6, 
-             piecol = c("#c2a5cf", "#a6dba0", "#d9d9d9")  )
+             piecol = paleta.deriva  )
   nodelabels(node = node.ref, bg = "transparent", frame = "n",cex = 0.6, col = "black", adj = c(1.2, 1.1) )
   legend("bottomleft", inset = .08,
          title ="Drift test \nB.matrices obtained from ED",
          text.col = "grey10",
          legend = c("Rejected - Correlation", "Rejected - Regression", "Not rejected"), 
-         fill = c("#c2a5cf", "#a6dba0", "#d9d9d9"), 
-         col = c("#c2a5cf", "#a6dba0", "#d9d9d9"), 
+         fill = paleta.deriva, 
+         col = paleta.deriva, 
          border = "grey", box.lwd = "n",
          bg= "transparent",
          cex = 0.5)
-  
+  par(mfrow = c(1,1)) 
   if (contrasts == TRUE) {plot.phylo(tree, font = 3, no.margin = TRUE,  cex = font.size, edge.color = "darkgrey", edge.width = 3, label.offset = 1 )
   nodelabels(node = node.ref, 
              pie = results.ci[,1:3], cex=0.6, 
-             piecol = c("#c2a5cf", "#a6dba0", "#d9d9d9")  )
+             piecol = paleta.deriva  )
   nodelabels(node = node.ref, bg = "transparent", frame = "n",cex = 0.6, col = "black", adj = c(1.1, 1.1) )
   legend("bottomleft", inset = 0.08,
          title ="Drift test \nB.matrices obtained from IC",
          text.col = "grey10",
          legend = c("Rejected - Correlation", "Rejected - Regression", "Not rejected"), 
-         fill = c("#c2a5cf", "#a6dba0", "#d9d9d9") , 
-         col = c("#c2a5cf", "#a6dba0", "#d9d9d9") , 
+         fill = paleta.deriva , 
+         col = paleta.deriva , 
          border = "grey", box.lwd = "n",
          bg= "transparent",
          cex = 0.5)
  
     par(mfrow = c(1,1)) 
+    
     return(data.frame("node" = node.ref,
            "ed" = results.ed,
            "ic" = results.ci) ) }
@@ -279,10 +282,14 @@ Plot.Drift.Results <- function (tree, node.ref, info, font.size = 0.4, contrasts
 }
 Drift.results.Toplot$Extants$Plots$Tree <- Plot.Drift.Results(tree = Trees$extant.sp.tree, 
                                                               info = Drift.results.Toplot$Extants$Results, 
-                                                              font.size = 0.7, contrasts = F)
+                                                              font.size = 0.7, 
+                                                              contrasts = F,
+                                                              paleta.deriva = c("#ECA400", "#1BAAB7", "#CBC9E0"))
 Drift.results.Toplot$All.sp$Plots$Tree <- Plot.Drift.Results(tree = Trees$all.with.ed, 
                                                              info = Drift.results.Toplot$All.sp$Results, 
-                                                             font.size = 0.7)
+                                                             font.size = 0.7,
+                                                             contrasts = F,
+                                                             paleta.deriva = c("#ECA400", "#1BAAB7", "#CBC9E0"))
 
 
 drift.vai.porra$sum.abs.values <- Drift.alltests.tree$Correlation.test.Regular %>% llply(function (x) x$Correlation.p.value[1:39,1:39]) %>% llply(abs) %>% laply( function (x) x[lower.tri(x)]) %>% colSums 
@@ -313,7 +320,7 @@ Correlation.Tree.plot <- plot_grid(
   ncol = 3)
 
 Correlation.Tree.plot 
-save_plot(filename = "Figures/Correlation_Tree_plot.png", plot = Correlation.Tree.plot, 
+save_plot(filename = "Figures/Correlation_Tree_plot.pdf", plot = Correlation.Tree.plot, 
           base_aspect_ratio = 0.3, base_height = 15, base_width = 9.5)
 
 Drift.results$extant.sp$Regression.test$`101`$plot + geom_abline(slope = 1, color = "red") + ggtitle ("Indridae")
@@ -321,13 +328,14 @@ Drift.results$extant.sp$Regression.test$`101`$plot + geom_abline(slope = 1, colo
 Plot.Drift.regression <- function(regress.result) {
   regressae <- data.frame( "log.B_variance" = regress.result$log.between_group_variance, "log.W_eVals" = regress.result$log.W_eVals, names = 1:(dim(mean.array)[2]) ) 
   
-  if (regress.result$drift_rejected == T) beta <- "red" else "green"
+  if (regress.result$drift_rejected == T) beta <- "red" 
+  if (regress.result$drift_rejected == F) beta <- "green"
   empirical.c.i <- regress.result$coefficient_CI_95[2, ]
   beta.coef <- lm(data = regressae[-1,], log.B_variance ~ log.W_eVals)$coefficients[2]
   
   plotows <- 
     ggplot(regressae, aes (y = log.B_variance, x = log.W_eVals) ) +
-    geom_abline(slope = beta.coef, color = beta, size = 2, alpha = 0.4) +
+    geom_abline(slope = beta.coef, color = beta, size = 1, alpha = 0.4, linetype = 2) +
     geom_text(aes(label = names, size = 5)) + 
     geom_smooth(method = "lm", color = beta) + 
     labs(x = "log(W Eigenvalues)", y = "log(B variances)") + 
@@ -341,32 +349,32 @@ Plot.Drift.regression <- function(regress.result) {
               "drift.rejected" = regress.result$drift_rejected))
 }
 
-Plot.Drift.regression (regress.result = Drift.results$extant.sp$Regression.test$`134`)
+Plot.Drift.regression (regress.result = Drift.results$extant.sp$Regression.test$`77`)
 
 Drift.results.Toplot$Extants$Results$Regression <- Drift.results$extant.sp$Regression.test %>% llply(Plot.Drift.regression)
 
 Regression.Tree.plot <- plot_grid(
-  Drift.results$extant.sp$Regression.test$`131`$plot + ggtitle ("Lorisiformes\n Galagidae x Lorisidae") ,
-  Drift.results$extant.sp$Regression.test$`132`$plot + ggtitle ("Lorisidae") ,
-  Drift.results$extant.sp$Regression.test$`134`$plot + ggtitle ("Nyc-Lor"), 
+  Drift.results.Toplot$Extants$Results$Regression$`131`$regression.plot + ggtitle ("Lorisiformes\n Galagidae x Lorisidae") ,
+  Drift.results.Toplot$Extants$Results$Regression$`132`$regression.plot + ggtitle ("Lorisidae") ,
+  Drift.results.Toplot$Extants$Results$Regression$`134`$regression.plot + ggtitle ("Nyc-Lor"), 
   
-  Drift.results$extant.sp$Regression.test$`99`$plot + ggtitle ("Lemuridae x Indridae") ,
-  Drift.results$extant.sp$Regression.test$`100`$plot + ggtitle ("Indridae") ,
-  Drift.results$extant.sp$Regression.test$`112`$plot + ggtitle ("Lemuridae") ,
+  Drift.results.Toplot$Extants$Results$Regression$`99`$regression.plot + ggtitle ("Lemuridae x Indridae") ,
+  Drift.results.Toplot$Extants$Results$Regression$`100`$regression.plot + ggtitle ("Indridae") ,
+  Drift.results.Toplot$Extants$Results$Regression$`112`$regression.plot + ggtitle ("Lemuridae") ,
   
   
-  Drift.results$extant.sp$Regression.test$`76`$plot + ggtitle ("Lepilemuridae x Cheirogaleidae") ,
-  Drift.results$extant.sp$Regression.test$`77`$plot + ggtitle ("Cheirogaleidae") ,
-  Drift.results$extant.sp$Regression.test$`88`$plot + ggtitle ("Lepilemuridae") ,
+  Drift.results.Toplot$Extants$Results$Regression$`76`$regression.plot + ggtitle ("Lepilemuridae x Cheirogaleidae") ,
+  Drift.results.Toplot$Extants$Results$Regression$`77`$regression.plot + ggtitle ("Cheirogaleidae") ,
+  Drift.results.Toplot$Extants$Results$Regression$`88`$regression.plot + ggtitle ("Lepilemuridae") ,
   
-  Drift.results$extant.sp$Regression.test$`73`$plot + ggtitle ("Strepsirrhini") ,
-  Drift.results$extant.sp$Regression.test$`74`$plot + ggtitle ("Lemuriformes x Daubentonidae") ,
-  Drift.results$extant.sp$Regression.test$`75`$plot + ggtitle ("Lemuriformes") ,
-  Drift.results$extant.sp$Regression.test$`71`$plot + ggtitle ("Prosimian\n Strepsirrhini + Tarsiidae") ,
+  Drift.results.Toplot$Extants$Results$Regression$`73`$regression.plot + ggtitle ("Strepsirrhini") ,
+  Drift.results.Toplot$Extants$Results$Regression$`74`$regression.plot + ggtitle ("Lemuriformes x Daubentonidae") ,
+  Drift.results.Toplot$Extants$Results$Regression$`75`$regression.plot + ggtitle ("Lemuriformes") ,
+  Drift.results.Toplot$Extants$Results$Regression$`71`$regression.plot + ggtitle ("Prosimian\n Strepsirrhini + Tarsiidae") ,
   ncol = 3)
 
 Regression.Tree.plot 
-
+Drift.results.Toplot$Extants$Results$Regression$`77`$regression.plot
 Drift.results.Toplot$Extants$Results$Regression.Ed
 save_plot(filename = "R/Figures/Correlation_Tree_plot.pdf", plot = Correlation.Tree.plot, 
           base_aspect_ratio = 0.9, base_height = 14, base_width = 4)
