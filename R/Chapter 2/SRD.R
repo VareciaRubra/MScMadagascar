@@ -21,6 +21,7 @@ mx.list.taxonomy$Prolemur <- ancestral.mx$Prolemur_simus
 mx.list.taxonomy$Lemur <- ancestral.mx$Lemur_catta
 mx.list.taxonomy$Varecia <- ancestral.mx$'76'
 mx.list.taxonomy$W.Lemuridae <- ancestral.mx$'63'
+mx.list.taxonomy$W.Lemuriformes <- ancestral.mx$'46'
 mx.list.taxonomy$Daubentonia <- ancestral.mx$Daubentonia_madagascariensis
 mx.list.taxonomy$W.Madagascar <- ancestral.mx$'45'
 mx.list.taxonomy$Perodicticus <- ancestral.mx$Perodicticus_potto
@@ -31,7 +32,7 @@ mx.list.taxonomy$Euoticus <- ancestral.mx$Euoticus_elegantulus
 mx.list.taxonomy$Otolemur <- ancestral.mx$Otolemur_crassicaudatus
 mx.list.taxonomy$Galago <- ancestral.mx$Galago_senegalensis
 mx.list.taxonomy$W.Galagidae <- ancestral.mx$'80'
-mx.list.taxonomy$W.OutMadagascar <- ancestral.mx$'77'
+mx.list.taxonomy$W.Lorisiformes <- ancestral.mx$'77'
 mx.list.taxonomy$W.Strepsirrhini <- ancestral.mx$'44'
 mx.list.taxonomy$W.Prosimian <- ancestral.mx$'42'
 mx.list.taxonomy$Saguinus.P <- Saguinus_P.cov

@@ -1,7 +1,7 @@
 
 
 
-SRD.Tree <- function (tree, cov.matrix.list, sample.sizes = NULL) 
+SRD.Tree <- function (tree, cov.matrix.list, sample.sizes = NULL, mean.list) 
 {
   if (!all(tree$tip.label %in% names(cov.matrix.list))) 
     stop("All tip labels must be in names(cov.matrix.list).")
@@ -18,8 +18,10 @@ SRD.Tree <- function (tree, cov.matrix.list, sample.sizes = NULL)
                        function(node) 
                         {
                           indices <- as.character(tree$edge[,2] [tree$edge[,1] == node])
-                          tryCatch (expr = SRD(cov.matrices [[ indices [1] ]], cov.matrices [[ indices [2] ]]) , error = function(cond) vector("list") )
-                        })
+                          SRD.result <- tryCatch (expr = SRD(cov.matrices [[ indices [1] ]], cov.matrices [[ indices [2] ]]) , error = function(cond) vector("list") )
+                          m.sd.cor <-list(cov.matrices [[ indices [1] ]], cov.matrices [[ indices [2] ]]) %>% llply( function(x) data.frame( "trait" =  names(mean.sim(x)), "mean.cor" = mean.sim(abs(x)), "sd.cor" = mean.sd(abs(x)) ) , .progress = "text" )
+                          return(list(SRD.result = SRD.result, m.sd.cor = m.sd.cor))
+                              })
   names(SRD.by.node) <- paste0("node", nodes[node.mask])
 
   return( SRD.by.node)
@@ -30,29 +32,33 @@ SRD.Tree <- function (tree, cov.matrix.list, sample.sizes = NULL)
 plot.phylo(Trees$extant.sp.tree, no.margin = T, cex = 0.8)
 nodelabels(cex = 0.7)
 
-SRD.results <- SRD.Tree(tree = Trees$extant.sp.tree, 
+SRD.results.test <- SRD.Tree(tree = Trees$extant.sp.tree, 
+                        mean.list = All.sp.data$means[mask.extant & mask.at.tree],
                         cov.matrix.list = All.sp.data$cov.mx[mask.extant & mask.at.tree],
                         sample.sizes = All.sp.data$n.sizes[mask.extant & mask.at.tree])
+
+SRD.results.test$node135$SRD.result
+
 #save(SRD.results, file = "Data/SRDatTreeResults.RData")
 
-SRD.results$rolated <- SRD.results %>% ldply(., function(x) class(x) == "SRD") 
+SRD.results$rolated <- SRD.results.test %>% ldply(., function(x) class(x$SRD.result) == "SRD") 
 
 SRD.results$summary <- SRD.results[SRD.results$rolated[,2]] %>% laply(function(x) x$output[,5]) %>% alply(., 2, summary) %>% ldply(function (x) x) 
 
 SRD.results %>% filter(names(SRD.results) == "node77" )
-SRD.selected <- list("Prosimian" = SRD.results$node71,
-                     "Strepsirrhini" = SRD.results$node73,
-                     "Lorisiformes" = SRD.results$node131,
+SRD.selected <- list("Prosimian" = SRD.results.test$node71$SRD.result,
+                     "Strepsirrhini" = SRD.results.test$node73$SRD.result,
+                     "Lorisiformes" = SRD.results.test$node131$SRD.result,
                      "Galagidae" = SRD(ancestral.mx$Galago_senegalensis, ancestral.mx$Euoticus_elegantulus),
-                     "Lorisidae" = SRD.results$node132,
-                     "LemfxDaubs" = SRD.results$node74,
-                     "Lemuriformes" = SRD.results$node75,
-                     "LemxInd" = SRD.results$node99,
-                     "Lemuridae" = SRD.results$node112,
-                     "Indridae" = SRD.results$node100,
-                     "LepxChe" = SRD.results$node76,
-                     "Lepilemuridea" = SRD.results$node88,
-                     "Cheirogaleidae" = SRD.results$node77
+                     "Lorisidae" = SRD.results.test$node132$SRD.result,
+                     "LemfxDaubs" = SRD.results.test$node74$SRD.result,
+                     "Lemuriformes" = SRD.results.test$node75$SRD.result,
+                     "LemxInd" = SRD.results.test$node99$SRD.result,
+                     "Lemuridae" = SRD.results.test$node112$SRD.result,
+                     "Indridae" = SRD.results.test$node100$SRD.result,
+                     "LepxChe" = SRD.results.test$node76$SRD.result,
+                     "Lepilemuridea" = SRD.results.test$node88$SRD.result,
+                     "Cheirogaleidae" = SRD.results.test$node77$SRD.result
                      )
 SRD.select.genus <- list("Varecia" = SRD.results$node112,
                      "Lemur" = SRD.results$node125,
@@ -97,6 +103,55 @@ ggplot(SRD.to.plot) +
         strip.background = element_rect(fill = "transparent")) 
 
 
+SRD.results.test$node77$SRD.result$model$code
+
+SRD.sd.mean <- SRD.results.test[SRD.results$rolated[,2]] %>% ldply(., function(x) cbind(x$SRD.result$output, x$SRD.result$model$code, "A" = x$m.sd.cor[[1]], "B" = x$m.sd.cor[[2]][2:3]) ) 
+names(SRD.sd.mean)[8] <- "code"
+SRD.sd.mean $code
+
+
+SRD.sd.mean %>% filter (.id == "node71"| 
+                          .id == "node73"| 
+                          .id == "node131"| 
+                          .id == "node132"| 
+                          .id == "node74"| 
+                          .id == "node75"| 
+                          .id == "node99"| 
+                          .id == "node112"| 
+                          .id == "node100"|
+                          .id == "node76"| 
+                          .id == "node88"| 
+                          .id == "node77") %>%
+  ggplot(.) +
+  geom_point(aes(x = CSD, y = A.mean.cor), color = "red") +
+  #geom_point(aes(x = CSD, y = A.sd.cor), color = "red", shape = 8) +
+  geom_point(aes(x = CSD, y = B.mean.cor)) + 
+  #geom_point(aes(x = CSD, y = B.sd.cor), shape = 8) + 
+  facet_wrap(~.id, ncol = 3)
+
+SRD.sd.mean %>% filter (.id == "node71"| 
+                          .id == "node73"| 
+                          .id == "node131"| 
+                          .id == "node132"| 
+                          .id == "node74"| 
+                          .id == "node75"| 
+                          .id == "node99"| 
+                          .id == "node112"| 
+                          .id == "node100"|
+                          .id == "node76"| 
+                          .id == "node88"| 
+                          .id == "node77") %>%
+  ggplot(.) +
+  geom_point(aes(x = CSD, y = A.sd.cor/A.mean.cor), color = "red") +
+  geom_text(aes(x = CSD, y = A.sd.cor/A.mean.cor, label = A.trait, size = code), color = "red") +
+  geom_point(aes(x = CSD, y = B.sd.cor/B.mean.cor)) +
+  geom_text(aes(x = CSD, y = B.sd.cor/B.mean.cor, label = A.trait, size = code)) +
+  facet_wrap(~.id, ncol = 3)
+
+
+  
+  
+
 
 
 
@@ -127,7 +182,7 @@ plot.cheetows <-
     #geom_label(aes (x = X, y = Y, label = traits ),  alpha = 0.4, size = 2, label.padding = unit(0.5, "mm")) +
     ggtitle(TTL) +
     theme(plot.title = element_text(face = "bold", size = 12),
-          #legend.position= "none", 
+          legend.position= "none", 
           legend.direction="horizontal",
           legend.text = element_text(size = 5),
           plot.margin = unit(c(0,0,-0,0), "cm"), 
@@ -183,16 +238,13 @@ SRD.selected.Tree.plot <- plot_grid(
   SRD.plot.wire(SRD.result = SRD.selected$Galagidae, SHAPE = Shapes.sym$galago, ROTACIONI =  c(-1,-1,1), TTL = "Galagidae")$plot.muDev,
   SRD.plot.wire(SRD.result = SRD.selected$Lorisidae, SHAPE = Shapes.sym$loris, ROTACIONI =  c(-1,-1,1), TTL = "Lorisidae")$plot.muDev,
   SRD.plot.wire(SRD.result = SRD.selected$Lorisiformes, SHAPE = Shapes.sym$nycticebus, ROTACIONI =  c(-1,-1,1), TTL = "Lorisiformes\n Galagidae x Lorisidae")$plot.muDev,
-  
   SRD.plot.wire(SRD.result = SRD.selected$Lemuridae, SHAPE = Shapes.sym$varecia, ROTACIONI =  c(-1,-1,1), TTL = "Lemuridae")$plot.muDev,
   SRD.plot.wire(SRD.result = SRD.selected$Indridae, SHAPE = Shapes.sym$avahi, ROTACIONI =  c(-1,-1,1), TTL = "Indridae")$plot.muDev,
   SRD.plot.wire(SRD.result = SRD.selected$LemxInd, SHAPE = Shapes.sym$propithecus, ROTACIONI =  c(-1,-1,1), TTL = "Lemuridae x Indridae" )$plot.muDev,
-  
   SRD.plot.wire(SRD.result = SRD.selected$Lepilemuridea, SHAPE = Shapes.sym$lepilemur, ROTACIONI =  c(1,-1,1), TTL = "Lepilemuridae")$plot.muDev,
   SRD.plot.wire(SRD.result = SRD.selected$Cheirogaleidae, SHAPE = Shapes.sym$microcebus, ROTACIONI =  c(1,-1,1), TTL = "Cheirogaleidae")$plot.muDev,
   SRD.plot.wire(SRD.result = SRD.selected$LepxChe, SHAPE = Shapes.sym$cheirogaleus, ROTACIONI =  c(1,-1,1), TTL = "Lepilemuridae x Cheirogaleidae")$plot.muDev,
-  
-  SRD.plot.wire(SRD.result = SRD.selected$`L-IxL-C`, SHAPE = Shapes.sym$hapalemur, ROTACIONI =  c(1,-1,1), TTL = "Lem-Ind x Lep-Che")$plot.muDev,
+  SRD.plot.wire(SRD.result = SRD.selected$Lemuriformes, SHAPE = Shapes.sym$hapalemur, ROTACIONI =  c(1,-1,1), TTL = "Lem-Ind x Lep-Che")$plot.muDev,
   SRD.plot.wire(SRD.result = SRD.selected$LemfxDaubs, SHAPE = Shapes.sym$daubentonia, ROTACIONI =  c(1,-1,1), TTL = "Lemuriformes\n Lemurs x Daubentonidae")$plot.muDev,
   SRD.plot.wire(SRD.result = SRD.selected$Strepsirrhini, SHAPE = Shapes.sym$perodicticus, ROTACIONI =  c(-1,-1,1), TTL = "Strepsirrhini")$plot.muDev, # )#,
   SRD.plot.wire(SRD.result = SRD.selected$Prosimian, SHAPE = Shapes.sym$tarsius, ROTACIONI =  c(-1,-1,1), TTL = "Prosimian\n Strepsirrhini + Tarsiidae" )$plot.muDev, 
@@ -205,19 +257,15 @@ SRD.selected.Tree.plot <- plot_grid(
   SRD.plot.wire(SRD.result = SRD.selected$Galagidae, SHAPE = Shapes.sym$galago, ROTACIONI =  c(-1,-1,1), TTL = "Galagidae")$plot.relMean,
   SRD.plot.wire(SRD.result = SRD.selected$Lorisidae, SHAPE = Shapes.sym$loris, ROTACIONI =  c(-1,-1,1), TTL = "Lorisidae")$plot.relMean,
   SRD.plot.wire(SRD.result = SRD.selected$Lorisiformes, SHAPE = Shapes.sym$nycticebus, ROTACIONI =  c(-1,-1,1), TTL = "Lorisiformes\n Galagidae x Lorisidae")$plot.relMean,
-  
   SRD.plot.wire(SRD.result = SRD.selected$Lemuridae, SHAPE = Shapes.sym$varecia, ROTACIONI =  c(-1,-1,1), TTL = "Lemuridae")$plot.relMean,
   SRD.plot.wire(SRD.result = SRD.selected$Indridae, SHAPE = Shapes.sym$avahi, ROTACIONI =  c(-1,-1,1), TTL = "Indridae")$plot.relMean,
   SRD.plot.wire(SRD.result = SRD.selected$LemxInd, SHAPE = Shapes.sym$propithecus, ROTACIONI =  c(-1,-1,1), TTL = "Lemuridae x Indridae" )$plot.relMean,
-  
   SRD.plot.wire(SRD.result = SRD.selected$Lepilemuridea, SHAPE = Shapes.sym$lepilemur, ROTACIONI =  c(1,-1,1), TTL = "Lepilemuridae")$plot.relMean,
   SRD.plot.wire(SRD.result = SRD.selected$Cheirogaleidae, SHAPE = Shapes.sym$microcebus, ROTACIONI =  c(1,-1,1), TTL = "Cheirogaleidae")$plot.relMean,
   SRD.plot.wire(SRD.result = SRD.selected$LepxChe, SHAPE = Shapes.sym$cheirogaleus, ROTACIONI =  c(1,-1,1), TTL = "Lepilemuridae x Cheirogaleidae")$plot.relMean,
-  
-  SRD.plot.wire(SRD.result = SRD.selected$`L-IxL-C`, SHAPE = Shapes.sym$hapalemur, ROTACIONI =  c(1,-1,1), TTL = "Lem-Ind x Lep-Che")$plot.relMean,
+  SRD.plot.wire(SRD.result = SRD.selected$Lemuriformes, SHAPE = Shapes.sym$hapalemur, ROTACIONI =  c(1,-1,1), TTL = "Lem-Ind x Lep-Che")$plot.relMean,
   SRD.plot.wire(SRD.result = SRD.selected$LemfxDaubs, SHAPE = Shapes.sym$daubentonia, ROTACIONI =  c(1,-1,1), TTL = "Lemuriformes\n Lemurs x Daubentonidae")$plot.relMean,
-  SRD.plot.wire(SRD.result = SRD.selected$Strepsirrhini, SHAPE = Shapes.sym$perodicticus, ROTACIONI =  c(-1,-1,1), TTL = "Strepsirrhini")$plot.relMean, # )#,
-  
+  SRD.plot.wire(SRD.result = SRD.selected$Strepsirrhini, SHAPE = Shapes.sym$perodicticus, ROTACIONI =  c(-1,-1,1), TTL = "Strepsirrhini")$plot.relMean, 
   SRD.plot.wire(SRD.result = SRD.selected$Prosimian, SHAPE = Shapes.sym$tarsius, ROTACIONI =  c(-1,-1,1), TTL = "Prosimian\n Strepsirrhini + Tarsiidae" )$plot.relMean, 
   ncol = 3)
 
@@ -251,5 +299,11 @@ ggshape(shape = Shapes.sym$perodicticus,
   # scale_color_gradientn(colors = c("red", "darkgrey", "blue"),
   #                       guide = guide_colorbar(nbin=100, draw.ulim = T, draw.llim = T) ) 
 
+SRD.out <- SRD.selected %>% llply(function(x) x$output[, 6])
 
+Mx.cor.mean <- Gen.cov.list %>% llply( function(x) data.frame( "trait" =  names(mean.sim(x)), "mean.cor" = mean.sim(abs(x)), "sd.cor" = mean.sd(abs(x)) ) , .progress = "text" )
 
+Mx.cor.mean$W.Lorisiformes
+
+SRD.selected$Prosimian$pc1
+plot(SRD.selected$Prosimian)

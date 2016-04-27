@@ -62,8 +62,8 @@ Gen.cov.list$Hapalemur <- ancestral.mx$Hapalemur_griseus
 Gen.cov.list$Prolemur <- ancestral.mx$Prolemur_simus
 Gen.cov.list$Lemur <- ancestral.mx$Lemur_catta
 Gen.cov.list$Varecia <- ancestral.mx$'76'
-Gen.cov.list$W.Lemuriformes <- ancestral.mx$'46'
 Gen.cov.list$W.Lemuridae <- ancestral.mx$'63'
+Gen.cov.list$W.Lemuriformes <- ancestral.mx$'46'
 Gen.cov.list$Daubentonia <- ancestral.mx$Daubentonia_madagascariensis
 Gen.cov.list$W.Madagascar <- ancestral.mx$'45'
 Gen.cov.list$Perodicticus <- ancestral.mx$Perodicticus_potto
@@ -107,10 +107,11 @@ par (mar = c(5, 4, 4, 2) + 0.1)
 plot(pruned.tree.with.mx, cex = 0.9, no.margin =T, edge.color = "darkgrey", edge.width = 2, x.lim = c(-20, 150) )
 #nodelabels()
 nodelabels(bg = NULL, frame = "none", node = 56, pch = NULL, col = "black", text = "Indroidea" )
-nodelabels(bg = NULL, frame = "none", node = 45, pch = NULL, col = "black", text = "Malagasy \nprimates" )
-nodelabels(bg = NULL, frame = "none", node = 77, pch = NULL, col = "black", text = "Out of     \nMadagascar", adj = c(0.8, 0.5) )
+nodelabels(bg = NULL, frame = "none", node = 45, pch = NULL, col = "black", text = "Lemuriformes" )
+nodelabels(bg = NULL, frame = "none", node = 77, pch = NULL, col = "black", text = "Lorisiformes", adj = c(0.8, 0.5) )
 nodelabels(bg = NULL, frame = "none", node = 42, pch = NULL, col = "black", text = "Prosimian", adj = c(0.8, 0.5) )
 nodelabels(bg = NULL, frame = "none", node = 44, pch = NULL, col = "black", text = "Strepsirrhini", adj = c(0.8, 0.5) )
+nodelabels(bg = NULL, frame = "none", node = 53, pch = NULL, col = "black", text = "Lepilemuridae", adj = c(0.4, 0.5))
 nodelabels(bg = NULL, frame = "none", node = 48, pch = NULL, col = "black", text = "Cheirogaleidae", adj = c(0.4, 0.5))
 nodelabels(bg = NULL, frame = "none", node = 63, pch = NULL, col = "black", text = "Lemuridae" )
 nodelabels(bg = NULL, frame = "none", node = 80, pch = NULL, col = "black", text = "Galagidae", adj = c(0.1, 0.5))
