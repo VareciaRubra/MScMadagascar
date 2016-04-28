@@ -1,14 +1,17 @@
-SRD.selected.Diet.Lemuridae.plot <- plot_grid(PC.Plots$Varecia[[7]] +ggtitle("PC1 Varecia"), ggplot() ,ggplot() ,ggplot() ,
-                                              SRD.plot.wire(SRD.result = SRD(gen.cov.list$Varecia, gen.cov.list$Hapalemur), SHAPE = Shapes.sym$hapalemur, ROTACIONI =  c(1,-1,1), TTL = "Varecia x Hapalemur")$plot.muDev,
-                                              PC.Plots$Hapalemur[[7]] +ggtitle("PC1 Hapalemur"), ggplot(), ggplot(),
-                                              SRD.plot.wire(SRD.result = SRD(gen.cov.list$Varecia, gen.cov.list$Lemur), SHAPE = Shapes.sym$varecia, ROTACIONI =  c(-1,-1,1), TTL = "Varecia x Lemur")$plot.muDev,
-                                              SRD.plot.wire(SRD.result = SRD(gen.cov.list$Lemur, gen.cov.list$Hapalemur), SHAPE = Shapes.sym$hapalemur, ROTACIONI =  c(1,-1,1), TTL = "Lemur x Hapalemur")$plot.muDev,
-                                              PC.Plots$Lemur[[7]]+ggtitle("PC1 Lemur"), ggplot(), 
-                                              SRD.plot.wire(SRD.result = SRD(gen.cov.list$Varecia, gen.cov.list$Eulemur), SHAPE = Shapes.sym$eulemur, ROTACIONI =  c(1,-1,1), TTL = "Varecia x Eulemur")$plot.muDev,
-                                              SRD.plot.wire(SRD.result = SRD(gen.cov.list$Hapalemur, gen.cov.list$Eulemur), SHAPE = Shapes.sym$lemur, ROTACIONI =  c(1,-1,1), TTL = "Hapalemur x Eulemur")$plot.muDev,
-                                              SRD.plot.wire(SRD.result = SRD(gen.cov.list$Lemur, gen.cov.list$Eulemur), SHAPE = Shapes.sym$lemur, ROTACIONI =  c(1,-1,1), TTL = "Lemur x Eulemur")$plot.muDev,
-                                              PC.Plots$Eulemur[[7]] + ggtitle("PC1 Eulemur"),
-                                              ncol = 4)
+SRD.selected.Diet.Lemuridae.plot <- plot_grid(PC.Plots$Varecia[[7]], ggplot() ,ggplot() ,ggplot() ,
+                                              SRD.plot.wire(SRD.result = SRD(gen.cov.list$Varecia, gen.cov.list$Hapalemur), SHAPE = Shapes.sym$hapalemur, ROTACIONI =  c(1,-1,1), TTL = "")$plot.muDev,
+                                              PC.Plots$Hapalemur[[7]], ggplot(), ggplot(),
+                                              SRD.plot.wire(SRD.result = SRD(gen.cov.list$Varecia, gen.cov.list$Lemur), SHAPE = Shapes.sym$varecia, ROTACIONI =  c(-1,-1,1), TTL = "")$plot.muDev,
+                                              SRD.plot.wire(SRD.result = SRD(gen.cov.list$Lemur, gen.cov.list$Hapalemur), SHAPE = Shapes.sym$hapalemur, ROTACIONI =  c(1,-1,1), TTL = "")$plot.muDev,
+                                              PC.Plots$Lemur[[7]], ggplot(), 
+                                              SRD.plot.wire(SRD.result = SRD(gen.cov.list$Varecia, gen.cov.list$Eulemur), SHAPE = Shapes.sym$eulemur, ROTACIONI =  c(1,-1,1), TTL = "")$plot.muDev,
+                                              SRD.plot.wire(SRD.result = SRD(gen.cov.list$Hapalemur, gen.cov.list$Eulemur), SHAPE = Shapes.sym$lemur, ROTACIONI =  c(1,-1,1), TTL = "")$plot.muDev,
+                                              SRD.plot.wire(SRD.result = SRD(gen.cov.list$Lemur, gen.cov.list$Eulemur), SHAPE = Shapes.sym$eulemur, ROTACIONI =  c(1,-1,1), TTL = "")$plot.muDev,
+                                              PC.Plots$Eulemur[[7]],
+                                              ncol = 4, scale = c(1.2,1.3,1.3,1.3,
+                                                                  1.3,1.2,1.3,1.3,
+                                                                  1.3,1.3,1.2,1.3,
+                                                                  1.3,1.3,1.3,1.2))
 SRD.selected.Diet.Lemuridae.plot
 
 SRD.selected.Diet.Indridae.plot  <- plot_grid(PC.Plots$Indri[[7]] + ggtitle("PC1 Indri"), ggplot() ,ggplot(),
