@@ -14,19 +14,35 @@ SRD.selected.Diet.Lemuridae.plot <- plot_grid(PC.Plots$Varecia[[7]], ggplot() ,g
                                                                   1.3,1.3,1.3,1.2))
 SRD.selected.Diet.Lemuridae.plot
 
-SRD.selected.Diet.Indridae.plot  <- plot_grid(PC.Plots$Indri[[7]] + ggtitle("PC1 Indri"), ggplot() ,ggplot(),
-          SRD.plot.wire(SRD.result = SRD(gen.cov.list$Indri, gen.cov.list$Propithecus), SHAPE = Shapes.sym$indri, ROTACIONI =  c(-1,-1,1), TTL = "Indri x Propithecus")$plot.muDev,
-          PC.Plots$Propithecus[[7]] +ggtitle("PC1 Propithecus"), ggplot(), 
-          SRD.plot.wire(SRD.result = SRD(gen.cov.list$Indri, gen.cov.list$Avahi), SHAPE = Shapes.sym$avahi, ROTACIONI =  c(-1,-1,1), TTL = "Indri x Avahi")$plot.muDev,
-          SRD.plot.wire(SRD.result = SRD(gen.cov.list$Avahi, gen.cov.list$Propithecus), SHAPE = Shapes.sym$propithecus, ROTACIONI =  c(-1,-1,1), TTL = "Avahi x Propithecus")$plot.muDev,
-          PC.Plots$Avahi[[7]]+ggtitle("PC1 Avahi"),
+SRD.selected.Diet.Indridae.plot  <- plot_grid(PC.Plots$Indri[[7]], ggplot() ,ggplot(),
+          SRD.plot.wire(SRD.result = SRD(gen.cov.list$Indri, gen.cov.list$Propithecus), SHAPE = Shapes.sym$indri, ROTACIONI =  c(-1,-1,1), TTL = "")$plot.muDev,
+          PC.Plots$Propithecus[[7]] , ggplot(), 
+          SRD.plot.wire(SRD.result = SRD(gen.cov.list$Indri, gen.cov.list$Avahi), SHAPE = Shapes.sym$avahi, ROTACIONI =  c(-1,-1,1), TTL = "")$plot.muDev,
+          SRD.plot.wire(SRD.result = SRD(gen.cov.list$Avahi, gen.cov.list$Propithecus), SHAPE = Shapes.sym$propithecus, ROTACIONI =  c(-1,-1,1), TTL = "")$plot.muDev,
+          PC.Plots$Avahi[[7]],
           ncol = 3)
 SRD.selected.Diet.Indridae.plot
 
 
-SRD.selected.Lepilemuridae.plot  <- plot_grid(SRD.plot.wire(SRD.result = SRD(Drift.results$extant.sp$Regression.test$`96`$W.mx, Drift.results$extant.sp$Regression.test$`89`$W.mx), SHAPE = Shapes.sym$lepilemur, ROTACIONI =  c(1,-1,1), TTL = "Lepilemuridae")$plot.muDev, 
-                                              PC.Plots$Lepilemur[[7]], ncol = 2)
+SRD.selected.Lepilemuridae.plot  <- plot_grid(SRD.plot.wire(SRD.result = SRD(Drift.results$extant.sp$Regression.test$`96`$W.mx, Drift.results$extant.sp$Regression.test$`89`$W.mx), SHAPE = Shapes.sym$lepilemur, ROTACIONI =  c(1,-1,1), TTL = "")$plot.muDev, 
+                                              PC.Plots$Lepilemur[[7]], ncol = 2, scale = c(1.1,1.2))
 
+
+
+SRD.selected.Diet.Cheirogaleidae.plot <- plot_grid(PC.Plots$Phaner[[7]], ggplot() ,ggplot() ,ggplot() ,
+                                              SRD.plot.wire(SRD.result = SRD(gen.cov.list$Phaner, gen.cov.list$Cheirogaleus), SHAPE = Shapes.sym$cheirogaleus, ROTACIONI =  c(1,-1,1), TTL = "")$plot.muDev,
+                                              PC.Plots$Cheirogaleus[[7]], ggplot(), ggplot(),
+                                              SRD.plot.wire(SRD.result = SRD(gen.cov.list$Phaner, gen.cov.list$Microcebus), SHAPE = Shapes.sym$microcebus, ROTACIONI =  c(1,-1,1), TTL = "")$plot.muDev,
+                                              SRD.plot.wire(SRD.result = SRD(gen.cov.list$Microcebus, gen.cov.list$Cheirogaleus), SHAPE = Shapes.sym$cheirogaleus, ROTACIONI =  c(1,-1,1), TTL = "")$plot.muDev,
+                                              PC.Plots$Microcebus[[7]], ggplot(), 
+                                              SRD.plot.wire(SRD.result = SRD(gen.cov.list$Phaner, gen.cov.list$Mirza), SHAPE = Shapes.sym$phaner, ROTACIONI =  c(-1,-1,1), TTL = "")$plot.muDev,
+                                              SRD.plot.wire(SRD.result = SRD(gen.cov.list$Cheirogaleus, gen.cov.list$Mirza), SHAPE = Shapes.sym$cheirogaleus, ROTACIONI =  c(1,-1,1), TTL = "")$plot.muDev,
+                                              SRD.plot.wire(SRD.result = SRD(gen.cov.list$Microcebus, gen.cov.list$Mirza), SHAPE = Shapes.sym$mirza, ROTACIONI =  c(-1,-1,1), TTL = "")$plot.muDev,
+                                              PC.Plots$Mirza[[7]],
+                                              ncol = 4, scale = c(1,1.3,1.3,1.3,
+                                                                  1.3,1,1.3,1.3,
+                                                                  1.3,1.3,1,1.3,
+                                                                  1.3,1.3,1.3,1))
 
 
 plot_grid(PC.Plots$Daubentonia[[7]], ggplot(), ggplot(), ggplot(), ggplot(), ggplot(),ggplot(),
@@ -66,7 +82,8 @@ ncol = 7, scale = c(1.2,1.3,1.3,1.3,1.3,1.3,1.3,
                    1.3,1.3,1.3,1.3,1.3,1.3,1.2))
 
 
-
+################ refazer o PCs do Microcebus, que tá com -
+################ faz algum sentido fazer K multi nos valores de SRD?
 
 
 
