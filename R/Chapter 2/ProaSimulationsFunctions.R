@@ -48,7 +48,7 @@ simulateGP<-function(method, m, tNe, pop, n, sim.n, G, P)
     #perform Ackermann and Cheverud test with t-test for unity slope
     
     model <- summary(lm(log(v) ~ log(eigW$values)))
-    prob[i] <- pt(abs((model$coefficients[2,1]-1) / model$coefficients[2,2]), df = model$df[2], lower.tail=F)*2
+    prob[i] <- pt(abs( (model$coefficients[2,1]-1) / model$coefficients[2,2]), df = model$df[2], lower.tail=F)*2 # distribuição de student
     beta[i] <- model$coefficients[2,1]
   }
   #Calculate 95% confidence limits
