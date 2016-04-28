@@ -19,7 +19,7 @@ SRD.Tree <- function (tree, cov.matrix.list, sample.sizes = NULL, mean.list)
                         {
                           indices <- as.character(tree$edge[,2] [tree$edge[,1] == node])
                           SRD.result <- tryCatch (expr = SRD(cov.matrices [[ indices [1] ]], cov.matrices [[ indices [2] ]]) , error = function(cond) vector("list") )
-                          m.sd.cor <-list(cov.matrices [[ indices [1] ]], cov.matrices [[ indices [2] ]]) %>% llply( function(x) data.frame( "trait" =  names(mean.sim(x)), "mean.cor" = mean.sim(abs(x)), "sd.cor" = mean.sd(abs(x)) ) , .progress = "text" )
+                          m.sd.cor <-list(abs(cov2cor(cov.matrices [[ indices [1] ]])), abs(cov2cor(cov.matrices [[ indices [2] ]])) ) %>% llply( function(x) data.frame( "trait" =  names(mean.sim(x)), "mean.cor" = mean.sim(abs(x)), "sd.cor" = mean.sd(abs(x)) ) , .progress = "text" )
                           return(list(SRD.result = SRD.result, m.sd.cor = m.sd.cor))
                               })
   names(SRD.by.node) <- paste0("node", nodes[node.mask])
@@ -110,6 +110,20 @@ names(SRD.sd.mean)[8] <- "code"
 SRD.sd.mean $code
 
 
+SRD.sd.mean$Oral <- rep(Modular.hyp[, "Oral"], 32)
+SRD.sd.mean$Nasal <- rep(Modular.hyp[, "Nasal"], 32)
+SRD.sd.mean$Zygomatic <- rep(Modular.hyp[, "Zygomatic"], 32)
+SRD.sd.mean$Orbit <- rep(Modular.hyp[, "Orbit"], 32)
+SRD.sd.mean$Nasal <- rep(Modular.hyp[, "Nasal"], 32)
+SRD.sd.mean$Base <- rep(Modular.hyp[, "Base"], 32)
+SRD.sd.mean$Vault <- rep(Modular.hyp[, "Vault"], 32)
+SRD.sd.mean$Face <- rep(Modular.hyp[, "Face"], 32)
+SRD.sd.mean$Neuro <- rep(Modular.hyp[, "Neuro"], 32)
+
+SRD.sd.mean %>% dim()
+1248/39
+
+
 SRD.sd.mean %>% filter (.id == "node71"| 
                           .id == "node73"| 
                           .id == "node131"| 
@@ -123,9 +137,40 @@ SRD.sd.mean %>% filter (.id == "node71"|
                           .id == "node88"| 
                           .id == "node77") %>%
   ggplot(.) +
-  geom_point(aes(x = CSD, y = A.mean.cor), color = "red") +
+  geom_point(aes(x = CSD, y = A.mean.cor, size = code, color = interaction(Oral, Nasal, Zygomatic, Orbit, Base, Vault) ), shape = 8) +
+  #geom_smooth(aes(x = CSD, y = A.mean.cor, size = code), method = "lm", color = "red") +
+  #geom_text(aes(x = CSD, y = A.mean.cor, label = A.trait, size = code), color = "red") +
   #geom_point(aes(x = CSD, y = A.sd.cor), color = "red", shape = 8) +
-  geom_point(aes(x = CSD, y = B.mean.cor)) + 
+  geom_point(aes(x = CSD, y = B.mean.cor, size = code, color = interaction(Oral, Nasal, Zygomatic, Orbit, Base, Vault))) + 
+  #geom_smooth(aes(x = CSD, y = B.mean.cor, size = code), color = "black", method = "lm") +
+  #geom_text(aes(x = CSD, y = B.mean.cor, label = A.trait, size = code)) +
+  #geom_point(aes(x = CSD, y = B.sd.cor), shape = 8) + 
+  facet_wrap(~.id, ncol = 3)
+
+
+
+
+
+SRD.sd.mean %>% filter (.id == "node71"| 
+                          .id == "node73"| 
+                          .id == "node131"| 
+                          .id == "node132"| 
+                          .id == "node74"| 
+                          .id == "node75"| 
+                          .id == "node99"| 
+                          .id == "node112"| 
+                          .id == "node100"|
+                          .id == "node76"| 
+                          .id == "node88"| 
+                          .id == "node77") %>%
+  ggplot(.) +
+  geom_point(aes(x = CSD, y = A.sd.cor, size = code), color = "red") +
+  geom_smooth(aes(x = CSD, y = A.sd.cor, size = code), method = "lm", color = "red") +
+  #geom_text(aes(x = CSD, y = A.mean.cor, label = A.trait, size = code), color = "red") +
+  #geom_point(aes(x = CSD, y = A.sd.cor), color = "red", shape = 8) +
+  geom_point(aes(x = CSD, y = B.sd.cor, size = code)) + 
+  geom_smooth(aes(x = CSD, y = B.sd.cor, size = code), method = "lm") +
+  #geom_text(aes(x = CSD, y = B.mean.cor, label = A.trait, size = code)) +
   #geom_point(aes(x = CSD, y = B.sd.cor), shape = 8) + 
   facet_wrap(~.id, ncol = 3)
 
@@ -149,10 +194,42 @@ SRD.sd.mean %>% filter (.id == "node71"|
   facet_wrap(~.id, ncol = 3)
 
 
-  
-  
+Bvar.Wvar <- Drift.results$extant.sp$BW.compare %>% ldply(function(x) cbind(B.var = sum(diag(x$B.ed)), W.var = sum(diag(x$W)), r2W = CalcR2(x$W)) )
+Bvar.Wvar %>% 
+  filter (.id == "71"| 
+            .id == "73"| 
+            .id == "131"| 
+            .id == "132"| 
+            .id == "74"| 
+            .id == "75"| 
+            .id == "99"| 
+            .id == "112"| 
+            .id == "100"|
+            .id == "76"| 
+            .id == "88"| 
+            .id == "77") %>%
+  ggplot() +
+  #geom_point(aes(x= r2W, y = B.var/W.var)) +
+  geom_label(aes(x= r2W, y = B.var/W.var, label = .id))
+
+plot.phylo(Trees$extant.sp.tree, no.margin = T, cex = 0.8)
+nodelabels(text = round(Bvar.Wvar$B.var/Bvar.Wvar$W.var, digits=2), node = as.numeric(Bvar.Wvar$.id), adj = 0.8, bg = "grey")
+nodelabels(text = round(Bvar.Wvar$r2W, digits=2), node = as.numeric(Bvar.Wvar$.id), adj = -0.3, bg = "yellow" )
+legend("bottomleft", inset = 0.08,
+       title ="",
+       text.col = "grey10",
+       legend = c("var.B/varW", "r2"), 
+       fill = c("grey", "yellow") , 
+       col = c("grey", "yellow") , 
+       border = "grey", box.lwd = "n",
+       bg= "transparent",
+       cex = 2)
 
 
+sum(diag(x$B.ed))/sum(diag(x$W))
+
+CalcR2(Drift.results$extant.sp$BW.compare$`75`$W)
+CalcR2(sp.main.data$Indri_indri$matrix$cov)
 
 
 
@@ -307,3 +384,23 @@ Mx.cor.mean$W.Lorisiformes
 
 SRD.selected$Prosimian$pc1
 plot(SRD.selected$Prosimian)
+
+SRD.selected.Tree.plot <- plot_grid(
+  SRD.plot.wire(SRD.result = SRD(sp.main.data$Galago_senegalensis$matrix$cov, sp.main.data$Nycticebus_coucang$matrix$cov), SHAPE = Shapes.sym$galago, ROTACIONI =  c(-1,-1,1), TTL = "Galago x Nycticebus")$plot.muDev
+  SRD.plot.wire(SRD.result = SRD.selected$Lorisidae, SHAPE = Shapes.sym$loris, ROTACIONI =  c(-1,-1,1), TTL = "Lorisidae")$plot.muDev,
+  SRD.plot.wire(SRD.result = SRD.selected$Lorisiformes, SHAPE = Shapes.sym$nycticebus, ROTACIONI =  c(-1,-1,1), TTL = "Lorisiformes\n Galagidae x Lorisidae")$plot.muDev,
+  SRD.plot.wire(SRD.result = SRD.selected$Lemuridae, SHAPE = Shapes.sym$varecia, ROTACIONI =  c(-1,-1,1), TTL = "Lemuridae")$plot.muDev,
+  SRD.plot.wire(SRD.result = SRD.selected$Indridae, SHAPE = Shapes.sym$avahi, ROTACIONI =  c(-1,-1,1), TTL = "Indridae")$plot.muDev,
+  SRD.plot.wire(SRD.result = SRD.selected$LemxInd, SHAPE = Shapes.sym$propithecus, ROTACIONI =  c(-1,-1,1), TTL = "Lemuridae x Indridae" )$plot.muDev,
+  SRD.plot.wire(SRD.result = SRD.selected$Lepilemuridea, SHAPE = Shapes.sym$lepilemur, ROTACIONI =  c(1,-1,1), TTL = "Lepilemuridae")$plot.muDev,
+  SRD.plot.wire(SRD.result = SRD.selected$Cheirogaleidae, SHAPE = Shapes.sym$microcebus, ROTACIONI =  c(1,-1,1), TTL = "Cheirogaleidae")$plot.muDev,
+  SRD.plot.wire(SRD.result = SRD.selected$LepxChe, SHAPE = Shapes.sym$cheirogaleus, ROTACIONI =  c(1,-1,1), TTL = "Lepilemuridae x Cheirogaleidae")$plot.muDev,
+  SRD.plot.wire(SRD.result = SRD.selected$Lemuriformes, SHAPE = Shapes.sym$hapalemur, ROTACIONI =  c(1,-1,1), TTL = "Lem-Ind x Lep-Che")$plot.muDev,
+  SRD.plot.wire(SRD.result = SRD.selected$LemfxDaubs, SHAPE = Shapes.sym$daubentonia, ROTACIONI =  c(1,-1,1), TTL = "Lemuriformes\n Lemurs x Daubentonidae")$plot.muDev,
+  SRD.plot.wire(SRD.result = SRD.selected$Strepsirrhini, SHAPE = Shapes.sym$perodicticus, ROTACIONI =  c(-1,-1,1), TTL = "Strepsirrhini")$plot.muDev, # )#,
+  SRD.plot.wire(SRD.result = SRD.selected$Prosimian, SHAPE = Shapes.sym$tarsius, ROTACIONI =  c(-1,-1,1), TTL = "Prosimian\n Strepsirrhini + Tarsiidae" )$plot.muDev, 
+  ncol = 3)
+
+SRD.selected.Tree.plot
+
+
