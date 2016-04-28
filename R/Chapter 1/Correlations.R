@@ -16,8 +16,11 @@ mean.sd<-function(x) {
 
 mean.sim(abs(sp.main.data$Tarsius_bancanus$matrix$cor))
 
+Moduling <- mx.list.taxonomy[-c(73,74)] %>% ldply( function(x) data.frame( "trait" =  names(mean.sim(x)), "mean.cor" = mean.sim(abs(cov2cor(x))), "sd.cor" = mean.sd(abs(cov2cor(x))) ) , .progress = "text" )
+
 Moduling <- sp.main.data[mask.n.size] %>% 
   ldply( function(x) data.frame( "trait" =  names(mean.sim(x$matrix$cor)), "mean.cor" = mean.sim(abs(x$matrix$cor)), "sd.cor" = mean.sd(abs(x$matrix$cor)) ) , .progress = "text" )
+
 
 Moduling$cv <- Moduling$sd.cor/ Moduling$mean.cor
 
@@ -53,12 +56,22 @@ Moduling %>%
   geom_histogram(aes(x= cv, group = trait, color = Base)  )  +
   facet_wrap(~trait)+ theme_bw()
 
-Moduling %>% filter (Face == 1) %>%
-ggplot(., aes(y = cv, x = trait)) +
-  geom_jitter(aes(color = sp))+
+Moduling %>% #filter (Face == 1) %>%
+ggplot(., aes(y = cv, x = sp)) +
+  geom_jitter(aes(color = trait))+
+  geom_text(aes(label = trait)) +
+   #geom_dotplot(stackdir = "up", stackratio = 0.3)+
+  #facet_wrap(~trait) + 
+  guides(color = guide_legend(ncol =1)) +theme(axis.text.x = element_text(angle = 90))
+
+
+Moduling %>% #filter (Face == 1) %>%
+  ggplot(., aes(y = cv, x = sp)) +
+  geom_jitter()+
+  geom_text(aes(label = trait, color = interaction(Vault, Neuro) ), size = 3) +
   #geom_dotplot(stackdir = "up", stackratio = 0.3)+
   #facet_wrap(~trait) + 
-  guides(color = guide_legend(ncol =1))
+  guides(color = guide_legend(ncol =1)) +theme(axis.text.x = element_text(angle = 90))
 
 Moduling %>% #filter (trait == "BA_OPI") %>%
   ggplot( aes(y = r2, x = cv)) +
@@ -68,9 +81,3 @@ Moduling %>% #filter (trait == "BA_OPI") %>%
   theme_bw() + 
   facet_wrap(~trait, ncol = 8) 
 
-
-r2.stuff
-Moduling %>% names
-
-
-llply()
