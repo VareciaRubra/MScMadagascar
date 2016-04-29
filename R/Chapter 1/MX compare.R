@@ -32,7 +32,7 @@
   #Saguinus_P.cor <- cov2cor(Saguinus_P.cov)
   
   cov.list <- cov.mx[mask]
-  cov.list <- cov.sizeless[mask]
+  #cov.list <- cov.sizeless[mask]
   cov.list$Saguinus_P.cov <- Saguinus_P.cov
   cov.list$Saguinus_G.cov <- Saguinus_G.cov
   
@@ -49,7 +49,8 @@
   rep.list[dim(rep.list)[1] +1, ] <- c("Saguinus_P", rep(0.97, 7) )
   rep.list[dim(rep.list)[1] +1, ] <- c("Saguinus_G", rep(0.75, 7) )
   row.names(rep.list) <- rep.list$Especie
-  #colnames(rep.list) <- c("Especie", "BS.rs")  #### só pra sizeless
+  colnames(rep.list) <- c("Especie", "BS.rs", "BS.krz", "pcas", "cor.mantel", "cor.krz", "MC.rs", "MC.krz") 
+  colnames(rep.list)
   rep.list$Especie <- factor(rep.list$Especie, levels = unique(rep.list$Especie) )
   rep.list$BS.rs <- as.numeric(rep.list$BS.rs)
   rep.list$BS.krz <- as.numeric(rep.list$BS.krz)
@@ -61,7 +62,7 @@
   
   str(rep.list)
 
-  sample.size.list <- c(n.size[mask,2], 130, 230)
+  sample.size.list <- c(n.size[mask,2], 130, 36)
 
   safe.copy.mx.compare <- mx.compare
   mx.compare = vector("list", 7)
@@ -72,7 +73,7 @@
   mx.compare[[4]]$correlations <- as.matrix(MatrixCor(cor.x= cor.list, correlation = TRUE, num.vectors = 1000, repeat.vector = rep.list[, 5] ) )
   mx.compare[[5]]$correlations <- as.matrix(KrzCor(cov.x= cor.list, correlation = TRUE, num.vectors = 1000, repeat.vector = rep.list[, 6] ))
   mx.compare[[6]] <- RandomSkewers(cov.x= cov.list, num.vectors = 1000, repeat.vector = rep.list[, 7] )
-  mx.compare[[7]]$correlations <- as.matrix(KrzCor(cov.x= cor.list, correlation = TRUE, num.vectors = 1000, repeat.vector = rep.list[, 8] ))
+  mx.compare[[7]]$correlations <- as.matrix(KrzCor(cov.x= cov.list, correlation = TRUE, num.vectors = 1000, repeat.vector = rep.list[, 8] ))
   names(mx.compare)[1:7] <-  c('BS.RS', 'BS.KRZ','PCA.s', 'Mantel.Cor', 'KRZ.Cor', 'MC.RS', 'MC.KRZ')
   mx.class<- c('V/CV', 'V/CV','V/CV', 'COR', 'COR','V/CV','V/CV')
   for (i in 1:7)  {mx.compare[[i]]$method <- names(mx.compare)[i]}
@@ -189,7 +190,7 @@ Steppan$Plot$Corrected.mc <-
     Combine.Mx.Plot(Mx1 = mx.compare$MC.RS$correlations, 
                     Mx2 = mx.compare$MC.KRZ$correlations, 
                     prob = mx.compare$MC.RS$probabilities,
-                    diag.info = c(n.size[mask,2], 130, 12),
+                    diag.info = c(n.size[mask,2], 130, 36),
                     method = "Random Skewers",
                     titulo = "Corrected repetabilities Species matrices comparisons via Krzanowski and" )
 
