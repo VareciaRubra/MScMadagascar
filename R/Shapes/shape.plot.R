@@ -161,7 +161,7 @@ shape.plot [[i]] <-
           culo = 0.02, 
           thickness = 1) +
   #geom_point (aes (x = X, y = Y), alpha = 0.6, color ="darkgrey", size = 1.2) +
-  geom_label(aes (x = X, y = Y, label = traits ),  alpha = 0.6, size = 4, label.padding = unit(0.4, "mm")) +
+  geom_label(aes (x = X, y = Y, label = traits ),  alpha = 0.6, size = 7, label.padding = unit(0.4, "mm")) +
   #ggtitle(paste("PC", i, sep = " ")) +
   theme(plot.title = element_text(face = "bold", size = 12),
         legend.position = "none",
