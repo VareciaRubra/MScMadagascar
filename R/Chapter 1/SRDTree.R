@@ -19,14 +19,10 @@ SRD.Tree <- function (tree, cov.matrix.list, sample.sizes = NULL, mean.list)
                         {
                           indices <- as.character(tree$edge[,2] [tree$edge[,1] == node])
                           SRD.result <- tryCatch (expr = SRD(cov.matrices [[ indices [1] ]], cov.matrices [[ indices [2] ]]) , error = function(cond) vector("list") )
-<<<<<<< HEAD
                           m.sd.cor <-list(abs(cov2cor(cov.matrices [[ indices [1] ]])), abs(cov2cor(cov.matrices [[ indices [2] ]])) ) %>% llply( function(x) data.frame( "trait" =  names(mean.sim(x)), "mean.cor" = mean.sim(abs(x)), "sd.cor" = mean.sd(abs(x)) ) , .progress = "text" )
                           RS.result <- RandomSkewers(cov.matrices [[ indices [1] ]], cov.matrices [[ indices [2] ]]) 
                           return(list(SRD.result = SRD.result, RS.result = RS.result, m.sd.cor = m.sd.cor))
-=======
-                          #m.sd.cor <-list(abs(cov2cor(cov.matrices [[ indices [1] ]])), abs(cov2cor(cov.matrices [[ indices [2] ]])) ) %>% llply( function(x) data.frame( "trait" =  names(mean.sim(x)), "mean.cor" = mean.sim(abs(x)), "sd.cor" = mean.sd(abs(x)) ) , .progress = "text" )
-                          return(list(SRD.result = SRD.result))
->>>>>>> a6f0b3fa071439c4d680c4d364e9bebc4f3ed6d4
+
                               })
   names(SRD.by.node) <- paste0("node", nodes[node.mask])
 
