@@ -5,7 +5,7 @@
 #Mas da para voce ter uma ideia: mandei um for para calcular as medias harmonicas (n/(soma dos reciprocos)) para cada
 #especie
 
-harmonic.n.size <- c(n.size[mask,2], 130, 12) ## vetor com o tamanho amostral de cada especie que entrou nas comparaçao
+harmonic.n.size <- c(n.size[mask,2], 130, 36) ## vetor com o tamanho amostral de cada especie que entrou nas comparaçao
 
 names(harmonic.n.size) <- c(n.size[mask,1], 'Saguinus_P', 'Saguinus_G')
 
@@ -51,7 +51,7 @@ cor.test(Matrix.Similarity.KRZ[lower.tri(Matrix.Similarity.KRZ, diag = F)], harm
 }
 
 model.harmonic.mean <- lm(mx.compare$BS.RS$correlations [lower.tri(mx.compare$BS.RS$correlations, diag = F)] ~ harm_matrix[upper.tri(harm_matrix, diag = F)])
-model.harmonic.mean <- lm(mx.compare$BS.KRZ$correlations [lower.tri(mx.compare$BS.RS$correlations, diag = F)] ~ harm_matrix[upper.tri(harm_matrix, diag = F)])
+model.harmonic.mean.k <- lm(mx.compare$BS.KRZ$correlations [lower.tri(mx.compare$BS.RS$correlations, diag = F)] ~ harm_matrix[upper.tri(harm_matrix, diag = F)])
 
 #modelo linear: similaridade por RS explicado por medias harmonicas
 Harm.Mean <- harm_matrix[upper.tri(harm_matrix, diag = F)]
@@ -89,9 +89,9 @@ mx.compare$BS.RS$correlations.residual5 <- var(mx.compare$BS.RS$correlations.res
 MatrixCor(mx.compare$BS.RS$correlations, mx.compare$BS.RS$correlations.residual5)
 
 ############################# Vendo efeito de filogenia ##########################################
-notat.tree <- is.na(match(dimnames(mx.compare$RS$correlations)[[1]], treefile$tip.label)) 
-names.at.tree <- dimnames(mx.compare$RS$correlations)[[1]][!notat.tree] 
-mx.all.at.tree <- mx.compare$RS$correlations[!notat.tree,!notat.tree]
+notat.tree <- is.na(match(dimnames(mx.compare$MC.RS$correlations)[[1]], treefile$tip.label)) 
+names.at.tree <- dimnames(mx.compare$MC.RS$correlations)[[1]][!notat.tree] 
+mx.all.at.tree <- mx.compare$MC.RS$correlations[!notat.tree,!notat.tree]
 pruned.tree.all <- drop.tip(treefile,treefile$tip.label[-match( names.at.tree, treefile$tip.label)])
 phylo.dist.all.at.tree <- cophenetic.phylo(pruned.tree.all)
 phylo.dist.all.at.tree <- phylo.dist.all.at.tree[rownames( mx.all.at.tree), rownames( mx.all.at.tree)]
@@ -110,7 +110,7 @@ dimnames(phylo.dist.all.at.tree)[[1]] %in%
 dimnames(mx.compare$BS.RS$correlations[-c(41,43:44), -c(41,43:44)])[[1]] 
 
 
-MatrixCor(as.matrix(harm_matrix)[-c(41, 43:44), -c(41, 43:44)], mx.compare$BS.RS$correlations[-c(41,43:44), -c(41,43:44)])
+MatrixCor(as.matrix(harm_matrix)[-c(41, 43:44), -c(41, 43:44)], mx.compare$MC.RS$correlations[-c(41,43:44), -c(41,43:44)])
 
 Phylo.Dist<- phylo.dist.all.at.tree[rownames( mx.all.at.tree), rownames( mx.all.at.tree)]
 Phylo.Dist <- Phylo.Dist[upper.tri(Phylo.Dist, diag=F)]
@@ -231,3 +231,11 @@ Plot.HM.PHy<-
 
 summary(lm(Phylogenetic.Distance ~ log(Harmonic.Mean) , data = COr.PHyHM))
 MatrixCor(as.matrix(harm_matrix)[-c(41, 43:44), -c(41, 43:44)], phylo.dist.all.at.tree[rownames( mx.all.at.tree), rownames( mx.all.at.tree)])
+
+mantel.partial(xdis = 1-mx.compare$MC.RS$correlations[-c(41, 43:44), -c(41, 43:44)], 
+               zdis = as.matrix(harm_matrix)[-c(41, 43:44), -c(41, 43:44)], 
+               ydis = phylo.dist.all.at.tree[rownames( mx.all.at.tree), rownames( mx.all.at.tree)], 
+               method = "pearson")
+mantel.partial(xdis = 1-mx.compare$MC.KRZ$correlations[-c(41, 43:44), -c(41, 43:44)], 
+               zdis = as.matrix(harm_matrix)[-c(41, 43:44), -c(41, 43:44)], 
+               ydis = phylo.dist.all.at.tree[rownames( mx.all.at.tree), rownames( mx.all.at.tree)], method = "pearson")
