@@ -39,42 +39,26 @@ SRD.selected.Diet.Indridae.plot  <- plot_grid(PC.Plots$Indri[[7]], ggplot() ,ggp
           ncol = 3)
 SRD.selected.Diet.Indridae.plot
 
-
-<<<<<<< HEAD
 SRD.selected.Lepilemuridae.plot  <- plot_grid(SRD.plot.wire(SRD.result = SRD(Drift.results$extant.sp$Regression.test$`96`$W.mx, Drift.results$extant.sp$Regression.test$`89`$W.mx),lepilemur, ROTACIONI =  c(1,-1,1), TTL = "")$plot.muDev, 
                                               PC.Plots$Lepilemur[[7]], ncol = 2, scale = c(1.1,1.2))
-=======
-SRD.selected.Lepilemuridae.plot  <- plot_grid(SRD.plot.wire(SRD.result = SRD(Drift.results$extant.sp$Regression.test$`96`$W.mx, Drift.results$extant.sp$Regression.test$`89`$W.mx), SHAPE = Shapes.sym$lepilemur, ROTACIONI =  c(1,-1,1), TTL = "")$plot.muDev, 
-                                              PC.Plots$Lepilemur[[7]], ncol = 2, scale = c(1.1,1))
->>>>>>> a6f0b3fa071439c4d680c4d364e9bebc4f3ed6d4
-
 
 
 SRD.selected.Diet.Cheirogaleidae.plot <- plot_grid(PC.Plots$Phaner[[7]], ggplot() ,ggplot() ,ggplot() ,
-<<<<<<< HEAD
-                                              SRD.plot.wire(SRD.result = SRD(gen.cov.list$Phaner, gen.cov.list$Cheirogaleus),cheirogaleus, ROTACIONI =  c(1,-1,1), TTL = "")$plot.muDev,
-=======
-                                              SRD.plot.wire(SRD.result = SRD(gen.cov.list$Phaner, gen.cov.list$Cheirogaleus), SHAPE = Shapes.sym$phaner, ROTACIONI =  c(-1,-1,1), TTL = "")$plot.muDev,
->>>>>>> a6f0b3fa071439c4d680c4d364e9bebc4f3ed6d4
-                                              PC.Plots$Cheirogaleus[[7]], ggplot(), ggplot(),
-                                              SRD.plot.wire(SRD.result = SRD(gen.cov.list$Phaner, gen.cov.list$Microcebus),microcebus, ROTACIONI =  c(1,-1,1), TTL = "")$plot.muDev,
-                                              SRD.plot.wire(SRD.result = SRD(gen.cov.list$Microcebus, gen.cov.list$Cheirogaleus),cheirogaleus, ROTACIONI =  c(1,-1,1), TTL = "")$plot.muDev,
-                                              PC.Plots$Microcebus[[7]], ggplot(), 
-<<<<<<< HEAD
-                                              SRD.plot.wire(SRD.result = SRD(gen.cov.list$Phaner, gen.cov.list$Mirza),phaner, ROTACIONI =  c(-1,-1,1), TTL = "")$plot.muDev,
-                                              SRD.plot.wire(SRD.result = SRD(gen.cov.list$Cheirogaleus, gen.cov.list$Mirza),cheirogaleus, ROTACIONI =  c(1,-1,1), TTL = "")$plot.muDev,
-                                              SRD.plot.wire(SRD.result = SRD(gen.cov.list$Microcebus, gen.cov.list$Mirza),mirza, ROTACIONI =  c(-1,-1,1), TTL = "")$plot.muDev,
-=======
-                                              SRD.plot.wire(SRD.result = SRD(gen.cov.list$Phaner, gen.cov.list$Mirza), SHAPE = Shapes.sym$mirza, ROTACIONI =  c(-1,-1,1), TTL = "")$plot.muDev,
-                                              SRD.plot.wire(SRD.result = SRD(gen.cov.list$Cheirogaleus, gen.cov.list$Mirza), SHAPE = Shapes.sym$cheirogaleus, ROTACIONI =  c(1,-1,1), TTL = "")$plot.muDev,
-                                              SRD.plot.wire(SRD.result = SRD(gen.cov.list$Microcebus, gen.cov.list$Mirza), SHAPE = Shapes.sym$microcebus, ROTACIONI =  c(1,-1,1), TTL = "")$plot.muDev,
->>>>>>> a6f0b3fa071439c4d680c4d364e9bebc4f3ed6d4
-                                              PC.Plots$Mirza[[7]],
-                                              ncol = 4, scale = c(1,1.1,1.1,1.1,
-                                                                  1.1,1,1.1,1.1,
-                                                                  1.1,1.1,1,1.1,
-                                                                  1.1,1.1,1.1,1))
+                                                   RD.plot.wire(SRD.result = SRD(gen.cov.list$Phaner, gen.cov.list$Cheirogaleus), SHAPE = Shapes.sym$phaner, ROTACIONI =  c(-1,-1,1), TTL = "")$plot.muDev,
+                                                   PC.Plots$Cheirogaleus[[7]], ggplot(), ggplot(),
+                                                   SRD.plot.wire(SRD.result = SRD(gen.cov.list$Phaner, gen.cov.list$Microcebus), SHAPE = Shapes.sym$microcebus, ROTACIONI =  c(1,-1,1), TTL = "")$plot.muDev,
+                                                   SRD.plot.wire(SRD.result = SRD(gen.cov.list$Microcebus, gen.cov.list$Cheirogaleus), SHAPE = Shapes.sym$cheirogaleus, ROTACIONI =  c(1,-1,1), TTL = "")$plot.muDev,
+                                                   PC.Plots$Microcebus[[7]], ggplot(), 
+                                                   SRD.plot.wire(SRD.result = SRD(gen.cov.list$Phaner, gen.cov.list$Mirza), SHAPE = Shapes.sym$mirza, ROTACIONI =  c(-1,-1,1), TTL = "")$plot.muDev,
+                                                   SRD.plot.wire(SRD.result = SRD(gen.cov.list$Cheirogaleus, gen.cov.list$Mirza), SHAPE = Shapes.sym$cheirogaleus, ROTACIONI =  c(1,-1,1), TTL = "")$plot.muDev,
+                                                   SRD.plot.wire(SRD.result = SRD(gen.cov.list$Microcebus, gen.cov.list$Mirza), SHAPE = Shapes.sym$microcebus, ROTACIONI =  c(1,-1,1), TTL = "")$plot.muDev,
+                                                   PC.Plots$Mirza[[7]],
+                                                    ncol = 4, scale = c(1,1.1,1.1,1.1,
+                                                                        1.1,1,1.1,1.1,
+                                                                        1.1,1.1,1,1.1,
+                                                                        1.1,1.1,1.1,1))
 SRD.selected.Diet.Cheirogaleidae.plot
+
 
 plot_grid(PC.Plots$Daubentonia[[7]], ggplot(), ggplot(), ggplot(), ggplot(), ggplot(),ggplot(),
 SRD.plot.wire(SRD.result = SRD(gen.cov.list$Varecia, gen.cov.list$Daubentonia),daubentonia, ROTACIONI =  c(1,-1,1), TTL = "")$plot.muDev,
