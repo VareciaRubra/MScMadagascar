@@ -4,7 +4,8 @@ current.data <- gen.main.data
 cov.mx <- sp.main.data %>% llply(function(x) x$matrix$cov)
 mask <- ldply(cov.mx, function(x) !is.na(x[1]))[,2]
 mx.at.tree <- cov.mx[mask][-41]
-ancestral.mx <- PhyloW(tree = pruned.tree.with.mx, tip.data = mx.at.tree, tip.sample.size = n.size[mask][-41])
+mx.at.tree$Otolemur_crassicaudatus <- gen.main.data$Otolemur$matrix$cov
+ancestral.mx <- PhyloW(tree = pruned.tree.with.mx, tip.data = mx.at.tree, tip.sample.size = n.size[,2][mask][-41])
 plot(pruned.tree.with.mx, cex = 0.5)
 nodelabels()
 W.matrix <- ancestral.mx$'42'
@@ -68,10 +69,10 @@ Gen.cov.list$Daubentonia <- ancestral.mx$Daubentonia_madagascariensis
 Gen.cov.list$W.Madagascar <- ancestral.mx$'45'
 Gen.cov.list$Perodicticus <- ancestral.mx$Perodicticus_potto
 Gen.cov.list$Loris <- ancestral.mx$Loris_tardigradus
-Gen.cov.list$W.Lorisidae <- ancestral.mx$'78'
 Gen.cov.list$Nycticebus <- ancestral.mx$Nycticebus_coucang
+Gen.cov.list$W.Lorisidae <- ancestral.mx$'78'
 Gen.cov.list$Euoticus <- ancestral.mx$Euoticus_elegantulus
-Gen.cov.list$Otolemur <- ancestral.mx$Otolemur_crassicaudatus
+Gen.cov.list$Otolemur <- gen.main.data$Otolemur$matrix$cov
 Gen.cov.list$Galago <- ancestral.mx$Galago_senegalensis
 Gen.cov.list$W.Galagidae <- ancestral.mx$'80'
 Gen.cov.list$W.Lorisiformes <- ancestral.mx$'77'
@@ -81,9 +82,16 @@ Gen.cov.list$Saguinus.P <- Saguinus_P.cov
 Gen.cov.list$Saguinus.G <- Saguinus_G.cov
 
 
-ComparaSagui <- list ("G" = RandomSkewers(ancestral.mx[c(1:41, 45, 77,63, 56, 53, 48, 43)], Saguinus_G.cov),
-                      "P" =  RandomSkewers(ancestral.mx[c(1:41, 45, 77,63, 56, 53, 48, 43)], Saguinus_P.cov) ) 
-ComparaSagui %>% ldply(., function(x) summary(x$correlation[1:41]) ) %>% xtable
+ComparaSagui <- list ("G.RS" = RandomSkewers(ancestral.mx[c(1:41, 45, 77,63, 56, 53, 48, 43)], Saguinus_G.cov)$correlation,
+                      "G.KRZ" = KrzCor(ancestral.mx[c(1:41, 45, 77,63, 56, 53, 48, 43)], Saguinus_G.cov)[,2],
+                      "P.RS" =  RandomSkewers(ancestral.mx[c(1:41, 45, 77,63, 56, 53, 48, 43)], Saguinus_P.cov)$correlation,
+                      "P.KRZ" =  KrzCor(ancestral.mx[c(1:41, 45, 77,63, 56, 53, 48, 43)], Saguinus_P.cov)[,2]) 
+ComparaSagui <- list ("G.RS" = RandomSkewers(cov.mx[mask.n.size], Saguinus_G.cov)$correlation,
+                      "G.KRZ" = KrzCor(cov.mx[mask.n.size], Saguinus_G.cov)[,2],
+                      "P.RS" =  RandomSkewers(cov.mx[mask.n.size], Saguinus_P.cov)$correlation,
+                      "P.KRZ" =  KrzCor(cov.mx[mask.n.size], Saguinus_P.cov)[,2]) 
+
+ComparaSagui %>% ldply(., function(x) summary(x) ) %>% xtable
 
 #names(gen.cov.list) %<>% gsub("_", ' ', .)
 
