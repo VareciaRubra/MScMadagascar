@@ -29,7 +29,7 @@ cor.test(Matrix.Similarity[lower.tri(Matrix.Similarity, diag = F)], harm_matrix[
 {# #Pearson's product-moment correlation (RS)
 # 
 # data:  mx.compare$BS.RS$correlations[upper.tri(mx.compare$BS.RS$correlations,  and harm_matrix[upper.tri(harm_matrix, diag = F)]    diag = F)] and harm_matrix[upper.tri(harm_matrix, diag = F)]
-# t = 13.375, df = 944, p-value < 2.2e-16
+# t = 13.375, df = 944, p-value < 0.001
 # alternative hypothesis: true correlation is not equal to 0
 # 95 percent confidence interval:
 #  0.3441578 0.4513957
@@ -166,7 +166,7 @@ COr.PHyHM$Matrix.Similarity.KRZ <- Sim.Mx.bs.krz
   #scale_x_continuous(limits = c(0.1, 0.7)) +
   #scale_y_continuous(limits = c(1, 7)) +
   theme_bw() +
-  geom_text(x = 26,  y = 0.4, label = "r.squared = 0.35 \n 818 DF,  p-value: < 2.2e-16 \n MatrixCor = -0.577 ", color = "red", size = 2) + 
+  geom_label(x = 26,  y = 0.4, label = "r.squared = 0.35 \n 818 DF,  p-value: < 0.001 \n MatrixCor = -0.58 ", size = 3) + 
   #ggtitle("Geometric mean x PC1.percent") +
   theme(legend.position  ="none") +
   theme(plot.title = element_text(lineheight=.8, face="bold")) +
@@ -185,7 +185,7 @@ Plot.Phy.SIM.k<-
   #scale_x_continuous(limits = c(0.1, 0.7)) +
   scale_y_continuous(limits = c(0.5, 1)) +
   theme_bw() +
-  geom_text(x = 26,  y = 0.7, label = "r.squared = 0.2644 \n 818 DF,  p-value: < 2.2e-16 \n MatrixCor = -0.577 ", color = "red", size = 2) + 
+  geom_label(x = 2.5,  y = 0.55, label = "r.squared = 0.16 \n 818 DF,  p-value: < 0.001 \n MatrixCor = -0.44 ", size = 2) + 
   theme(legend.position  ="none") +
   theme(plot.title = element_text(lineheight=.8, face="bold")) +
   xlab( "Phylogenetic distance") + 
@@ -202,7 +202,7 @@ Plot.HM.SIM<-
   #scale_x_continuous(limits = c(0.1, 0.7)) +
   #scale_y_continuous(limits = c(1, 7)) +
   theme_bw() +
-  geom_text(x = 0.02,  y = 0.4, label = "r.squared = 0.3518 \n 818 DF,  p-value: < 2.2e-16 \n MatrixCor = -0.65", color = "red", size = 2) + 
+  geom_label(x = 0.023,  y = 0.4, label = "r.squared = 0.35 \n 818 DF,  p-value: < 0.001 \n MatrixCor = -0.65", size = 3) + 
   #ggtitle("Geometric mean x PC1.percent") +
   #theme(legend.position  ="none") +
   theme(plot.title = element_text(lineheight=.8, face="bold") ) +
@@ -212,7 +212,7 @@ Plot.HM.SIM<-
 summary(lm(Matrix.Similarity.RS ~ COr.PHyHM$Harmonic.Mean.inverso, data = COr.PHyHM))
 MatrixCor(1/(as.matrix(harm_matrix)[-c(41, 43:44), -c(41, 43:44)] ), mx.compare$BS.RS$correlations[-c(41,43:44), -c(41,43:44)])
 
-plot_grid(Plot.GM.PC1, Plot.R2.PC1, Plot.HM.SIM, Plot.Phy.SIM, labels = LETTERS[1:4], ncol = 2)
+temp <- plot_grid(Plot.HM.SIM, Plot.Phy.SIM,  labels = LETTERS[1:4], ncol = 2)
 
 Plot.HM.PHy<- 
   COr.PHyHM %>% 
@@ -222,7 +222,7 @@ Plot.HM.PHy<-
   #scale_x_continuous(limits = c(0.1, 0.7)) +
   #scale_y_continuous(limits = c(1, 7)) +
   theme_bw() +
-  geom_text(x = 3.8,  y = 0.4, label = "r.squared = 0.05665 \n 818 DF,  p-value: 5.02e-12 \n MatrixCor = -0.228", color = "red", size = 2) + 
+  geom_text(x = 3.8,  y = 0.4, label = "r.squared = 0.05665 \n 818 DF,  p-value: < 0.001 \n MatrixCor = -0.228", color = "red", size = 2) + 
   #ggtitle("Geometric mean x PC1.percent") +
   #theme(legend.position  ="none") +
   theme(plot.title = element_text(lineheight=.8, face="bold") ) +
@@ -231,3 +231,4 @@ Plot.HM.PHy<-
 
 summary(lm(Phylogenetic.Distance ~ log(Harmonic.Mean) , data = COr.PHyHM))
 MatrixCor(as.matrix(harm_matrix)[-c(41, 43:44), -c(41, 43:44)], phylo.dist.all.at.tree[rownames( mx.all.at.tree), rownames( mx.all.at.tree)])
+
