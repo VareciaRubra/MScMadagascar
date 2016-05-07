@@ -163,9 +163,9 @@ shape.plot [[i]] <-
   #geom_label(aes (x = X, y = Y, label = traits ),  alpha = 0.6, size = 3, label.padding = unit(0.3, "mm")) +
   #ggtitle(paste("PC", i, sep = " ")) +
   theme(plot.title = element_text(face = "bold", size = 12),
-        legend.position = "none",
-        #legend.position= c(0.3,0.1), 
-        legend.direction="horizontal",
+        #legend.position = "none",
+        legend.position= c(0.3,0.1), 
+        #legend.direction="horizontal",
         legend.text = element_text(size = 8),
         plot.margin = unit(c(0,0,-0,0), "cm"), 
         legend.key.size = unit(0.3, "cm"), 
@@ -189,8 +189,10 @@ shape.plot [[8]] <- shape.plot[[1]] + scale_fill_gradientn(colours = "darkgrey")
 return( shape.plot)
 }
 
-PC.Plots$Galago <-PCLoadShapePlotter(SHAPE = galago, W.MATRIX = mx.list.taxonomy$Galago, ROTACIONI = c(-1,-1,1), TTL = "Galago")
+PCLoadShapePlotter(SHAPE = galago, W.MATRIX = mx.list.taxonomy$Galago, ROTACIONI = c(-1,-1,1))[[2]]
 
+PC.Plots$Galago <-PCLoadShapePlotter(SHAPE = galago, W.MATRIX = mx.list.taxonomy$Galago, ROTACIONI = c(-1,-1,1), TTL = "Galago")
+PC.Plots$Galago[[7]]
 PC.Plots <- vector("list")
 
 PC.Plots$Galago <- PCLoadShapePlotter(SHAPE = galago, W.MATRIX = mx.list.taxonomy$Galago, ROTACIONI = c(-1,-1,1), TTL = "Galago")
