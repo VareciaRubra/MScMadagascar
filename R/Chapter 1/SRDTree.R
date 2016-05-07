@@ -19,8 +19,8 @@ SRD.Tree <- function (tree, cov.matrix.list, sample.sizes = NULL, mean.list)
                         {
                           indices <- as.character(tree$edge[,2] [tree$edge[,1] == node])
                           SRD.result <- tryCatch (expr = SRD(cov.matrices [[ indices [1] ]], cov.matrices [[ indices [2] ]]) , error = function(cond) vector("list") )
-                          m.sd.cor <-list(abs(cov2cor(cov.matrices [[ indices [1] ]])), abs(cov2cor(cov.matrices [[ indices [2] ]])) ) %>% llply( function(x) data.frame( "trait" =  names(mean.sim(x)), "mean.cor" = mean.sim(abs(x)), "sd.cor" = mean.sd(abs(x)) ) , .progress = "text" )
-                          return(list(SRD.result = SRD.result, m.sd.cor = m.sd.cor))
+                          #m.sd.cor <-list(abs(cov2cor(cov.matrices [[ indices [1] ]])), abs(cov2cor(cov.matrices [[ indices [2] ]])) ) %>% llply( function(x) data.frame( "trait" =  names(mean.sim(x)), "mean.cor" = mean.sim(abs(x)), "sd.cor" = mean.sd(abs(x)) ) , .progress = "text" )
+                          return(list(SRD.result = SRD.result))
                               })
   names(SRD.by.node) <- paste0("node", nodes[node.mask])
 
@@ -251,10 +251,10 @@ SRD.relMean <- as.numeric(SRD.result$output[,1]) / mean(as.numeric(SRD.result$ou
 plot.cheetows <- 
   ggshape(shape = SHAPE,
             wireframe = Aux $ tessel.39 [1:39, ],
-            colors = COLORE,
+            colors = rev(COLORE),
             rotation =ROTACIONI, 
             culo = 0.03, 
-            thickness = 1) +
+            thickness = 0.5) +
     #geom_point (aes (x = X, y = Y), alpha = 0.6, color ="darkgrey", size = 1.2) +
     #geom_label(aes (x = X, y = Y, label = traits ),  alpha = 0.4, size = 2, label.padding = unit(0.5, "mm")) +
     ggtitle(TTL) +
@@ -277,7 +277,7 @@ avgSRD <- mean(as.numeric(SRD.result$output[,1]))
 plot.doritows <- 
   ggshape(shape = SHAPE,
           wireframe = Aux $ tessel.39 [1:39, ],
-          colors = as.numeric(SRD.result$output[,1]),
+          colors = rev(as.numeric(SRD.result$output[,1])),
           rotation =ROTACIONI, 
           culo = 0.03,
           thickness = 1) +
@@ -315,15 +315,19 @@ SRD.selected.Tree.plot <- plot_grid(
   SRD.plot.wire(SRD.result = SRD.selected$Galagidae, SHAPE = Shapes.sym$galago, ROTACIONI =  c(-1,-1,1), TTL = "Galagidae")$plot.muDev,
   SRD.plot.wire(SRD.result = SRD.selected$Lorisidae, SHAPE = Shapes.sym$loris, ROTACIONI =  c(-1,-1,1), TTL = "Lorisidae")$plot.muDev,
   SRD.plot.wire(SRD.result = SRD.selected$Lorisiformes, SHAPE = Shapes.sym$nycticebus, ROTACIONI =  c(-1,-1,1), TTL = "Lorisiformes\n Galagidae x Lorisidae")$plot.muDev,
+  
   SRD.plot.wire(SRD.result = SRD.selected$Lemuridae, SHAPE = Shapes.sym$varecia, ROTACIONI =  c(-1,-1,1), TTL = "Lemuridae")$plot.muDev,
   SRD.plot.wire(SRD.result = SRD.selected$Indridae, SHAPE = Shapes.sym$avahi, ROTACIONI =  c(-1,-1,1), TTL = "Indridae")$plot.muDev,
   SRD.plot.wire(SRD.result = SRD.selected$LemxInd, SHAPE = Shapes.sym$propithecus, ROTACIONI =  c(-1,-1,1), TTL = "Lemuridae x Indridae" )$plot.muDev,
+  
   SRD.plot.wire(SRD.result = SRD.selected$Lepilemuridea, SHAPE = Shapes.sym$lepilemur, ROTACIONI =  c(1,-1,1), TTL = "Lepilemuridae")$plot.muDev,
   SRD.plot.wire(SRD.result = SRD.selected$Cheirogaleidae, SHAPE = Shapes.sym$microcebus, ROTACIONI =  c(1,-1,1), TTL = "Cheirogaleidae")$plot.muDev,
   SRD.plot.wire(SRD.result = SRD.selected$LepxChe, SHAPE = Shapes.sym$cheirogaleus, ROTACIONI =  c(1,-1,1), TTL = "Lepilemuridae x Cheirogaleidae")$plot.muDev,
-  SRD.plot.wire(SRD.result = SRD.selected$Lemuriformes, SHAPE = Shapes.sym$hapalemur, ROTACIONI =  c(1,-1,1), TTL = "Lem-Ind x Lep-Che")$plot.muDev,
-  SRD.plot.wire(SRD.result = SRD.selected$LemfxDaubs, SHAPE = Shapes.sym$daubentonia, ROTACIONI =  c(1,-1,1), TTL = "Lemuriformes\n Lemurs x Daubentonidae")$plot.muDev,
+  
+  SRD.plot.wire(SRD.result = SRD.selected$Lemuriformes, SHAPE = Shapes.sym$hapalemur, ROTACIONI =  c(1,-1,1), TTL = "Lemuriformes")$plot.muDev,
+  SRD.plot.wire(SRD.result = SRD.selected$LemfxDaubs, SHAPE = Shapes.sym$daubentonia, ROTACIONI =  c(1,-1,1), TTL = "Lemuriformes x Daubentonidae")$plot.muDev,
   SRD.plot.wire(SRD.result = SRD.selected$Strepsirrhini, SHAPE = Shapes.sym$perodicticus, ROTACIONI =  c(-1,-1,1), TTL = "Strepsirrhini")$plot.muDev, # )#,
+  
   SRD.plot.wire(SRD.result = SRD.selected$Prosimian, SHAPE = Shapes.sym$tarsius, ROTACIONI =  c(-1,-1,1), TTL = "Prosimian\n Strepsirrhini + Tarsiidae" )$plot.muDev, 
   ncol = 3)
 
@@ -334,15 +338,19 @@ SRD.selected.Tree.plot <- plot_grid(
   SRD.plot.wire(SRD.result = SRD.selected$Galagidae, SHAPE = Shapes.sym$galago, ROTACIONI =  c(-1,-1,1), TTL = "Galagidae")$plot.relMean,
   SRD.plot.wire(SRD.result = SRD.selected$Lorisidae, SHAPE = Shapes.sym$loris, ROTACIONI =  c(-1,-1,1), TTL = "Lorisidae")$plot.relMean,
   SRD.plot.wire(SRD.result = SRD.selected$Lorisiformes, SHAPE = Shapes.sym$nycticebus, ROTACIONI =  c(-1,-1,1), TTL = "Lorisiformes\n Galagidae x Lorisidae")$plot.relMean,
+  
   SRD.plot.wire(SRD.result = SRD.selected$Lemuridae, SHAPE = Shapes.sym$varecia, ROTACIONI =  c(-1,-1,1), TTL = "Lemuridae")$plot.relMean,
   SRD.plot.wire(SRD.result = SRD.selected$Indridae, SHAPE = Shapes.sym$avahi, ROTACIONI =  c(-1,-1,1), TTL = "Indridae")$plot.relMean,
   SRD.plot.wire(SRD.result = SRD.selected$LemxInd, SHAPE = Shapes.sym$propithecus, ROTACIONI =  c(-1,-1,1), TTL = "Lemuridae x Indridae" )$plot.relMean,
+  
   SRD.plot.wire(SRD.result = SRD.selected$Lepilemuridea, SHAPE = Shapes.sym$lepilemur, ROTACIONI =  c(1,-1,1), TTL = "Lepilemuridae")$plot.relMean,
   SRD.plot.wire(SRD.result = SRD.selected$Cheirogaleidae, SHAPE = Shapes.sym$microcebus, ROTACIONI =  c(1,-1,1), TTL = "Cheirogaleidae")$plot.relMean,
   SRD.plot.wire(SRD.result = SRD.selected$LepxChe, SHAPE = Shapes.sym$cheirogaleus, ROTACIONI =  c(1,-1,1), TTL = "Lepilemuridae x Cheirogaleidae")$plot.relMean,
-  SRD.plot.wire(SRD.result = SRD.selected$Lemuriformes, SHAPE = Shapes.sym$hapalemur, ROTACIONI =  c(1,-1,1), TTL = "Lem-Ind x Lep-Che")$plot.relMean,
-  SRD.plot.wire(SRD.result = SRD.selected$LemfxDaubs, SHAPE = Shapes.sym$daubentonia, ROTACIONI =  c(1,-1,1), TTL = "Lemuriformes\n Lemurs x Daubentonidae")$plot.relMean,
+  
+  SRD.plot.wire(SRD.result = SRD.selected$Lemuriformes, SHAPE = Shapes.sym$hapalemur, ROTACIONI =  c(1,-1,1), TTL = "Lemuriformes")$plot.relMean,
+  SRD.plot.wire(SRD.result = SRD.selected$LemfxDaubs, SHAPE = Shapes.sym$daubentonia, ROTACIONI =  c(1,-1,1), TTL = "Lemuriformes x Daubentonidae")$plot.relMean,
   SRD.plot.wire(SRD.result = SRD.selected$Strepsirrhini, SHAPE = Shapes.sym$perodicticus, ROTACIONI =  c(-1,-1,1), TTL = "Strepsirrhini")$plot.relMean, 
+  
   SRD.plot.wire(SRD.result = SRD.selected$Prosimian, SHAPE = Shapes.sym$tarsius, ROTACIONI =  c(-1,-1,1), TTL = "Prosimian\n Strepsirrhini + Tarsiidae" )$plot.relMean, 
   ncol = 3)
 
@@ -403,4 +411,6 @@ SRD.selected.Tree.plot <- plot_grid(
 
 SRD.selected.Tree.plot
 
+
+table(All.raw.main.data$All$Localidade == "ZOO")/2
 
