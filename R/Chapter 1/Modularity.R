@@ -2,24 +2,34 @@ Modular.hyp <- Aux$def.hyp[c(2:20, 1, 21:39),] # pegando as hipoteses modulares 
 Modular.hyp[20,] <- c(0,0,1,0,0,1,1,1) # mas ele tem logCS e nao tem PT.TSP, enfiemolhos!
 rownames(Modular.hyp)[20] <- "PT.TSP"
 
-Modulemurs <- vector("list")
-Modulemurs$test.modularity <- sp.main.data[mask.no.na.cov] %>% 
-  llply (function (x) TestModularity(cor.matrix = x$matrix$cor, modularity.hipot = Modular.hyp , permutations = 1000, MHI = F), .progress = "text")
+Modularity.stuff <- vector("list")
 
-Modulemurs$Probability<- Modulemurs$test.modularity %>% ldply(function (x) x$Probability)
-names(Modulemurs$Probability) <- c("sp", Modulemurs$test.modularity$Tarsius_bancanus$hypothesis)
+Modularity.stuff$Modulemurs.size <- Modulemurs
+Modularity.stuff$Modulemurs <- vector("list")
+Modularity.stuff$Modulemurs$test.modularity <- sp.main.data[mask.no.na.cov] %>% 
+  llply (function (x) TestModularity(cor.matrix = cov2cor(x$matrix$cov.sizeless), modularity.hipot = Modular.hyp[,1:6] , permutations = 1000, MHI = F), .progress = "text")
+
+Modulemurs <- Modularity.stuff$Modulemurs$test.modularity
+
+Modulemurs$Probability<-Modularity.stuff$Modulemurs$test.modularity %>% ldply(function (x) x$Probability)
+colnames(Modulemurs$Probability) <- c("sp", Modularity.stuff$Modulemurs$test.modularity$Tarsius_bancanus[,1])
 Modulemurs$Probability$sp <- factor (Modulemurs$Probability$sp, levels = rev(unique(Modulemurs$Probability$sp)))
 Modulemurs$Probability$sp %<>% gsub("_", " ",.)
 Modulemurs$Probability$sp <- factor (Modulemurs$Probability$sp, levels = rev(unique(Modulemurs$Probability$sp)))
 
-Modulemurs$Probs<- Modulemurs$test.modularity %>% ldply(function (x) x$Probability)
-names(Modulemurs$Probs) <- c("sp", Modulemurs$test.modularity$Tarsius_bancanus$hypothesis)
+Modulemurs$Probs<- Modularity.stuff$Modulemurs$test.modularity %>% ldply(function (x) x$Probability)
+colnames(Modulemurs$Probs) <- c("sp", Modularity.stuff$Modulemurs$test.modularity$Tarsius_bancanus[,1])
 rownames(Modulemurs$Probs) <- Modulemurs$Probs[,1]
 Modulemurs$Probs[Modulemurs$Probs <= 0.05] <- "red"
 Modulemurs$Probs[Modulemurs$Probs != "red"] <- "darkgrey"
 Modulemurs$Probs[,1] <- rownames(Modulemurs$Probs)
 
-Modulemurs$Probability %>% gather(key = "Probability", value = probability, 2:10) %>%
+
+
+Modulemurs$Probability.gathered <-  Modulemurs$Probability %>% gather(key = "Probability", value = probability, 2:8) 
+Modulemurs$Probability.gathered$Probability<- factor(Modulemurs$Probability.gathered$Probability, levels = unique(Modulemurs$Probability.gathered$Probability))
+Modulemurs$Probability.gathered$Probability
+Modulemurs$Probability.gathered %>%
 ggplot (.) +
   geom_tile(aes(x = Probability, y = sp, fill = as.numeric(probability<= 0.05) ), alpha = 0.9,  color = "grey") +
   #geom_point(aes(x =Probability, y = sp, color = as.numeric(probability<= 0.05) ) ) +
@@ -34,7 +44,7 @@ ggplot (.) +
         rect = element_blank(), 
         line = element_blank())
 
-Modulemurs$AVG.ratio<- Modulemurs$test.modularity %>% ldply(function (x) x$`AVG Ratio`)
+Modulemurs$AVG.ratio <- Modulemurs$test.modularity %>% ldply(function (x) x$`AVG Ratio`)
 names(Modulemurs$AVG.ratio) <- c("sp", Modulemurs$test.modularity$Tarsius_bancanus$hypothesis)
 Modulemurs$AVG.ratio$sp <- factor (Modulemurs$AVG.ratio$sp, levels = rev(unique(Modulemurs$AVG.ratio$sp)))
 Modulemurs$AVG.ratio$sp %<>% gsub("_", " ",.)
@@ -42,7 +52,7 @@ Modulemurs$AVG.ratio$sp <- factor (Modulemurs$AVG.ratio$sp, levels = rev(unique(
 rownames(Modulemurs$AVG.ratio) <- Modulemurs$AVG.ratio[,1]
 Modulemurs$AVG.ratio[,1] <- rownames(Modulemurs$AVG.ratio)
 
-Modulemurs$AVG.ratio %>% gather(key = "Region", value = AVG.ratio, 2:10) %>% 
+Modulemurs$AVG.ratio %>% gather(key = "Region", value = AVG.ratio, 2:8) %>% 
   ggplot (.) +
   geom_tile(aes(x = Region, y = sp, fill = abs(AVG.ratio)) , alpha = 0.9,  color = "grey") +
   #geom_point(aes(x =AVG.ratio, y = sp, color = as.numeric(AVG.ratio<= 0.05) ) ) +
@@ -56,52 +66,53 @@ Modulemurs$AVG.ratio %>% gather(key = "Region", value = AVG.ratio, 2:10) %>%
         rect = element_blank(), 
         line = element_blank())
 PC1.percent$.id %in% criminosos
-criminosos_ <- c("Euoticus_elegantulus", "Prolemur_simus", "Tarsius_syrichta")
+criminosos_ <- c("Euoticus_elegantulus", "Prolemur_simus", "Tarsius_syrichta","Loris_tardigradis", "Nycticebus_coucang")
 criminosos = PC1.percent$.id %in% criminosos_
 criminosos <- criminosos== FALSE
-Modulemurs$cor.pc1.flex <- cbind.data.frame("cor.Flex" = cor(abs(Modulemurs$AVG.ratio[criminosos, 2:10]), Flex$V1[criminosos]), 
-                                            "cor.PC1" = cor(abs(Modulemurs$AVG.ratio[criminosos, 2:10]), PC1.percent$V1[criminosos]),
-                                            "cor.r2" = cor(abs(Modulemurs$AVG.ratio[criminosos, 2:10]), r2.stuff[42:1,2][criminosos,]))
+Modulemurs$cor.pc1.flex <- cbind.data.frame("cor.Flex" = cor(abs(Modulemurs$AVG.ratio[criminosos, 2:8]), Flex$V1[criminosos]), 
+                                            "cor.PC1" = cor(abs(Modulemurs$AVG.ratio[criminosos, 2:8]), PC1.percent$V1[criminosos]),
+                                            "cor.r2" = cor(abs(Modulemurs$AVG.ratio[criminosos, 2:8]), r2.stuff[42:1,2][criminosos,]))
 Flex <- Variae %>% ldply( function(x) mean(x$flex.dist))
 PC1.percent <- Variae %>% ldply( function(x) x$intervalo.mc.pc$observed[1] )
 R2 <- Variae %>% ldply(function(x) mean(x$r2.dist ))
-AVG.r <- Modulemurs$AVG.ratio %>% gather(key = "Region", value = AVG.ratio, 2:10) 
-AVG.r$Flex <- rep(Flex$V1, 9) 
-AVG.r$PC1.percent <- rep(PC1.percent$V1, 9) 
-AVG.r$r2 <- rep(R2$V1, 9) 
+
+AVG.r <- Modulemurs$AVG.ratio %>% gather(key = "Region", value = AVG.ratio, 2:8) 
+  AVG.r$Flex <- rep(Flex$V1, 7) 
+AVG.r$PC1.percent <- rep(PC1.percent$V1, 7) 
+AVG.r$r2 <- rep(R2$V1, 7) 
 AVG.r$cor.flex <- rep(Modulemurs$cor.pc1.flex$cor.Flex, each = length(unique(AVG.r$sp)) )
 AVG.r$cor.PC1<- rep(Modulemurs$cor.pc1.flex$cor.PC1, each = length(unique(AVG.r$sp)) )
 AVG.r$cor.r2<- rep(Modulemurs$cor.pc1.flex$mean, each = length(unique(AVG.r$sp)) )
 
-Modulemurs$Plot$AVG.Flex <- AVG.r %>% tbl_df %>% filter (sp != "Euoticus elegantulus") %>% filter (sp != "Prolemur simus")%>% filter (sp != "Tarsius syrichta")%>%
+Modulemurs$Plot$AVG.Flex <- AVG.r %>% tbl_df %>% filter (sp != "Euoticus elegantulus") %>% filter (sp != "Prolemur simus")%>% filter (sp != "Tarsius syrichta")%>% filter (sp != "Loris tardigradus") %>% filter (sp != "Nycticebus coucang") %>%
   ggplot (aes(group = Region)) +
  geom_point(aes(y = abs(AVG.ratio), x = Flex), size = 1, color = "darkgrey") + 
-  geom_text(aes(y = 4.2, x = 0.37 , label = paste ("r=", round(cor.flex,2) ), group = Region)) +
-  geom_text(aes(y = AVG.ratio, x = Flex, label = sp), size = 3, alpha = 0.8) + 
+  geom_text(aes(y = max(abs(AVG.ratio)), x = mean(Flex) , label = paste ("r=", round(cor.flex,2) ), group = Region)) +
+  geom_text(aes(y = abs(AVG.ratio), x = Flex, label = sp), size = 3, alpha = 0.8) + 
   geom_smooth(aes(y = abs(AVG.ratio), x = Flex), method = "lm") +
   facet_wrap(~Region) + theme_bw() +
   theme(axis.text = element_text(size = 7))
-Modulemurs$Plot$AVG.PC1 <- AVG.r%>% tbl_df %>% filter (sp != "Euoticus elegantulus") %>% filter (sp != "Prolemur simus")%>% filter (sp != "Tarsius syrichta")%>%
+Modulemurs$Plot$AVG.PC1 <- AVG.r%>% tbl_df %>% filter (sp != "Euoticus elegantulus") %>% filter (sp != "Prolemur simus")%>% filter (sp != "Tarsius syrichta")%>% filter (sp != "Loris tardigradus") %>% filter (sp != "Nycticebus coucang") %>%
   ggplot (aes(group = Region )) +
   geom_point(aes(y = abs(AVG.ratio), x = PC1.percent), size = 1, color = "darkgrey") + 
-  geom_text(aes(y = 4.2, x = 0.45 , label = paste("r=", round(cor.PC1, 2)), group = Region)) +
-  geom_text(aes(y = AVG.ratio, x = PC1.percent, label = sp),  size = 3, alpha = 0.8) + 
+  geom_text(aes(y = max(abs(AVG.ratio)), x = mean(PC1.percent) , label = paste("r=", round(cor.PC1, 2)), group = Region)) +
+  geom_text(aes(y = abs(AVG.ratio), x = PC1.percent, label = sp),  size = 3, alpha = 0.8) + 
   geom_smooth(aes(y = abs(AVG.ratio), x = PC1.percent), method = "lm", alpha = 0.5) +
   facet_wrap(~Region)+ theme_bw() +
   theme(axis.text = element_text(size = 7))
 
 plot_grid(Modulemurs$Plot$AVG.Flex, Modulemurs$Plot$AVG.PC1, ncol = 2) #########################################################################################
 
-Modulemurs$Plot$AVG.R2 <- AVG.r %>% tbl_df %>% filter (sp != "Euoticus elegantulus") %>% filter (sp != "Prolemur simus")%>% filter (sp != "Tarsius syrichta")%>%
+Modulemurs$Plot$AVG.R2 <- AVG.r %>% tbl_df %>% filter (sp != "Euoticus elegantulus") %>% filter (sp != "Prolemur simus")%>% filter (sp != "Tarsius syrichta")%>% filter (sp != "Loris tardigradus") %>% filter (sp != "Nycticebus coucang") %>%
   ggplot (aes(group = Region)) +
   geom_point(aes(y = abs(AVG.ratio), x = r2), size = 1, color = "darkgrey") + 
-  geom_text(aes(y = 4.2, x = 0.22 , label = paste ("r=", round(cor.r2,2) ), group = Region)) +
-  geom_text(aes(y = AVG.ratio, x = r2, label = sp), size = 3, alpha = 0.8) + 
+  geom_text(aes(y = max(abs(AVG.ratio)), x = mean(r2) , label = paste ("r=", round(cor.r2,2) ), group = Region)) +
+  geom_text(aes(y = abs(AVG.ratio), x = r2, label = sp), size = 3, alpha = 0.8) + 
   geom_smooth(aes(y = abs(AVG.ratio), x = r2), method = "lm") +
   facet_wrap(~Region) + theme_bw() +
   theme(axis.text = element_text(size = 7))
 
-DistModular <- function (x, simulations = 1000, modularity.hipot = Modular.hyp)
+DistModular <- function (x, simulations = 1000, modularity.hipot = Modular.hyp[,2:8])
   {
   hypothesis <- c(dimnames(Modular.hyp)[[2]], "Full.integration")
   Rsquared <- matrix(data = NA, nrow = simulations, ncol = dim(Modular.hyp)[[2]] +1)
@@ -118,8 +129,8 @@ DistModular <- function (x, simulations = 1000, modularity.hipot = Modular.hyp)
   observed <- TestModularity(cor.matrix = x$matrix$cor, modularity.hipot = Modular.hyp , permutations = 1, MHI = F)
   
   for (i in 1:simulations)  {
-    Mx.Cor <- var (rmvnorm (x$sample.size, sigma = x$matrix$cor, method = 'svd') )
-    modular <- TestModularity(cor.matrix = Mx.Cor, modularity.hipot = Modular.hyp , permutations = 1, MHI = F) 
+    Mx.Cor <- var (rmvnorm (x$sample.size, sigma = cov2cor(x$matrix$cov.sizeless), method = 'svd') )
+    modular <- TestModularity(cor.matrix = Mx.Cor, modularity.hipot = Modular.hyp , permutations = 10, MHI = F) 
     
     Rsquared [i, ] <- modular$Rsquared
     AVG.plus [i, ] <- modular$`AVG+`
@@ -128,7 +139,7 @@ DistModular <- function (x, simulations = 1000, modularity.hipot = Modular.hyp)
     AVG.rat [i, ] <-  modular$`AVG Ratio`
   }
   plotaisso <- cbind(rep (unique(x$info.raw$Especie), simulations),
-  #melt(Probability, value.name = "Probability")[2:3],
+  melt(Probability, value.name = "Probability")[2:3],
   melt(AVG.plus, value.name = "AVG+")[2:3],
   melt(AVG.minus, value.name = "AVG-")[3] )
   names(plotaisso)[1:2] <- c("sp", "hyp")
@@ -143,7 +154,7 @@ DistModular <- function (x, simulations = 1000, modularity.hipot = Modular.hyp)
   #   geom_violin() +
   #   ggtitle(who) 
 
-  Plotavg <- data.frame("sp" = as.character(rep(unique(AVG.r$sp), 9)),
+  Plotavg <- data.frame("sp" = as.character(rep(unique(AVG.r$sp), 7)),
         "hypotesis"= observed$hypothesis,
         "AVG.ratio" = observed$`AVG Ratio`,
         "mean" = AVG.r %>%  group_by(hyp) %>% summarise_each(funs(mean(abs(.))), abs(AVG.rat)) %>% as.data.frame%>% .[,2],
@@ -176,18 +187,18 @@ names(plotaisso)[1:2] <- c("sp", "hyp")
                 ) )
 }
 
-temp <- DistModular(x = sp.main.data$Varecia_variegata, simulations = 10, modularity.hipot =  Modular.hyp )
+temp <- DistModular(x = sp.main.data$Varecia_variegata, simulations = 1, modularity.hipot =  Modular.hyp[,2:8])
 temp$AVG.r.plot
 temp$`AVG.+-.plot`
 temp$AVG.r %>% ggplot(., aes (x = hyp, y = AVG.rat, group = hyp)) +
   geom_violin() +
   geom_boxplot() +
-  geom_point(aes (x = hyp, y = mean(AVG.rat), group = hyp) ) +
+  geom_point(aes (x = hyp, y = mean(abs(AVG.rat)), group = hyp) ) +
   #geom_errorbar(aes(x = hyp, ymin = min(AVG.r), ymax = max(AVG.r), group = hyp ))+
   ggtitle(who) 
 
-Modulemurs$test.modularity.dist <- sp.main.data[mask.no.na.cov] %>% llply(function (x) DistModular(x = x, simulations = 1000, modularity.hipot =  Modular.hyp) , .progress = "text")
-save(Modulemurs, file = "Data/Modularity.RData")
+Modulemurs$test.modularity.dist <- sp.main.data[mask.no.na.cov] %>% llply(function (x) DistModular(x = x, simulations = 100, modularity.hipot =  Modular.hyp[,2:8]) , .progress = "text")
+save(Modulemurs, file = "Data/Modularity_sizeless.RData")
 
 Modulemurs$Plot$Oral <- Modulemurs$test.modularity.dist %>%  # pot em 10 x 15
   ldply(function(x) x$plotaisso) %>% filter (sp != "Euoticus_elegantulus") %>% 

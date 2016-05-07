@@ -143,7 +143,8 @@ SHAPE.sym <- SHAPE.sym [match(rownames (hapa.sym), rownames (SHAPE.sym)), ]
 
 
 WPCs <- eigen(W.MATRIX)$vectors
-WPCs <- -WPCs
+if (WPCs[[1]] <=0) WPCs <- -WPCs
+if (WPCs[[1]] >=0) WPCs <- WPCs
 
 #myPalette <- colorRampPalette(rev(brewer.pal(11, "Spectral")), space="Lab")
 myPalette <- colorRampPalette(c("red", "grey", "blue") )
@@ -155,12 +156,12 @@ interval <- mean (WPCs[, i])
 shape.plot [[i]] <-
   ggshape(shape = SHAPE.sym,
           wireframe = Aux $ tessel.39 [1:39, ],
-          colors = WPCs[, i],
+          colors = rev(WPCs[, i]),
           rotation = ROTACIONI , 
           culo = 0.02, 
-          thickness = 1) +
+          thickness = 0.3) +
   #geom_point (aes (x = X, y = Y), alpha = 0.6, color ="darkgrey", size = 1.2) +
-  #geom_label(aes (x = X, y = Y, label = traits ),  alpha = 0.6, size = 3, label.padding = unit(0.3, "mm")) +
+  #geom_label(aes (x = X, y = Y, label = traits ),  alpha = 0.6, size = 7, label.padding = unit(0.4, "mm")) +
   #ggtitle(paste("PC", i, sep = " ")) +
   theme(plot.title = element_text(face = "bold", size = 12),
         #legend.position = "none",
@@ -183,16 +184,21 @@ shape.plot [[i]] <-
                         guide = guide_colorbar(nbin=100, draw.ulim = T, draw.llim = T) ) 
 }
 #shape.plot [[40]] <- plot_grid(plotlist = shape.plot, ncol = 4, labels = TTL) 
-shape.plot [[7]] <- plot_grid(shape.plot[[1]], shape.plot[[2]],shape.plot[[3]], ncol = 3, align = "hv", labels = TTL)
+shape.plot [[7]] <- plot_grid(shape.plot[[1]], shape.plot[[2]],shape.plot[[3]], nrow =  3, align = "hv", labels = TTL) 
 shape.plot [[8]] <- shape.plot[[1]] + scale_fill_gradientn(colours = "darkgrey") + scale_color_gradientn(colours = "darkgrey") + ggtitle(TTL) + theme(plot.title  = element_text(face = "italic", size = 15), legend.position = "none" )
 #rm(shape.plot)
 return( shape.plot)
 }
 
+<<<<<<< HEAD
 PCLoadShapePlotter(SHAPE = galago, W.MATRIX = mx.list.taxonomy$Galago, ROTACIONI = c(-1,-1,1))[[2]]
 
 PC.Plots$Galago <-PCLoadShapePlotter(SHAPE = galago, W.MATRIX = mx.list.taxonomy$Galago, ROTACIONI = c(-1,-1,1), TTL = "Galago")
 PC.Plots$Galago[[7]]
+=======
+PC.Plots$Galago <-PCLoadShapePlotter(SHAPE = galago, W.MATRIX = mx.list.taxonomy$Galago, ROTACIONI = c(-1,-1,1), TTL = "Galago")
+PC.Plots$Galago [[8]]
+>>>>>>> a6f0b3fa071439c4d680c4d364e9bebc4f3ed6d4
 PC.Plots <- vector("list")
 
 PC.Plots$Galago <- PCLoadShapePlotter(SHAPE = galago, W.MATRIX = mx.list.taxonomy$Galago, ROTACIONI = c(-1,-1,1), TTL = "Galago")
