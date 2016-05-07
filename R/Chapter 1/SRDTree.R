@@ -408,7 +408,7 @@ SRD.selected$Prosimian$pc1
 plot(SRD.selected$Prosimian)
 
 SRD.selected.Tree.plot <- plot_grid(
-  SRD.plot.wire(SRD.result = SRD(sp.main.data$Galago_senegalensis$matrix$cov, sp.main.data$Nycticebus_coucang$matrix$cov), SHAPE = Shapes.sym$galago, ROTACIONI =  c(-1,-1,1), TTL = "Galago x Nycticebus")$plot.muDev
+  SRD.plot.wire(SRD.result = SRD(sp.main.data$Galago_senegalensis$matrix$cov, sp.main.data$Nycticebus_coucang$matrix$cov), SHAPE = Shapes.sym$galago, ROTACIONI =  c(-1,-1,1), TTL = "Galago x Nycticebus")$plot.muDev,
   SRD.plot.wire(SRD.result = SRD.selected$Lorisidae, SHAPE = Shapes.sym$loris, ROTACIONI =  c(-1,-1,1), TTL = "Lorisidae")$plot.muDev,
   SRD.plot.wire(SRD.result = SRD.selected$Lorisiformes, SHAPE = Shapes.sym$nycticebus, ROTACIONI =  c(-1,-1,1), TTL = "Lorisiformes\n Galagidae x Lorisidae")$plot.muDev,
   SRD.plot.wire(SRD.result = SRD.selected$Lemuridae, SHAPE = Shapes.sym$varecia, ROTACIONI =  c(-1,-1,1), TTL = "Lemuridae")$plot.muDev,
