@@ -232,8 +232,6 @@ Plot.HM.PHy<-
 summary(lm(Phylogenetic.Distance ~ log(Harmonic.Mean) , data = COr.PHyHM))
 MatrixCor(as.matrix(harm_matrix)[-c(41, 43:44), -c(41, 43:44)], phylo.dist.all.at.tree[rownames( mx.all.at.tree), rownames( mx.all.at.tree)])
 
-<<<<<<< HEAD
-=======
 mantel.partial(xdis = 1-mx.compare$MC.RS$correlations[-c(41, 43:44), -c(41, 43:44)], 
                zdis = as.matrix(harm_matrix)[-c(41, 43:44), -c(41, 43:44)], 
                ydis = phylo.dist.all.at.tree[rownames( mx.all.at.tree), rownames( mx.all.at.tree)], 
@@ -241,4 +239,4 @@ mantel.partial(xdis = 1-mx.compare$MC.RS$correlations[-c(41, 43:44), -c(41, 43:4
 mantel.partial(xdis = 1-mx.compare$MC.KRZ$correlations[-c(41, 43:44), -c(41, 43:44)], 
                zdis = as.matrix(harm_matrix)[-c(41, 43:44), -c(41, 43:44)], 
                ydis = phylo.dist.all.at.tree[rownames( mx.all.at.tree), rownames( mx.all.at.tree)], method = "pearson")
->>>>>>> a6f0b3fa071439c4d680c4d364e9bebc4f3ed6d4
+
