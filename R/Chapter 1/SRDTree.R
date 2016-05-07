@@ -20,14 +20,13 @@ SRD.Tree <- function (tree, cov.matrix.list, sample.sizes = NULL, mean.list)
                           indices <- as.character(tree$edge[,2] [tree$edge[,1] == node])
                           SRD.result <- tryCatch (expr = SRD(cov.matrices [[ indices [1] ]], cov.matrices [[ indices [2] ]]) , error = function(cond) vector("list") )
                           m.sd.cor <-list(abs(cov2cor(cov.matrices [[ indices [1] ]])), abs(cov2cor(cov.matrices [[ indices [2] ]])) ) %>% llply( function(x) data.frame( "trait" =  names(mean.sim(x)), "mean.cor" = mean.sim(abs(x)), "sd.cor" = mean.sd(abs(x)) ) , .progress = "text" )
-                          return(list(SRD.result = SRD.result, m.sd.cor = m.sd.cor))
+                          RS.result <- RandomSkewers(cov.matrices [[ indices [1] ]], cov.matrices [[ indices [2] ]]) 
+                          return(list(SRD.result = SRD.result, RS.result = RS.result, m.sd.cor = m.sd.cor))
                               })
   names(SRD.by.node) <- paste0("node", nodes[node.mask])
 
   return( SRD.by.node)
 }
-
-
 
 plot.phylo(Trees$extant.sp.tree, no.margin = T, cex = 0.8)
 nodelabels(cex = 0.7)
@@ -43,9 +42,19 @@ SRD.results.test$node135$SRD.result
 
 SRD.results$rolated <- SRD.results.test %>% ldply(., function(x) class(x$SRD.result) == "SRD") 
 
-SRD.results$summary <- SRD.results[SRD.results$rolated[,2]] %>% laply(function(x) x$output[,5]) %>% alply(., 2, summary) %>% ldply(function (x) x) 
+SRD.results$summary <- SRD.results.test[SRD.results$rolated[,2]] %>% laply(function(x) x$SRD.result$output[,5]) %>% alply(., 2, summary) %>% ldply(function (x) x) 
+SRD.results$summary %>% melt %>%
+  ggplot(., (aes(x=variable, y = value, group = X1))) +
+  geom_label(aes(x=variable, y = value, group = X1, label = X1) )
+  geom_point()
 
-SRD.results %>% filter(names(SRD.results) == "node77" )
+
+  SRD.node <- SRD.results.test[SRD.results$rolated[,2]]
+> 
+
+
+SRD.results.test [SRD.results$rolated[,2]] %>% llply(function(x) cbind(mean = mean(x$SRD.result$output[,1]), rs = x$RS.result[1]) )
+
 SRD.selected <- list("Prosimian" = SRD.results.test$node71$SRD.result,
                      "Strepsirrhini" = SRD.results.test$node73$SRD.result,
                      "Lorisiformes" = SRD.results.test$node131$SRD.result,
@@ -60,6 +69,10 @@ SRD.selected <- list("Prosimian" = SRD.results.test$node71$SRD.result,
                      "Lepilemuridea" = SRD.results.test$node88$SRD.result,
                      "Cheirogaleidae" = SRD.results.test$node77$SRD.result
                      )
+
+
+SRD.selected %>% llply(function (x) mean(x$output[,1]) )
+
 SRD.select.genus <- list("Varecia" = SRD.results$node112,
                      "Lemur" = SRD.results$node125,
                      "Prolemur" = SRD.results$node126,
