@@ -145,8 +145,8 @@ Drift.results$with.mx <- TreeDriftTestAll (tree = pruned.tree.with.mx,
 
 mask.at.tree <- names(sp.main.data) %in% Trees$all.my.sp.tree$tip.label
 Trees$extant.sp.tree <- drop.tip(treefile,treefile$tip.label[-match(Species$species.extants, treefile$tip.label)]) # árvore com todo mundo
-plot.phylo(Trees$extant.sp.tree, no.margin = T, cex = 0.6)
-nodelabels(cex = 0.4)
+plot.phylo(Trees$extant.sp.tree, no.margin = T, cex = 0.8)
+nodelabels(cex = 0.9)
 
 All.sp.data$cov.mx$Otolemur_crassicaudatus <- gen.cov.mx$Otolemur
 
@@ -211,10 +211,10 @@ Drift.results$all.sp$Correlation.test.Regular$`81`$P.value.plot
 # nesse caso sobrarão apenas os que tem NA e aqueles casos em que rejeitamos Deriva. Nesses casos o resultado do table terá 2 elementos.
 # se eu perguntar quem é ==2 pego aqueles em que rejeitamos deriva
 Drift.results.Toplot$All.sp$Results$Node.ref <- Drift.results$all.sp$Correlation.test.Regular %>% ldply(function(x) dim(table(x$Bonferroni == T, exclude = T)) ==2) %>% .[,1]
-Drift.results.Toplot$All.sp$Results$Corr.Ed.1 <- Drift.results$all.sp$Correlation.test.Regular %>% ldply(function(x) dim(table(x$Bonferroni == T, exclude = T)) ==2) %>% .[,2]
+Drift.results.Toplot$All.sp$Results$Corr.Ed.1 <- Drift.results$all.sp$Correlation.test.Regular %>% ldply(function(x) (table(x$Bonferroni == T) %>% dimnames() %>% .[[1]] %>% length()) ==2)  %>% .[,2]
 Drift.results.Toplot$All.sp$Results$Corr.Contrasts.1 <- Drift.results$all.sp$Correlation.test.Contrasts %>% ldply(function(x) dim(table(x$Bonferroni == T, exclude = T)) !=1) %>% .[,2]
 Drift.results.Toplot$Extants$Results$Node.ref <- Drift.results$extant.sp$Correlation.test.Regular %>% ldply(function(x) dim(table(x$Bonferroni == T, exclude = T)) ==2) %>% .[,1]
-Drift.results.Toplot$Extants$Results$Corr.Ed.1 <- Drift.results$extant.sp$Correlation.test.Regular %>% ldply(function(x) dim(table(x$Bonferroni == T, exclude = T)) ==2) %>% .[,2]
+Drift.results.Toplot$Extants$Results$Corr.Ed.1 <- Drift.results$extant.sp$Correlation.test.Regular %>% ldply(function(x) (table(x$Bonferroni == T) %>% dimnames() %>% .[[1]] %>% length()) ==2)  %>% .[,2]
 Drift.results.Toplot$Extants$Results$Corr.Contrasts.1 <- Drift.results$extant.sp$Correlation.test.Contrasts %>% ldply(function(x) dim(table(x$Bonferroni == T, exclude = T)) ==2) %>% .[,2]
 
 # como pegar o resultado de deriva no teste de regressao:
@@ -233,7 +233,7 @@ Drift.results.Toplot$Extants$Results$Regression.Ed <- Drift.results$extant.sp$Re
 Drift.results.Toplot$Extants$Results$Regression.Contrasts <- Drift.results$extant.sp$Regression.test.Contrasts %>% ldply(function(x) x$drift_rejected )  %>% .[,2]
 
 
-Plot.Drift.Results <- function (tree, node.ref, info, font.size = 0.4, contrasts = TRUE, paleta.deriva = c("#ECA400", "#1BAAB7", "#CBC9E0")) {
+Plot.Drift.Results <- function (tree, node.ref, info, font.size = 0.4, contrasts = TRUE,  paleta.deriva = c("#ffaf02ff", "#1baab7ff", "#c3bbbfff") ) {
   node.ref <- as.numeric(info$Node.ref)
   results.ed <- data.frame(V1 = as.numeric(info$Corr.Ed.1) * 0.5, V2 = as.numeric(info$Regression.Ed) * 0.5  )
   if (contrasts == TRUE) results.ci <- data.frame(V1 = as.numeric(info$Corr.Contrasts.1) * 0.5, V2 = as.numeric(info$Regression.Contrasts) * 0.5) 
@@ -283,11 +283,11 @@ Plot.Drift.Results <- function (tree, node.ref, info, font.size = 0.4, contrasts
 }
 Drift.results.Toplot$Extants$Plots$Tree <- Plot.Drift.Results(tree = Trees$extant.sp.tree, 
                                                               info = Drift.results.Toplot$Extants$Results, 
-                                                              font.size = 0.7, contrasts = F)
+                                                              font.size = 0.7, contrasts = F, paleta.deriva = c("#ffaf02ff", "#1baab7ff", "#c3bbbfff") )
 
 Drift.results.Toplot$All.sp$Plots$Tree <- Plot.Drift.Results(tree = Trees$all.with.ed, 
                                                              info = Drift.results.Toplot$All.sp$Results, 
-                                                             font.size = 0.7)
+                                                             font.size = 0.7, contrasts = F, paleta.deriva = c("#ffaf02ff", "#1baab7ff", "#c3bbbfff") )
 Correlation.Tree.plot <- plot_grid(
 Drift.results$extant.sp$Correlation.test.Regular$`131`$P.value.plot + theme(legend.position = "none") + ggtitle ("Lorisiformes\n Galagidae x Lorisidae") ,
 Drift.results$extant.sp$Correlation.test.Regular$`132`$P.value.plot + theme(legend.position = "none") + ggtitle ("Lorisidae") ,
@@ -355,7 +355,8 @@ Plot.Drift.regression <- function(regress.result) {
               "beta.1" = regress.result$regression$coefficients[2], 
               "beta.-1" = beta.coef, 
               "IC95" = empirical.c.i, 
-              "drift.rejected" = regress.result$drift_rejected))
+              "drift.rejected" = regress.result$drift_rejected,
+              "intercept" = regress.result$regression$coefficients[1]))
 }
 
 Plot.Drift.regression (regress.result = Drift.results$extant.sp$Regression.test$`125`)
@@ -374,7 +375,7 @@ Regression.Tree.plot <- plot_grid(
   Drift.results.Toplot$Extants$Results$Regression$`77`$plot + geom_abline(slope = 1, color = "green") + ggtitle ("Cheirogaleidae") ,
   Drift.results.Toplot$Extants$Results$Regression$`76`$plot + geom_abline(slope = 1, color = "green") + ggtitle ("Lepilemuridae x Cheirogaleidae") ,
   Drift.results.Toplot$Extants$Results$Regression$`75`$plot  + ggtitle ("Lem-Ind x Lep-Che") ,
-  Drift.results.Toplot$Extants$Results$Regression$`74`$plot  + ggtitle ("Lemuriformes\n Lemurs x Daubentonidae") ,
+  Drift.results.Toplot$Extants$Results$Regression$`74`$plot  + ggtitle ("Lemuriformes x Daubentonidae") ,
   Drift.results.Toplot$Extants$Results$Regression$`73`$plot  + ggtitle ("Strepsirrhini") ,
   Drift.results.Toplot$Extants$Results$Regression$`71`$plot  + ggtitle ("Prosimian\n Strepsirrhini + Tarsiidae") ,
   ncol = 3)
@@ -383,3 +384,30 @@ Regression.Tree.plot
 
 save_plot(filename = "R/Figures/Regression_Tree_plot.pdf", plot = CRegression.Tree.plot, 
           -          base_aspect_ratio = 0.9, base_height = 14, base_width = 4)
+
+############### make tables
+Drift.results$extant.sp$Regression.test$`71`$regression$coefficients[2]
+Drift.results$extant.sp$Regression.test$`71`$coefficient_CI_95
+Drift.results$extant.sp$Regression.test$`71`$drift_rejected
+Drift.results$extant.sp$Regression.test$`71`$regression$coefficients[1]
+Drift.results$extant.sp$Regression.test$`71`$log.W_eVals
+
+Drift.results.Toplot$Extants$Results$Regression$`71`
+Drift.results$extant.sp$Regression.test$`135`$means
+  
+table.drift.results <- Drift.results.Toplot$Extants$Results$Regression %>% ldply(function(x) cbind("2.5 %" = round(x$IC95[1],3), 
+                                                                            "97.5 %" = round(x$IC95[2],3),
+                                                                            "\beta" = round(x$beta.1,3),  
+                                                                            "\beta_-PC1"= round(x$`beta.-1`,3), 
+                                                                            "Drift rejected" = as.character(x$drift.rejected)
+                                                                           ) 
+                                                                    )
+                                                  
+table.drift.results$intercept <- Drift.results$extant.sp$Regression.test %>% ldply(function(x) beta = round(x$regression$coefficients[1],3 ) )%>% .[,2]
+table.drift.results$B.W <- round(Bvar.Wvar$ratio, 3)
+names(table.drift.results)[1] <- "Node"
+rownames(table.drift.results) <- table.drift.results[,1]
+
+table.drift.results[,-1] %>% as.data.frame %>% xtable()
+
+
