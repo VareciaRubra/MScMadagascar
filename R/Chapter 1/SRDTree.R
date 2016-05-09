@@ -226,13 +226,25 @@ Bvar.Wvar %>%
   #geom_point(aes(x= r2W, y = B.var/W.var)) +
   geom_label(aes(x= r2W, y = B.var/W.var, label = .id))
 
+Bvar.Wvar$ratio <- Bvar.Wvar$B.var/Bvar.Wvar$W.var
+Bvar.Wvar$log.ratio <- log(Bvar.Wvar$B.var)/log(Bvar.Wvar$W.var)
+
+Bvar.Wvar%>% 
+  ggplot(aes(x = log.ratio, y = table.drift.results$intercept)) +
+  geom_point() +
+  geom_smooth(method = "lm") +
+  geom_abline(aes(slope=1, intercept = 0))
+
+summary(lm(table.drift.results$intercept~Bvar.Wvar$log.ratio) )
+
 plot.phylo(Trees$extant.sp.tree, no.margin = T, cex = 0.8)
+add.scale.bar(ask = T)
 nodelabels(text = round(Bvar.Wvar$B.var/Bvar.Wvar$W.var, digits=2), node = as.numeric(Bvar.Wvar$.id), adj = 0.8, bg = "grey")
-nodelabels(text = round(Bvar.Wvar$r2W, digits=2), node = as.numeric(Bvar.Wvar$.id), adj = -0.3, bg = "yellow" )
+nodelabels(text = round(table.drift.results$intercept, digits=2), node = as.numeric(table.drift.results$.id), adj = -0.3, bg = "yellow" )
 legend("bottomleft", inset = 0.08,
        title ="",
        text.col = "grey10",
-       legend = c("var.B/varW", "r2"), 
+       legend = c("var.B/varW", "intercept"), 
        fill = c("grey", "yellow") , 
        col = c("grey", "yellow") , 
        border = "grey", box.lwd = "n",
