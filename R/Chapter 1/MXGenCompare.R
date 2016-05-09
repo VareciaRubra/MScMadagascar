@@ -111,8 +111,10 @@ Steppan$Plot$GenusCompare <-
 Steppan$Plot$GenusCompare + theme(legend.position= "bottom") + theme(legend.position= c(-0.1,-0.15)) 
 
 
-par (mar = c(5, 4, 4, 2) + 0.1)
-plot(pruned.tree.with.mx, cex = 0.9, no.margin =T, edge.color = "darkgrey", edge.width = 2, x.lim = c(-20, 150) )
+par (mar = c(5, 4, 4, 8) + 0.1)
+
+plot(pruned.tree.with.mx, cex = 0.9, no.margin =F, edge.color = "darkgrey", edge.width = 2, x.lim = c(-20, 150) )
+add.scale.bar(length = 60, ask =T)
 #nodelabels()
 nodelabels(bg = NULL, frame = "none", node = 56, pch = NULL, col = "black", text = "Indroidea" )
 nodelabels(bg = NULL, frame = "none", node = 45, pch = NULL, col = "black", text = "Lemuriformes" )
