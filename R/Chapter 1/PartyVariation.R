@@ -100,7 +100,7 @@ rda(mx.pcoa$BS.RS$vectors[1:10], mahala.pcoa$vectors[1:10])
 # multi.mantel {phytools} Multiple matrix regression (partial Mantel test) ####
 #Y	== single "dependent" square matrix. Can be either a symmetric matrix of class "matrix" or a distance matrix of class "dist".
 #X	== a single independent matrix or multiple independent matrices in a list. As with Y can be a object of class "matrix" or class "dist".
-dist.dissim <-  mx.dissimilarity$MC.RS
+dist.dissim <-  mx.dissimilarity$MC.KRZ
 dist.dissim[upper.tri(dist.dissim)] <- NA
 diag(dist.dissim) <- 0
 dist.dissim <- dist(dist.dissim)

@@ -186,6 +186,13 @@ Drift.results$with.mx$BW.compare %>% llply(function (x) x$BW.compare)
 Drift.results$all.sp$BW.compare %>% llply(function (x) x$BW.compare) 
 Drift.results$extant.sp$BW.compare %>% llply(function (x) x$BW.compare) 
 
+Drift.results$all.sp$BW.compare$`81`$W
+
+Drift.results$all.sp$BW.compare %>% ldply(function (x) cbind(Pc1Percent(x$B.ed ), Pc1Percent(x$W ) ) )
+Drift.results$extant.sp$BW.compare %>% ldply(function (x) cbind(Pc1Percent(x$B.ed ), Pc1Percent(x$W ) ) )
+
+  
+  
 Drift.results.Toplot <- vector("list")
 Drift.results.Toplot$All.sp <- vector("list")
 Drift.results.Toplot$All.sp$Results <- vector("list")

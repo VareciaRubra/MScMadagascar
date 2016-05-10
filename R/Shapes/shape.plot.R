@@ -151,7 +151,7 @@ myPalette <- colorRampPalette(c("red", "grey", "blue") )
 shape.plot <- list()
 for (i in 1:6)
 {
-myBreaks <- c(round(min(WPCs[, i]), digits = 1), round(mean (WPCs[, i]), digits = 1 ), round(max(WPCs[, i]), digits = 1 )) 
+myBreaks <- c(round(min(WPCs[, i]) , digits = 1), round(mean (WPCs[, i]), digits = 1 ), round(max(WPCs[, i]), digits = 1 )) 
 interval <- mean (WPCs[, i])
 shape.plot [[i]] <-
   ggshape(shape = SHAPE.sym,
@@ -159,7 +159,7 @@ shape.plot [[i]] <-
           colors = rev(WPCs[, i]),
           rotation = ROTACIONI , 
           culo = 0.02, 
-          thickness = 0.3) +
+          thickness = 0.9) +
   #geom_point (aes (x = X, y = Y), alpha = 0.6, color ="darkgrey", size = 1.2) +
   #geom_label(aes (x = X, y = Y, label = traits ),  alpha = 0.6, size = 7, label.padding = unit(0.4, "mm")) +
   #ggtitle(paste("PC", i, sep = " ")) +
@@ -172,33 +172,29 @@ shape.plot [[i]] <-
         legend.key.size = unit(0.3, "cm"), 
         panel.margin.x = unit(0.3, "cm"), 
         panel.margin.y = unit(0.3, "cm") ) +
-  scale_fill_gradient2(paste("PC", i, sep = " "),  low = "#fdb863", mid = "#cccccc", high ="#5e3c99",  midpoint = 0, 
+  scale_fill_gradient2(paste("PC", i, sep = " "),  low = "red", mid = "grey", high ="blue",  midpoint = 0, 
                        #labels =c(-0.7, 0, 0.7), 
                        #breaks = c(-0.7, 0, 0.7),
                         breaks= myBreaks,
                         #colors = myPalette(11),
-                        guide = guide_colorbar(nbin=100, draw.ulim = T, draw.llim = T) ) +
-  scale_color_gradient2(paste("PC", i, sep = " "), low = "#fdb863", mid = "#cccccc", high ="#5e3c99",  midpoint = 0,
+                        guide = guide_colorbar(nbin=102, draw.ulim = T, draw.llim = T) ) +
+  scale_color_gradient2(paste("PC", i, sep = " "), low = "red", mid = "grey", high ="blue",  midpoint = 0,
                         breaks= myBreaks,
                         #colors = myPalette(11),
-                        guide = guide_colorbar(nbin=100, draw.ulim = T, draw.llim = T) ) 
-}
+                        guide = guide_colorbar(nbin=102, draw.ulim = T, draw.llim = T) ) 
+rm(myBreaks)}
 #shape.plot [[40]] <- plot_grid(plotlist = shape.plot, ncol = 4, labels = TTL) 
-shape.plot [[7]] <- plot_grid(shape.plot[[1]], shape.plot[[2]],shape.plot[[3]], nrow =  3, align = "hv", labels = TTL) 
+shape.plot [[7]] <- plot_grid(shape.plot[[1]], shape.plot[[2]],shape.plot[[3]],shape.plot[[4]], ncol =  4, align = "hv", labels = TTL) 
 shape.plot [[8]] <- shape.plot[[1]] + scale_fill_gradientn(colours = "darkgrey") + scale_color_gradientn(colours = "darkgrey") + ggtitle(TTL) + theme(plot.title  = element_text(face = "italic", size = 15), legend.position = "none" )
 #rm(shape.plot)
 return( shape.plot)
 }
 
-<<<<<<< HEAD
-PCLoadShapePlotter(SHAPE = galago, W.MATRIX = mx.list.taxonomy$Galago, ROTACIONI = c(-1,-1,1))[[2]]
+temp <- PCLoadShapePlotter(SHAPE = hapalemur, W.MATRIX = mx.list.taxonomy$W.Madagascar, ROTACIONI = c(1,-1,1), TTL = "Strepsirrhini W matrix")
+temp[[7]]
 
 PC.Plots$Galago <-PCLoadShapePlotter(SHAPE = galago, W.MATRIX = mx.list.taxonomy$Galago, ROTACIONI = c(-1,-1,1), TTL = "Galago")
-PC.Plots$Galago[[7]]
-=======
-PC.Plots$Galago <-PCLoadShapePlotter(SHAPE = galago, W.MATRIX = mx.list.taxonomy$Galago, ROTACIONI = c(-1,-1,1), TTL = "Galago")
 PC.Plots$Galago [[8]]
->>>>>>> a6f0b3fa071439c4d680c4d364e9bebc4f3ed6d4
 PC.Plots <- vector("list")
 
 PC.Plots$Galago <- PCLoadShapePlotter(SHAPE = galago, W.MATRIX = mx.list.taxonomy$Galago, ROTACIONI = c(-1,-1,1), TTL = "Galago")
