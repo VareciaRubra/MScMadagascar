@@ -51,7 +51,7 @@ SRD.results$summary %>% melt %>%
 
 
   SRD.node <- SRD.results.test[SRD.results$rolated[,2]]
-> 
+
 
 
 SRD.results.test [SRD.results$rolated[,2]] %>% llply(function(x) cbind(mean = mean(x$SRD.result$output[,1]), rs = x$RS.result[1]) )
