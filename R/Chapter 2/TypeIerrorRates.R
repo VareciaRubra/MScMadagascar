@@ -52,7 +52,7 @@ Drift.results$fixed <- DriftTestInterpretation(tree = Trees$extant.sp.tree,
                                                mean.list = All.sp.data$means[mask.extant & mask.at.tree], 
                                                cov.matrix.list = All.sp.data$cov.mx[mask.extant & mask.at.tree], 
                                                W.fixed = NULL,
-                                               #W.fixed = ancestral.mx$Daubentonia_madagascariensis,
+                                               #W.fixed = Gen.cov.list$W.Strepsirrhini,
                                                sample.sizes = All.sp.data$n.sizes[mask.extant & mask.at.tree] )
 
 Drift.results.Toplot$Fixed$Plots$Corr.Contrasts  <- Drift.results$fixed$Correlation.W.fixed %>% llply(function (x) x$P.value.plot) %>% llply(function(x) x + theme(legend.position = "none") ) %>% cowplot::plot_grid(plotlist = .) 
@@ -191,13 +191,25 @@ BWtoSimulate$Extants <- GetBW(tree = Trees$extant.sp.tree,
                               sample.sizes = All.sp.data$n.sizes[mask.extant & mask.at.tree] )
 
 W.percent <- BWtoSimulate$Extants$BW.compare%>% ldply(function (x) eigen(x$W)$values[1:10]/sum(eigen(x$W)$values))
-names(B.percent) <- c(".node", paste0("PC", 1:10))
-B.percent <- BWtoSimulate$Extants$BW.compare%>% ldply(function (x) eigen(x$B.ed)$values[1:10]/sum(eigen(x$B.ed)$values))
 names(W.percent) <- c(".node", paste0("PC", 1:10))
+B.percent <- BWtoSimulate$Extants$BW.compare%>% ldply(function (x) eigen(x$B.ed)$values[1:10]/sum(eigen(x$B.ed)$values))
+names(B.percent) <- c(".node", paste0("PC", 1:10))
+W.fixedpcpercent <- eigen(Gen.cov.list$W.Prosimian)$values[1:10]/sum(eigen(Gen.cov.list$W.Prosimian)$values)
+#W.fixedpcpercent <- as.data.frame(W.fixedpcpercent)
+#rownames(W.fixedpcpercent)<- paste0("PC", 1:10)
+#W.fixedpcpercent$PC <- rownames(W.fixedpcpercent)
+#names(W.fixedpcpercent) <- c("value", "PC")
+
 B.percent$Matrix <- rep("B", dim(B.percent)[1])
 W.percent$Matrix <- rep("W", dim(W.percent)[1])
 
-pcpercent.pernode <- rbind(B.percent, W.percent)
+B.percent %>% names
+W.percent %>% names
+W.fixedpcpercent.to.be <- B.percent
+for (i in 1:  dim(W.fixedpcpercent.to.be)[1]) W.fixedpcpercent.to.be[i,2:11] <- W.fixedpcpercent
+W.fixedpcpercent.to.be$Matrix <- "W.fixed"
+
+pcpercent.pernode <- rbind(B.percent, W.percent, W.fixedpcpercent.to.be)
 
 pcpercent.pernode.selected <- pcpercent.pernode %>% melt %>% 
   filter (.node == "71"| 
@@ -224,13 +236,12 @@ pcpercent.pernode.selected$.node <- factor(pcpercent.pernode.selected$.node, lev
 
 pcpercent.pernode.selected %>%
   ggplot( aes( x = variable, y = value, group = Matrix) )+
-    geom_point(aes(shape = Matrix, color = Matrix)) +
-  geom_line(aes(group = Matrix, color = Matrix)) +
-  scale_color_grey()+
-  facet_wrap(~.node, ncol = 3) +
-  theme_bw() + theme(axis.text.x = element_text(angle = 270)) +
-  ylab("Percentage of variance in each PC")
-
+    geom_point(aes(shape = Matrix, color = Matrix), alpha = 0.5, size = 0.5) +
+    geom_line(aes(group = Matrix, color = Matrix), alpha = 0.4) +
+  scale_color_manual(values = c("black", "darkgrey", "red") )+
+    facet_wrap(~.node, ncol = 3) +
+    theme_bw() + theme_minimal() + theme(axis.text.x = element_text(angle = 270, size = 7)) +
+ ylab("Percentage of variance in each PC") + xlab("")
 
 
 
