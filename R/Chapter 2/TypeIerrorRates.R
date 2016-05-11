@@ -57,7 +57,7 @@ Drift.results$fixed <- DriftTestInterpretation(tree = Trees$extant.sp.tree,
 
 Drift.results.Toplot$Fixed$Plots$Corr.Contrasts  <- Drift.results$fixed$Correlation.W.fixed %>% llply(function (x) x$P.value.plot) %>% llply(function(x) x + theme(legend.position = "none") ) %>% cowplot::plot_grid(plotlist = .) 
 Drift.results.Toplot$FixedW.Extants$Results$Node.ref <- Drift.results$fixed$Correlation.W.fixed %>% ldply(function(x) dim(table(x$Bonferroni == T, exclude = T)) ==2) %>% .[,1]
-Drift.results.Toplot$FixedW.Extants$Results$Corr.Ed.1 <- Drift.results$fixed$Correlation.W.fixed %>% ldply(function(x) dim(table(x$Bonferroni == T, exclude = T)) ==2) %>% .[,2]
+Drift.results.Toplot$FixedW.Extants$Results$Corr.Ed.1 <- Drift.results$fixed$Correlation.W.fixed  %>% ldply(function(x) (table(x$Bonferroni == T) %>% dimnames() %>% .[[1]] %>% length()) ==2)  %>% .[,2]
 Drift.results.Toplot$FixedW.Extants$Results$Regression.Ed <- Drift.results$fixed$Regression.W.fixed %>% ldply(function(x) x$drift_rejected )  %>% .[,2]
 
 Plot.Drift.Results(tree = Trees$all.with.ed, 
@@ -76,11 +76,7 @@ Plot.Drift.Results(tree = Trees$extant.sp.tree,
 
 Drift.results.Toplot$Fixed$Plots$Corr.Ed.1  <- Drift.results$fixed$Correlation.W.fixed %>% llply(function (x) x$P.value.plot) %>% llply(function(x) x + theme(legend.position = "none") ) %>% cowplot::plot_grid(plotlist = .) 
 
-Drift.results$fixed$Correlation.W.fixed %>% llply(Plot.Drift.regression)
-
 Drift.results$fixed$Correlation.W.fixed$`135`$P.value.plot
-
-Regression.Tree.plot.fixed.W <- Drift.results$extant.sp$Regression.test %>% llply(Plot.Drift.regression)
 
 Correlation.Tree.plot.Wfixed <- plot_grid(
   Drift.results$fixed$Correlation.W.fixed$`131`$P.value.plot + theme(legend.position = "none") + ggtitle ("Lorisiformes") ,
@@ -107,7 +103,7 @@ save_plot(filename = "Figures/Correlation_Tree_plot_Wfixed.pdf", plot = Correlat
           base_aspect_ratio = 0.3, base_height = 15, base_width = 9.5)
 
 
-Regression.Tree.plot.fixed.W <- Drift.results$fixed$Regression.W.fixed %>% llply(Plot.Drift.regression)
+Regression.Tree.plot.fixed.W <- Drift.results$extant.sp$Regression.test %>% llply(Plot.Drift.regression)
 
 Regression.Tree.plot.W.fixed <- plot_grid(
   Regression.Tree.plot.fixed.W$`134`$plot  + ggtitle ("Nyc-Lor"), 
