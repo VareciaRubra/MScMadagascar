@@ -343,45 +343,63 @@ Drift.results$extant.sp$Regression.test$`101`$plot + geom_abline(slope = 1, colo
 Plot.Drift.regression <- function(regress.result) {
   regressae <- data.frame( "log.B_variance" = regress.result$log.between_group_variance, "log.W_eVals" = regress.result$log.W_eVals, names = 1:(dim(mean.array)[2]) ) 
   
-  if (regress.result$drift_rejected == T) beta <- "red" 
-  if (regress.result$drift_rejected == F) beta <- "green"
+  if (regress.result$drift_rejected == T) .beta <- "red" 
+  if (regress.result$drift_rejected == F) .beta <- "green"
   empirical.c.i <- regress.result$coefficient_CI_95[2, ]
   beta.coef <- lm(data = regressae[-1,], log.B_variance ~ log.W_eVals)$coefficients[2]
+  IC95_.1 <- confint(lm(data = regressae[-1,], log.B_variance ~ log.W_eVals))[2,]
+  containsOne <- function(x) ifelse(x[1] < 1 & x[2] > 1, TRUE, 
+                                    FALSE)
+  test <- !containsOne(confint(lm(data = regressae[-1,], log.B_variance ~ log.W_eVals))[2,])
+  names(test) <- "5 %"
+  if (test == T) .beta1 <- "red" 
+  if (test == F) .beta1 <- "green"
   
   plotows <- 
     ggplot(regressae, aes (y = log.B_variance, x = log.W_eVals) ) +
-    geom_abline(slope = beta.coef, color = beta, size = 1, alpha = 0.4, linetype = 2) +
-    geom_abline(slope = beta.coef, color = beta, size = 2, alpha = 0.4) +
+    geom_abline(slope = beta.coef, color = .beta1, size = 1, alpha = 0.4, linetype = 2) +
     geom_text(aes(label = names, size = 5)) + 
-    geom_smooth(method = "lm", color = beta) + 
+    geom_smooth(method = "lm", color = .beta) + 
     labs(x = "log(W Eigenvalues)", y = "log(B variances)") + 
     theme_bw() +
     theme(legend.position = "none") +
     geom_abline(slope = 1, color = "black") 
+  
+  tabelado <- cbind("IC-" = empirical.c.i[1], "beta"= regress.result$regression$coefficients[2], "IC+" = empirical.c.i[2], "Ho" = regress.result$drift_rejected,
+                    "IC-.-PC1" = IC95_.1[1], "beta.-PC1" = beta.coef, "IC+.-PC1" = IC95_.1[2], "Ho.-PC1" = test )
+  
+  
   return(list("plot" = plotows,
-              "beta.1" = regress.result$regression$coefficients[2], 
+              "beta" = regress.result$regression$coefficients[2], 
               "beta.-1" = beta.coef, 
               "IC95" = empirical.c.i, 
+              "IC95.-1" = IC95_.1, 
               "drift.rejected" = regress.result$drift_rejected,
-              "intercept" = regress.result$regression$coefficients[1]))
+              "drift.rejected.-1" = test,
+              "intercept" = regress.result$regression$coefficients[1],
+              "tabelinha" = tabelado) )
+  rm(.beta, .beta.1)
 }
 
-Plot.Drift.regression (regress.result = Drift.results$extant.sp$Regression.test$`125`)
+Plot.Drift.regression (regress.result = Drift.results$extant.sp$Regression.test$`76`)
 
 Drift.results.Toplot$Extants$Results$Regression <- Drift.results$extant.sp$Regression.test %>% llply(Plot.Drift.regression)
+tabelinha <- Drift.results.Toplot$Extants$Results$Regression %>% ldply(function (x) x$tabelinha)
+rownames(tabelinha) <- tabelinha[,1]
 
+tabelinha[-1] %>% xtable()
 
 Regression.Tree.plot <- plot_grid(
-  Drift.results.Toplot$Extants$Results$Regression$`134`$plot  + ggtitle ("Nyc-Lor"), 
+  Drift.results.Toplot$Extants$Results$Regression$`134`$plot  + ggtitle ("Nycticebus x Loris"), 
   Drift.results.Toplot$Extants$Results$Regression$`132`$plot  + ggtitle ("Lorisidae") ,
-  Drift.results.Toplot$Extants$Results$Regression$`131`$plot + geom_abline(slope = 1, color = "green") + ggtitle ("Lorisiformes\n Galagidae x Lorisidae") ,
-  Drift.results.Toplot$Extants$Results$Regression$`112`$plot + geom_abline(slope = 1, color = "green") + ggtitle ("Lemuridae") ,
-  Drift.results.Toplot$Extants$Results$Regression$`100`$plot  + ggtitle ("Indridae") ,
-  Drift.results.Toplot$Extants$Results$Regression$`99`$plot  + ggtitle ("Lemuridae x Indridae") ,
+  Drift.results.Toplot$Extants$Results$Regression$`131`$plot + ggtitle ("Lorisiformes") ,
+  Drift.results.Toplot$Extants$Results$Regression$`112`$plot + ggtitle ("Lemuridae") ,
+  Drift.results.Toplot$Extants$Results$Regression$`100`$plot + ggtitle ("Indriidae") ,
+  Drift.results.Toplot$Extants$Results$Regression$`99`$plot  + ggtitle ("Lemuridae x Indriidae") ,
   Drift.results.Toplot$Extants$Results$Regression$`88`$plot  + ggtitle ("Lepilemuridae") ,
-  Drift.results.Toplot$Extants$Results$Regression$`77`$plot + geom_abline(slope = 1, color = "green") + ggtitle ("Cheirogaleidae") ,
-  Drift.results.Toplot$Extants$Results$Regression$`76`$plot + geom_abline(slope = 1, color = "green") + ggtitle ("Lepilemuridae x Cheirogaleidae") ,
-  Drift.results.Toplot$Extants$Results$Regression$`75`$plot  + ggtitle ("Lem-Ind x Lep-Che") ,
+  Drift.results.Toplot$Extants$Results$Regression$`77`$plot  + ggtitle ("Cheirogaleidae") ,
+  Drift.results.Toplot$Extants$Results$Regression$`76`$plot  + ggtitle ("Lepilemuridae x Cheirogaleidae") ,
+  Drift.results.Toplot$Extants$Results$Regression$`75`$plot  + ggtitle ("Lemuriformes") ,
   Drift.results.Toplot$Extants$Results$Regression$`74`$plot  + ggtitle ("Lemuriformes x Daubentonidae") ,
   Drift.results.Toplot$Extants$Results$Regression$`73`$plot  + ggtitle ("Strepsirrhini") ,
   Drift.results.Toplot$Extants$Results$Regression$`71`$plot  + ggtitle ("Prosimian\n Strepsirrhini + Tarsiidae") ,

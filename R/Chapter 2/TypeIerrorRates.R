@@ -80,15 +80,15 @@ Drift.results$fixed$Correlation.W.fixed %>% llply(Plot.Drift.regression)
 
 Drift.results$fixed$Correlation.W.fixed$`135`$P.value.plot
 
-Drift.results.Toplot$Extants$Results$Regression <- Drift.results$extant.sp$Regression.test %>% llply(Plot.Drift.regression)
+Regression.Tree.plot.fixed.W <- Drift.results$extant.sp$Regression.test %>% llply(Plot.Drift.regression)
 
 Correlation.Tree.plot.Wfixed <- plot_grid(
-  Drift.results$fixed$Correlation.W.fixed$`131`$P.value.plot + theme(legend.position = "none") + ggtitle ("Lorisiformes\n Galagidae x Lorisidae") ,
+  Drift.results$fixed$Correlation.W.fixed$`131`$P.value.plot + theme(legend.position = "none") + ggtitle ("Lorisiformes") ,
   Drift.results$fixed$Correlation.W.fixed$`132`$P.value.plot + theme(legend.position = "none") + ggtitle ("Lorisidae") ,
   Drift.results$fixed$Correlation.W.fixed$`134`$P.value.plot + theme(legend.position = "none") + ggtitle ("Nyc-Lor"), 
   
-  Drift.results$fixed$Correlation.W.fixed$`99`$P.value.plot + theme(legend.position = "none") + ggtitle ("Lemuridae x Indridae") ,
-  Drift.results$fixed$Correlation.W.fixed$`100`$P.value.plot + theme(legend.position = "none") + ggtitle ("Indridae") ,
+  Drift.results$fixed$Correlation.W.fixed$`99`$P.value.plot + theme(legend.position = "none") + ggtitle ("Lemuridae x Indriidae") ,
+  Drift.results$fixed$Correlation.W.fixed$`100`$P.value.plot + theme(legend.position = "none") + ggtitle ("Indriidae") ,
   Drift.results$fixed$Correlation.W.fixed$`112`$P.value.plot + theme(legend.position = "none") + ggtitle ("Lemuridae") ,
   
   
@@ -99,7 +99,7 @@ Correlation.Tree.plot.Wfixed <- plot_grid(
   Drift.results$fixed$Correlation.W.fixed$`73`$P.value.plot + theme(legend.position = "none") + ggtitle ("Strepsirrhini") ,
   Drift.results$fixed$Correlation.W.fixed$`74`$P.value.plot + theme(legend.position = "none") + ggtitle ("Lemuriformes x Daubentonidae") ,
   Drift.results$fixed$Correlation.W.fixed$`75`$P.value.plot + theme(legend.position = "none") + ggtitle ("Lemuriformes") ,
-  Drift.results$fixed$Correlation.W.fixed$`71`$P.value.plot + theme(legend.position = "none") + ggtitle ("Prosimian\n Strepsirrhini + Tarsiidae") ,
+  Drift.results$fixed$Correlation.W.fixed$`71`$P.value.plot + theme(legend.position = "none") + ggtitle ("Prosimian") ,
   ncol = 3)
 
 Correlation.Tree.plot.Wfixed
@@ -107,8 +107,36 @@ save_plot(filename = "Figures/Correlation_Tree_plot_Wfixed.pdf", plot = Correlat
           base_aspect_ratio = 0.3, base_height = 15, base_width = 9.5)
 
 
+Regression.Tree.plot.fixed.W <- Drift.results$fixed$Regression.W.fixed %>% llply(Plot.Drift.regression)
 
+Regression.Tree.plot.W.fixed <- plot_grid(
+  Regression.Tree.plot.fixed.W$`134`$plot  + ggtitle ("Nyc-Lor"), 
+  Regression.Tree.plot.fixed.W$`132`$plot  + ggtitle ("Lorisidae") ,
+  Regression.Tree.plot.fixed.W$`131`$plot + ggtitle ("Lorisiformes") ,
+  
+  Regression.Tree.plot.fixed.W$`112`$plot + ggtitle ("Lemuridae") ,
+  Regression.Tree.plot.fixed.W$`100`$plot  + ggtitle ("Indriidae") ,
+  Regression.Tree.plot.fixed.W$`99`$plot  + ggtitle ("Lemuridae x Indriidae") ,
+  
+  Regression.Tree.plot.fixed.W$`88`$plot  + ggtitle ("Lepilemuridae") ,
+  Regression.Tree.plot.fixed.W$`77`$plot + ggtitle ("Cheirogaleidae") ,
+  Regression.Tree.plot.fixed.W$`76`$plot + ggtitle ("Lepilemuridae x Cheirogaleidae") ,
+  
+  Regression.Tree.plot.fixed.W$`75`$plot  + ggtitle ("Lemuriformes") ,
+  Regression.Tree.plot.fixed.W$`74`$plot  + ggtitle ("Lemuriformes x Daubentonidae") ,
+  Regression.Tree.plot.fixed.W$`73`$plot  + ggtitle ("Strepsirrhini") ,
+  
+  Regression.Tree.plot.fixed.W$`71`$plot  + ggtitle ("Prosimian") ,
+  ncol = 3)
 
+Regression.Tree.plot.W.fixed
+save_plot(filename = "Figures/Regression_Tree_plot_Wfixed.pdf", plot = Regression.Tree.plot.W.fixed, 
+          base_aspect_ratio = 0.3, base_height = 15, base_width = 9.5)
+
+tabelinha <- Regression.Tree.plot.fixed.W  %>% ldply(function (x) x$tabelinha)
+rownames(tabelinha) <- tabelinha[,1]
+
+tabelinha[-1] %>% xtable()
 
 
 
@@ -161,6 +189,49 @@ BWtoSimulate$Extants <- GetBW(tree = Trees$extant.sp.tree,
                               mean.list = All.sp.data$means[mask.extant & mask.at.tree], 
                               cov.matrix.list = All.sp.data$cov.mx[mask.extant & mask.at.tree], 
                               sample.sizes = All.sp.data$n.sizes[mask.extant & mask.at.tree] )
+
+W.percent <- BWtoSimulate$Extants$BW.compare%>% ldply(function (x) eigen(x$W)$values[1:10]/sum(eigen(x$W)$values))
+names(B.percent) <- c(".node", paste0("PC", 1:10))
+B.percent <- BWtoSimulate$Extants$BW.compare%>% ldply(function (x) eigen(x$B.ed)$values[1:10]/sum(eigen(x$B.ed)$values))
+names(W.percent) <- c(".node", paste0("PC", 1:10))
+B.percent$Matrix <- rep("B", dim(B.percent)[1])
+W.percent$Matrix <- rep("W", dim(W.percent)[1])
+
+pcpercent.pernode <- rbind(B.percent, W.percent)
+
+pcpercent.pernode.selected <- pcpercent.pernode %>% melt %>% 
+  filter (.node == "71"| 
+            .node == "75"|
+            .node == "74"| 
+            .node == "73"| 
+            .node == "88"| 
+            .node == "77"|
+            .node == "76"| 
+            .node == "100"| 
+            .node == "112"| 
+            .node == "99"|
+            .node == "134"| 
+            .node == "132"| 
+            .node == "131" ) 
+
+pcpercent.pernode.selected$.node <- factor(pcpercent.pernode.selected$.node, levels = rev(c("71", 
+                                                                                            "75", "74", "73", 
+                                                                                            "88", "77", "76",
+                                                                                            "112", "100", "99", 
+                                                                                            "134", "132" , "131" ) ) )
+                                                                                        
+                                                                                       
+
+pcpercent.pernode.selected %>%
+  ggplot( aes( x = variable, y = value, group = Matrix) )+
+    geom_point(aes(shape = Matrix, color = Matrix)) +
+  geom_line(aes(group = Matrix, color = Matrix)) +
+  scale_color_grey()+
+  facet_wrap(~.node, ncol = 3) +
+  theme_bw() + theme(axis.text.x = element_text(angle = 270)) +
+  ylab("Percentage of variance in each PC")
+
+
 
 
 P <- BWtoSimulate$Extants$BW.compare$`71`$B.ed
