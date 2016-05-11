@@ -186,9 +186,16 @@ BWtoSimulate$Extants <- GetBW(tree = Trees$extant.sp.tree,
                               cov.matrix.list = All.sp.data$cov.mx[mask.extant & mask.at.tree], 
                               sample.sizes = All.sp.data$n.sizes[mask.extant & mask.at.tree] )
 
+var.B <- apply(BWtoSimulate$Extants$BW.compare$`76`$Proj.B, 2, var)
+var.B/sum(var.B) 
+
+
+
+BWtoSimulate$Extants$BW.compare %>% llply( function (x) apply(x$Proj.B, 2, var) )
+
 W.percent <- BWtoSimulate$Extants$BW.compare%>% ldply(function (x) eigen(x$W)$values[1:10]/sum(eigen(x$W)$values))
 names(W.percent) <- c(".node", paste0("PC", 1:10))
-B.percent <- BWtoSimulate$Extants$BW.compare%>% ldply(function (x) eigen(x$B.ed)$values[1:10]/sum(eigen(x$B.ed)$values))
+B.percent <- BWtoSimulate$Extants$BW.compare %>% ldply( function (x) apply(x$Proj.B[,1:10], 2, var)/ sum(apply(x$Proj.B[,1:10], 2, var)) )
 names(B.percent) <- c(".node", paste0("PC", 1:10))
 W.fixedpcpercent <- eigen(Gen.cov.list$W.Prosimian)$values[1:10]/sum(eigen(Gen.cov.list$W.Prosimian)$values)
 #W.fixedpcpercent <- as.data.frame(W.fixedpcpercent)
@@ -205,7 +212,8 @@ W.fixedpcpercent.to.be <- B.percent
 for (i in 1:  dim(W.fixedpcpercent.to.be)[1]) W.fixedpcpercent.to.be[i,2:11] <- W.fixedpcpercent
 W.fixedpcpercent.to.be$Matrix <- "W.fixed"
 
-pcpercent.pernode <- rbind(B.percent, W.percent, W.fixedpcpercent.to.be)
+pcpercent.pernode <- rbind(B.percent,# W.percent, 
+                           W.fixedpcpercent.to.be)
 
 pcpercent.pernode.selected <- pcpercent.pernode %>% melt %>% 
   filter (.node == "71"| 
@@ -234,10 +242,10 @@ pcpercent.pernode.selected %>%
   ggplot( aes( x = variable, y = value, group = Matrix) )+
     geom_point(aes(shape = Matrix, color = Matrix), alpha = 0.5, size = 0.5) +
     geom_line(aes(group = Matrix, color = Matrix), alpha = 0.4) +
-  scale_color_manual(values = c("black", "darkgrey", "red") )+
+  scale_color_manual(values = c("black",  "red") )+
     facet_wrap(~.node, ncol = 3) +
     theme_bw() + theme_minimal() + theme(axis.text.x = element_text(angle = 270, size = 7)) +
- ylab("Percentage of variance in each PC") + xlab("")
+ ylab("Proportion of variance in each PC") + xlab("")
 
 
 
