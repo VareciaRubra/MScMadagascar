@@ -321,19 +321,19 @@ save_plot(filename = "Figures/Correlation_Tree_plot.pdf", plot = Correlation.Tre
 Drift.results$extant.sp$Regression.test$`71`$log.between_group_variance
 
 Regression.Tree.plot <- plot_grid(
-  Drift.results$extant.sp$Regression.test$`134`$plot + geom_abline(slope = 1, color = "red") + ggtitle ("Nyc-Lor"), 
-  Drift.results$extant.sp$Regression.test$`132`$plot + geom_abline(slope = 1, color = "red") + ggtitle ("Lorisidae") ,
-  Drift.results$extant.sp$Regression.test$`131`$plot + geom_abline(slope = 1, color = "green") + ggtitle ("Lorisiformes\n Galagidae x Lorisidae") ,
-  Drift.results$extant.sp$Regression.test$`112`$plot + geom_abline(slope = 1, color = "green") + ggtitle ("Lemuridae") ,
-  Drift.results$extant.sp$Regression.test$`100`$plot + geom_abline(slope = 1, color = "red") + ggtitle ("Indridae") ,
-  Drift.results$extant.sp$Regression.test$`99`$plot + geom_abline(slope = 1, color = "red") + ggtitle ("Lemuridae x Indridae") ,
-  Drift.results$extant.sp$Regression.test$`88`$plot + geom_abline(slope = 1, color = "red") + ggtitle ("Lepilemuridae") ,
-  Drift.results$extant.sp$Regression.test$`77`$plot + geom_abline(slope = 1, color = "green") + ggtitle ("Cheirogaleidae") ,
-  Drift.results$extant.sp$Regression.test$`76`$plot + geom_abline(slope = 1, color = "green") + ggtitle ("Lepilemuridae x Cheirogaleidae") ,
-  Drift.results$extant.sp$Regression.test$`75`$plot + geom_abline(slope = 1, color = "red") + ggtitle ("Lem-Ind x Lep-Che") ,
-  Drift.results$extant.sp$Regression.test$`74`$plot + geom_abline(slope = 1, color = "red") + ggtitle ("Lemuriformes\n Lemurs x Daubentonidae") ,
-  Drift.results$extant.sp$Regression.test$`73`$plot + geom_abline(slope = 1, color = "red") + ggtitle ("Strepsirrhini") ,
-  Drift.results$extant.sp$Regression.test$`71`$plot + geom_abline(slope = 1, color = "red") + ggtitle ("Prosimian\n Strepsirrhini + Tarsiidae") ,
+  Drift.results$extant.sp$Regression.test$`134`$plot + ggtitle ("Nyc-Lor"), 
+  Drift.results$extant.sp$Regression.test$`132`$plot + ggtitle ("Lorisidae") ,
+  Drift.results$extant.sp$Regression.test$`131`$plot +  ggtitle ("Lorisiformes\n Galagidae x Lorisidae") ,
+  Drift.results$extant.sp$Regression.test$`112`$plot +  ggtitle ("Lemuridae") ,
+  Drift.results$extant.sp$Regression.test$`100`$plot +  ggtitle ("Indridae") ,
+  Drift.results$extant.sp$Regression.test$`99`$plot +  ggtitle ("Lemuridae x Indridae") ,
+  Drift.results$extant.sp$Regression.test$`88`$plot + ggtitle ("Lepilemuridae") ,
+  Drift.results$extant.sp$Regression.test$`77`$plot + ggtitle ("Cheirogaleidae") ,
+  Drift.results$extant.sp$Regression.test$`76`$plot +  ggtitle ("Lepilemuridae x Cheirogaleidae") ,
+  Drift.results$extant.sp$Regression.test$`75`$plot +  ggtitle ("Lem-Ind x Lep-Che") ,
+  Drift.results$extant.sp$Regression.test$`74`$plot +  ggtitle ("Lemuriformes\n Lemurs x Daubentonidae") ,
+  Drift.results$extant.sp$Regression.test$`73`$plot +  ggtitle ("Strepsirrhini") ,
+  Drift.results$extant.sp$Regression.test$`71`$plot +  ggtitle ("Prosimian\n Strepsirrhini + Tarsiidae") ,
   ncol = 3)
 
 Regression.Tree.plot 
@@ -346,7 +346,8 @@ Plot.Drift.regression <- function(regress.result) {
   if (regress.result$drift_rejected == T) .beta <- "red" 
   if (regress.result$drift_rejected == F) .beta <- "green"
   empirical.c.i <- regress.result$coefficient_CI_95[2, ]
-  beta.coef <- lm(data = regressae[-1,], log.B_variance ~ log.W_eVals)$coefficients[2]
+  beta.coef <- lm(data = regressae, log.B_variance ~ log.W_eVals)$coefficients[2]
+  regressae.1 <- regressae[-1,]
   IC95_.1 <- confint(lm(data = regressae[-1,], log.B_variance ~ log.W_eVals))[2,]
   containsOne <- function(x) ifelse(x[1] < 1 & x[2] > 1, TRUE, 
                                     FALSE)

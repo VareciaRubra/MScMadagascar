@@ -258,15 +258,23 @@ DumBW.compare <- function (means, contrasts, W.mx) {
   B.ed <- var(laply(means, identity) ) 
   B.ic <- var(as.matrix(contrasts)  ) 
   n <- length(means)
+  
+  if (is.list(means)) mean.array <- laply(means, identity) else  mean.array <- means
+  W.pc <- eigen(W.mx)
+  proj.med <- as.matrix(mean.array) %*% W.pc$vectors
+  colnames(proj.med) <- paste0("PC", 1:ncol(proj.med))
+  
   BW.compare <- data.frame (BedBic = MatrixCompare(B.ed, B.ic)$correlation,
                            BedW = MatrixCompare(B.ed, W.mx)$correlation,
                            BicW = MatrixCompare(B.ic, W.mx)$correlation , 
                            method = c("RS", "Mantel", "KRZ", "PCA"), 
                            row.names = c("RS", "Mantel", "KRZ", "PCA") )
   
+  
   return (list ("BW.compare" = BW.compare,
                 "B.ed" = B.ed,
                 "B.ic" = B.ic,
+                "Proj.B" = proj.med,
                 "W" = W.mx,
                 "B.sample.size" = n) )
   
