@@ -277,12 +277,12 @@ SRD.relMean <- as.numeric(SRD.result$output[,1]) / mean(as.numeric(SRD.result$ou
 plot.cheetows <- 
   ggshape(shape = SHAPE,
             wireframe = Aux $ tessel.39 [1:39, ],
-            colors = rev(COLORE),
+            colors =  COLORE,
             rotation =ROTACIONI, 
             culo = 0.03, 
             thickness = 0.5) +
     #geom_point (aes (x = X, y = Y), alpha = 0.6, color ="darkgrey", size = 1.2) +
-    #geom_label(aes (x = X, y = Y, label = traits ),  alpha = 0.4, size = 2, label.padding = unit(0.5, "mm")) +
+    geom_label(aes (x = X, y = Y, label = traits ),  alpha = 0.4, size = 2, label.padding = unit(0.5, "mm")) +
     ggtitle(TTL) +
     theme(plot.title = element_text(face = "bold", size = 12),
           legend.position= "none", 
@@ -303,7 +303,7 @@ avgSRD <- mean(as.numeric(SRD.result$output[,1]))
 plot.doritows <- 
   ggshape(shape = SHAPE,
           wireframe = Aux $ tessel.39 [1:39, ],
-          colors = rev(as.numeric(SRD.result$output[,1])),
+          colors = as.numeric(SRD.result$output[,1]),
           rotation =ROTACIONI, 
           culo = 0.03,
           thickness = 1) +
@@ -332,6 +332,8 @@ return(list(plot.muDev = plot.cheetows,
             SRD.relMean = SRD.relMean) ) 
 }
 
+SRD.result = SRD(Gen.cov.list$Avahi, Gen.cov.list$Indri)
+plot(SRD.result)
 SRD.plot.wire(SRD.result = SRD.results$node71, SHAPE = Shapes.sym$avahi, ROTACIONI =  c(-1,-1,1))
 
 SRD.plot.wire(SRD.result = SRD.selected$Prosimian, SHAPE = Shapes.sym$tarsius, ROTACIONI =  c(-1,-1,1), TTL = "Prosimian\n Strepsirrhini + Tarsiidae")
