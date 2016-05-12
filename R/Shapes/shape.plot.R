@@ -156,17 +156,17 @@ interval <- mean (WPCs[, i])
 shape.plot [[i]] <-
   ggshape(shape = SHAPE.sym,
           wireframe = Aux $ tessel.39 [1:39, ],
-          colors = rev(WPCs[, i]),
+          colors = WPCs[, i],
           rotation = ROTACIONI , 
           culo = 0.02, 
           thickness = 0.9) +
   #geom_point (aes (x = X, y = Y), alpha = 0.6, color ="darkgrey", size = 1.2) +
-  #geom_label(aes (x = X, y = Y, label = traits ),  alpha = 0.6, size = 7, label.padding = unit(0.4, "mm")) +
+  geom_label(aes (x = X, y = Y, label = traits ),  alpha = 0.6, size = 3, label.padding = unit(0.4, "mm")) +
   #ggtitle(paste("PC", i, sep = " ")) +
   theme(plot.title = element_text(face = "bold", size = 12),
         #legend.position = "none",
         legend.position= c(0.3,0.1), 
-        #legend.direction="horizontal",
+        legend.direction="horizontal",
         legend.text = element_text(size = 8),
         plot.margin = unit(c(0,0,-0,0), "cm"), 
         legend.key.size = unit(0.3, "cm"), 
@@ -190,8 +190,17 @@ shape.plot [[8]] <- shape.plot[[1]] + scale_fill_gradientn(colours = "darkgrey")
 return( shape.plot)
 }
 
-temp <- PCLoadShapePlotter(SHAPE = hapalemur, W.MATRIX = mx.list.taxonomy$W.Madagascar, ROTACIONI = c(1,-1,1), TTL = "Strepsirrhini W matrix")
+temp <- PCLoadShapePlotter(SHAPE = galago, W.MATRIX = mx.list.taxonomy$W.Prosimian, ROTACIONI = c(-1,-1,1), TTL = "Strepsirrhini W matrix")
 temp[[7]]
+
+
+WPCs <- eigen(mx.list.taxonomy$W.Prosimian)$vectors
+if (WPCs[[1]] <=0) WPCs <- -WPCs
+if (WPCs[[1]] >=0) WPCs <- WPCs
+WPCs <- WPCs[,1:10]
+colnames(WPCs) <- paste0("PC", 1:10)
+rownames(WPCs) <- dimnames(sp.main.data$Tarsius_bancanus$matrix$cov)[[2]]
+WPCs %>% xtable
 
 PC.Plots$Galago <-PCLoadShapePlotter(SHAPE = galago, W.MATRIX = mx.list.taxonomy$Galago, ROTACIONI = c(-1,-1,1), TTL = "Galago")
 PC.Plots$Galago [[8]]

@@ -69,16 +69,17 @@ myPalette <- colorRampPalette(rev(brewer.pal(11, "Spectral")), space="Lab")
 ########################################################################################################
 Iso.Compare.cor.iso %>% gather(key="Isometric.Correlation", value=value, 2:5 ) %>%
   ggplot (.) +
-  geom_tile(aes(x = Isometric.Correlation, y = .sp, fill = abs(value) ), alpha = 0.9 ) +
-  #geom_text(aes(x= Isometric.Correlation, y = .sp, label = abs(round(value, digits = 2) ) ), color = "black" ) +
+  geom_tile(aes(x = Isometric.Correlation, y = .sp, fill = abs(value) ), alpha = 0.4 ) +
+  geom_text(aes(x= Isometric.Correlation, y = .sp, label = abs(round(value, digits = 2) ) ), color = "black" ) +
   theme_bw() +
   scale_fill_gradientn(name = 'Correlation with \nIsometric vector', colours = myPalette(50)) +
-  ylab ('') + xlab ('') +
+  ylab ('') + xlab ('') + theme_minimal()+
   #scale_x_discrete(limits = levels(PCs1to4$.pcScore), breaks = c(0.2, 0.4, 0.6, 0.8, 1) ) +
-  theme(axis.text.x = element_text(angle = 0, hjust = 0.5, vjust = 1, size = 8),
+  theme(legend.position = "bottom", legend.direction = "horizontal",
+        axis.text.x = element_text(angle = 0, hjust = 0.5, vjust = 1, size = 8),
         axis.ticks = element_line(size = 0),
         axis.text.y = element_text(face = "italic", size= 10),
-        plot.title = element_text(lineheight=.8, face="bold")) 
+        plot.title = element_text(lineheight=.4)) 
 
 Iso.Compare.reoriented %>% gather(key="Isometric.Correlation", value=value, 2:5) %>%
   ggplot (.) +
