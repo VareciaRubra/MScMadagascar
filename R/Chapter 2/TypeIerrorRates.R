@@ -198,6 +198,12 @@ names(W.percent) <- c(".node", paste0("PC", 1:10))
 B.percent <- BWtoSimulate$Extants$BW.compare %>% ldply( function (x) apply(x$Proj.B[,1:10], 2, var)/ sum(apply(x$Proj.B[,1:10], 2, var)) )
 names(B.percent) <- c(".node", paste0("PC", 1:10))
 W.fixedpcpercent <- eigen(Gen.cov.list$W.Prosimian)$values[1:10]/sum(eigen(Gen.cov.list$W.Prosimian)$values)
+
+B.percent <- BWtoSimulate$Extants$BW.compare %>% ldply( function (x) apply(x$Proj.B, 2, var) )
+names(B.percent) <- c(".node", paste0("PC", 1:39))
+W.fixedpcpercent <- eigen(Gen.cov.list$W.Prosimian)$values
+
+
 #W.fixedpcpercent <- as.data.frame(W.fixedpcpercent)
 #rownames(W.fixedpcpercent)<- paste0("PC", 1:10)
 #W.fixedpcpercent$PC <- rownames(W.fixedpcpercent)
@@ -209,7 +215,7 @@ W.percent$Matrix <- rep("W", dim(W.percent)[1])
 B.percent %>% names
 W.percent %>% names
 W.fixedpcpercent.to.be <- B.percent
-for (i in 1:  dim(W.fixedpcpercent.to.be)[1]) W.fixedpcpercent.to.be[i,2:11] <- W.fixedpcpercent
+for (i in 1:  dim(W.fixedpcpercent.to.be)[1]) W.fixedpcpercent.to.be[i,2:40] <- W.fixedpcpercent
 W.fixedpcpercent.to.be$Matrix <- "W.fixed"
 
 pcpercent.pernode <- rbind(B.percent,# W.percent, 
@@ -236,16 +242,16 @@ pcpercent.pernode.selected$.node <- factor(pcpercent.pernode.selected$.node, lev
                                                                                             "112", "100", "99", 
                                                                                             "134", "132" , "131" ) ) )
                                                                                         
-                                                                                       
+pcpercent.pernode.selected$variable %>% class                                                                                       
 
 pcpercent.pernode.selected %>%
-  ggplot( aes( x = variable, y = value, group = Matrix) )+
+  ggplot( aes( x = variable, y = log(value), group = Matrix)  )+
     geom_point(aes(shape = Matrix, color = Matrix), alpha = 0.5, size = 0.5) +
     geom_line(aes(group = Matrix, color = Matrix), alpha = 0.4) +
   scale_color_manual(values = c("black",  "red") )+
     facet_wrap(~.node, ncol = 3) +
     theme_bw() + theme_minimal() + theme(axis.text.x = element_text(angle = 270, size = 7)) +
- ylab("Proportion of variance in each PC") + xlab("")
+ ylab("log variance in each PC") + xlab("")
 
 
 
