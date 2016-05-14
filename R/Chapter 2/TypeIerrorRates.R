@@ -221,6 +221,8 @@ W.fixedpcpercent.to.be$Matrix <- "W.fixed"
 pcpercent.pernode <- rbind(B.percent,# W.percent, 
                            W.fixedpcpercent.to.be)
 
+
+
 pcpercent.pernode.selected <- pcpercent.pernode %>% melt %>% 
   filter (.node == "71"| 
             .node == "75"|
