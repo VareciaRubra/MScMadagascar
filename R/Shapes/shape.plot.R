@@ -161,30 +161,30 @@ shape.plot [[i]] <-
           culo = 0.02, 
           thickness = 0.9) +
   #geom_point (aes (x = X, y = Y), alpha = 0.6, color ="darkgrey", size = 1.2) +
-  geom_label(aes (x = X, y = Y, label = traits ),  alpha = 0.6, size = 3, label.padding = unit(0.4, "mm")) +
+  geom_label(aes (x = X, y = Y, label = traits ),  alpha = 0.7, size = 2, label.padding = unit(0.3, "mm")) +
   #ggtitle(paste("PC", i, sep = " ")) +
   theme(plot.title = element_text(face = "bold", size = 12),
         #legend.position = "none",
         legend.position= c(0.3,0.1), 
-        legend.direction="horizontal",
+        legend.direction="vertical",
         legend.text = element_text(size = 8),
         plot.margin = unit(c(0,0,-0,0), "cm"), 
-        legend.key.size = unit(0.3, "cm"), 
-        panel.margin.x = unit(0.3, "cm"), 
+        legend.key.size = unit(0.1, "cm"), 
+        1panel.margin.x = unit(0.1, "cm"), 
         panel.margin.y = unit(0.3, "cm") ) +
   scale_fill_gradient2(paste("PC", i, sep = " "),  low = "red", mid = "grey", high ="blue",  midpoint = 0, 
                        #labels =c(-0.7, 0, 0.7), 
                        #breaks = c(-0.7, 0, 0.7),
-                        breaks= myBreaks,
+                        #breaks= myBreaks,
                         #colors = myPalette(11),
                         guide = guide_colorbar(nbin=102, draw.ulim = T, draw.llim = T) ) +
   scale_color_gradient2(paste("PC", i, sep = " "), low = "red", mid = "grey", high ="blue",  midpoint = 0,
-                        breaks= myBreaks,
+                        #breaks= myBreaks,
                         #colors = myPalette(11),
                         guide = guide_colorbar(nbin=102, draw.ulim = T, draw.llim = T) ) 
 rm(myBreaks)}
 #shape.plot [[40]] <- plot_grid(plotlist = shape.plot, ncol = 4, labels = TTL) 
-shape.plot [[7]] <- plot_grid(shape.plot[[1]], shape.plot[[2]],shape.plot[[3]],shape.plot[[4]], ncol =  4, align = "hv", labels = TTL) 
+shape.plot [[7]] <- plot_grid(shape.plot[[1]], shape.plot[[2]],shape.plot[[3]],shape.plot[[4]], shape.plot[[5]], ncol =  5, rel_widths = 1.1, align = "hv", labels = TTL) 
 shape.plot [[8]] <- shape.plot[[1]] + scale_fill_gradientn(colours = "darkgrey") + scale_color_gradientn(colours = "darkgrey") + ggtitle(TTL) + theme(plot.title  = element_text(face = "italic", size = 15), legend.position = "none" )
 #rm(shape.plot)
 return( shape.plot)

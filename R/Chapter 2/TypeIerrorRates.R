@@ -68,7 +68,7 @@ Plot.Drift.Results(tree = Trees$all.with.ed,
 
 Plot.Drift.Results(tree = Trees$extant.sp.tree, 
                    info = Drift.results.Toplot$FixedW.Extants$Results, 
-                   font.size = 0.7,
+                   font.size = 0.6,
                    contrasts = F,
                    paleta.deriva = c("#ECA400", "#1BAAB7", "#CBC9E0"))
 
