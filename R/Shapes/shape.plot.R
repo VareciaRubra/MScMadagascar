@@ -249,6 +249,15 @@ PC.Plots$W.Strepsirrhini <- PCLoadShapePlotter(SHAPE = hapalemur, W.MATRIX = mx.
 PC.Plots$Tarsius.g <- PCLoadShapePlotter(SHAPE = tarsius, W.MATRIX = mx.list.taxonomy$Tarsius, ROTACIONI = c(-1,-1,1), TTL = "Tarsius (g)")
 PC.Plots$W.Prosimian <-PCLoadShapePlotter(SHAPE = tupaia, W.MATRIX = mx.list.taxonomy$W.Prosimian, ROTACIONI = c(-1,-1,1), TTL = "Tupaia (g)")
 
+plot_grid(plotlist = list(PC.Plots$W.Lepilemuridae[4][[1]], 
+                          PC.Plots$Indri[4][[1]], 
+                          PC.Plots$Microcebus[4][[1]],
+                          PC.Plots$Varecia[3][[1]]), ncol = 2 ,
+          labels =  c("Lepilemur", "Indri", "Microcebus", "Varecia") )#, 
+          
+
+
+
 save.image(file = 'Data/PC_loadings_plots.RData')
 
 shapes.general <- PC.Plots[1:7] %>% llply(function (x) x[[8]]) 
