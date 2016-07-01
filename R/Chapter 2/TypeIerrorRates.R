@@ -52,7 +52,11 @@ Drift.results$fixed <- DriftTestInterpretation(tree = Trees$extant.sp.tree,
                                                mean.list = All.sp.data$means[mask.extant & mask.at.tree], 
                                                cov.matrix.list = All.sp.data$cov.mx[mask.extant & mask.at.tree], 
                                                W.fixed = NULL,
-                                               #W.fixed = Gen.cov.list$W.Strepsirrhini,
+                                               sample.sizes = All.sp.data$n.sizes[mask.extant & mask.at.tree] )
+Drift.results$fixed <- DriftTestInterpretation(tree = Trees$extant.sp.tree, 
+                                               mean.list = All.sp.data$means[mask.extant & mask.at.tree], 
+                                               cov.matrix.list = All.sp.data$cov.mx[mask.extant & mask.at.tree], 
+                                               W.fixed = Gen.cov.list$Lepilemur,
                                                sample.sizes = All.sp.data$n.sizes[mask.extant & mask.at.tree] )
 
 Drift.results.Toplot$Fixed$Plots$Corr.Contrasts  <- Drift.results$fixed$Correlation.W.fixed %>% llply(function (x) x$P.value.plot) %>% llply(function(x) x + theme(legend.position = "none") ) %>% cowplot::plot_grid(plotlist = .) 
