@@ -41,7 +41,7 @@ nodelabels(bg = NULL, frame = "none")
 
 notat.tree <- is.na(match(dimnames(mx.dissimilarity$BS.RS)[[1]], treefile$tip.label)) 
 names.at.tree <- dimnames(mx.dissimilarity$BS.RS)[[1]][!notat.tree] 
-mx.all.at.tree<- mx.compare$RS$correlations[!notat.tree,!notat.tree]
+mx.all.at.tree<- mx.compare$MC.RS$correlations[!notat.tree,!notat.tree]
 pruned.tree.with.mx<- drop.tip(treefile,treefile$tip.label[-match( names.at.tree, treefile$tip.label)])
 phylo.dist<- cophenetic.phylo(pruned.tree.with.mx)
 phylo.dist<- phylo.dist[rownames( mx.all.at.tree), rownames( mx.all.at.tree)]
@@ -100,16 +100,13 @@ rda(mx.pcoa$BS.RS$vectors[1:10], mahala.pcoa$vectors[1:10])
 # multi.mantel {phytools} Multiple matrix regression (partial Mantel test) ####
 #Y	== single "dependent" square matrix. Can be either a symmetric matrix of class "matrix" or a distance matrix of class "dist".
 #X	== a single independent matrix or multiple independent matrices in a list. As with Y can be a object of class "matrix" or class "dist".
-dist.dissim <-  mx.dissimilarity$MC.KRZ
-dist.dissim[upper.tri(dist.dissim)] <- NA
-diag(dist.dissim) <- 0
-dist.dissim <- dist(dist.dissim)
+dist.dissim <- mx.dissimilarity$MC.RS[-c(41,43:44), -c(41, 43:44)]
+diag(dist.dissim) <- NA
+dist.dissim <- as.dist(dist.dissim)
 
-dist.sim <- mx.compare$BS.RS$correlations[-c(41,43:44), -c(41, 43:44)]
-dist.sim[upper.tri(dist.sim)] <- NA
-diag(dist.sim) <- 0
+dist.sim <- mx.compare$MC.RS$correlations[-c(41,43:44), -c(41, 43:44)]
+diag(dist.sim) <- NA
 dist.sim <- dist(dist.sim)
-
 
 Multi.Mantel <- list()
 Multi.Mantel$diss.phylo <- multi.mantel(Y = dist.dissim, X = cophenetic.phylo(pruned.tree.with.mx), nperm=1000)
@@ -117,3 +114,35 @@ Multi.Mantel$diss.phylo$probF
 Multi.Mantel$sim.phylo <- multi.mantel(Y = dist.sim, X = cophenetic.phylo(pruned.tree.with.mx), nperm=1000)
 Multi.Mantel$sim.phylo$probF
 
+# MMRR testes:
+dist.dissim.rs <- mx.dissimilarity$MC.RS[-c(41,43:44), -c(41, 43:44)]
+diag(dist.dissim.rs) <- NA
+dist.dissim.krz <- mx.dissimilarity$MC.KRZ[-c(41,43:44), -c(41, 43:44)]
+diag(dist.dissim.krz) <- NA
+rs.sim <- mx.compare$MC.RS$correlations[-c(41,43:44), -c(41, 43:44)]
+diag(rs.sim) <- NA
+krz.sim <- mx.compare$MC.KRZ$correlations[-c(41,43:44), -c(41, 43:44)]
+diag(krz.sim) <- NA
+MahalaLemur.mx <- MahalaLemur[rownames(krz.sim), colnames(krz.sim)]
+
+cophylo.dist <- cophenetic.phylo(pruned.tree.with.mx)
+diag(cophylo.dist) <- NA
+cophylo.dist <- list(phylo = cophylo.dist[rownames(krz.sim), colnames(krz.sim)])
+
+mx.comp.phylo <- list()
+mx.comp.phylo$RS.dis <- dist.dissim.rs
+mx.comp.phylo$RS.sim <- rs.sim
+mx.comp.phylo$KRZ.dis <- dist.dissim.krz
+mx.comp.phylo$KRZ.sim <- krz.sim
+mx.comp.phylo$Mahalalemur <- MahalaLemur.mx
+
+MMRR.results <- list()
+MMRR.results$RS.dis <- MMRR(Y = dist.dissim.rs, X = cophylo.dist, nperm=10000)
+MMRR.results$RS.sim <- MMRR(Y = rs.sim, X = cophylo.dist, nperm=10000)
+MMRR.results$KRZ.dis <- MMRR(Y = dist.dissim.krz, X = cophylo.dist, nperm=10000)
+MMRR.results$KRZ.sim <- MMRR(Y = krz.sim, X = cophylo.dist, nperm=10000)
+MMRR.results$Mahalanobis <- MMRR(Y = MahalaLemur.mx, X = cophylo.dist, nperm=10000)
+
+MMRR.results %>% laply(function(x) data.frame(x$r.squared, x$tpvalue[2]))
+
+Sp.main
