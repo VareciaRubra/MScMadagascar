@@ -7,7 +7,7 @@ MMRR<-function(Y,X,nperm=999){
   nrowsY<-nrow(Y)
   y<-unfold(Y)
   if(is.null(names(X)))names(X)<-paste("X",1:length(X),sep="")
-  Xmats<-sapply(X,unfold)
+  Xmats<- sapply(X,unfold)
   fit<-lm(y~Xmats)
   coeffs<-fit$coefficients
   summ<-summary(fit)
