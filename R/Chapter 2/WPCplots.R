@@ -135,3 +135,4 @@ pc_plot123 <- plot_grid(pc_plot12+ theme(legend.position = "none"),
           axis.title= element_text(size=15),
           plot.title = element_text(lineheight=.8, size = 13))
   pc_plot15
+  
