@@ -27,6 +27,9 @@ if(!require(psych)) {install.packages('psych'); library(psych)} # pro Bartlet te
 if(!require(xtable)) {install.packages('xtable'); library(xtable)}
 if(!require(geomorph)) {install.packages('geomorph'); library(geomorph)} # k.multi pra ver sinal filogenetico a la Adams
 if(!require(shapes)) {install.packages('shapes'); library(shapes)} 
+if(!require(mvMORPH)) {install.packages('mvMORPH'); library(mvMORPH)} # testar 
+if(!require(tseries)) {install.packages('tseries'); library(tseries)} #pro MMRR
+if(!require(plspm)) {install.packages('plspm'); library(plspm)} #pro MMRR
 
 
 
