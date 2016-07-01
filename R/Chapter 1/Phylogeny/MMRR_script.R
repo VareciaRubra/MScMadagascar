@@ -60,3 +60,4 @@ Xmats = list(geo = geo)
 MMRR(alk,Xmats,nperm=10000)
 MMRR(antalk,Xmats,nperm=10000)
 MMRR(antgut,Xmats,nperm=10000)
+
