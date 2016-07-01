@@ -252,7 +252,7 @@ PC.Plots$W.Prosimian <-PCLoadShapePlotter(SHAPE = tupaia, W.MATRIX = mx.list.tax
 plot_grid(plotlist = list(PC.Plots$W.Lepilemuridae[4][[1]], 
                           PC.Plots$Indri[4][[1]], 
                           PC.Plots$Microcebus[4][[1]],
-                          PC.Plots$Varecia[3][[1]]), ncol = 2 ,
+                          PC.Plots$Varecia[4][[1]]), ncol = 2 ,
           labels =  c("Lepilemur", "Indri", "Microcebus", "Varecia") )#, 
           
 
